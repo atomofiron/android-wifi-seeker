@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="ListFrameStyle" parent="android:Widget.ListView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+</resources>

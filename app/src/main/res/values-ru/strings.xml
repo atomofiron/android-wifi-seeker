@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Wireless Scan</string>
+    <string name="settings">Настройки</string>
+    <string name="scanning">Сканирование…</string>
+    <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
+    <string name="stop">Остановить</string>
+    <string name="ok">ОК</string>
+
+    <!-- prefs -->
+    <string name="default_delay">Задержка по умолчанию</string>
+    <string name="show_description">Подробная информация о выбранной сети</string>
+    <string name="show_description_sum">Таблица над списком</string>
+    <string name="work_in_bg">Работать в фоне</string>
+    <string name="detect_attacks">Обнаружение атак</string>
+    <string name="detect_attacks_sum">Предупреждать о появлении точек доступа с одинаковыми именами</string>
+
+    <string name="attack_screen">Настройки обнаружения</string>
+    <string name="smart_detection">Умное обнаружение</string>
+    <string name="smart_detection_sum">Пропускать сети с похожими MAC адресами</string>
+    <string name="extras">Сети исключения (на каждой строке)</string>
+    <string name="guarding">Защита подключения</string>
+    <string name="recom">Рекомендуется включить работу в фоне</string>
+    <string name="auto_off_wifi">Автоотключение WiFi</string>
+    <string name="auto_off_wifi_sum">При подключении к подозрительной сети</string>
+    <string name="no_scan_in_bg">Энергосберегающий режим</string>
+    <string name="no_scan_in_bg_sum">Не сканировать сети в фоне</string>
+
+    <!-- Description -->
+    <string name="essid_format">SSID: %s</string>
+    <string name="bssid_format">BSSID: %s</string>
+    <string name="capab_format">Возможности: %s</string>
+    <string name="frequ_format">Частота: %1$d, канал: %2$d</string>
+    <string name="manuf_format">Производитель: %s</string>
+
+    <!-- Permissions -->
+    <string name="need_coarse_location">Для функционирования программы на Android 6 и выше необходимо разрешение на ПРИБЛИЗИТЕЛЬНОЕ местоположение</string>
+    <string name="get_perm_by_settings">Дайте разрешение на местоположение в настройках системы</string>
+    <string name="no_perm">Нет доступа</string>
+</resources>

@@ -1,0 +1,19 @@
+<resources>
+
+    <style name="AppTheme" parent="android:style/Theme.Material">
+        <item name="android:colorPrimary">@color/colorDarkDarkGray</item>
+        <item name="android:colorPrimaryDark">@color/colorDarkDarkGray</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+
+        <item name="android:statusBarColor">@color/colorDarkDarkGray</item>
+        <item name="android:actionBarStyle">@style/ActionBarStyle</item>
+        <item name="android:windowBackground">@color/colorDarkGray</item>
+        <!--  name="android:buttonsPaneBarColor">@color/colorDarkDarkGray -->
+        <item name="android:navigationBarColor">@color/colorDarkDarkGray</item>
+    </style>
+    <style name="ActionBarStyle" parent="android:Widget.Material.ActionBar">
+        <item name="android:background">@color/colorDarkDarkGray</item>
+    </style>
+    <style name="ButtonBorderlessStyle" parent="@android:style/Widget.Material.Button.Borderless" />
+
+</resources>

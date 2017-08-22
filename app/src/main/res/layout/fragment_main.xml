@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="@integer/similar_orientation"
+    tools:context="io.atomofiron.wirelessscan.MainActivity">
+
+    <include layout="@layout/layout_description" android:visibility="gone" />
+    <RelativeLayout
+        style="@style/ListFrameStyle"
+        android:layout_weight="1">
+
+        <include layout="@layout/layout_item" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/label"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:text="0/0"
+            android:textColor="@color/color_label"
+            />
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/list_view"
+            android:overScrollMode="never"
+            android:divider="@null"
+            android:layout_below="@+id/layout_item"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/flash"
+            android:background="@color/colorFlash"
+            android:visibility="gone"
+            />
+    </RelativeLayout>
+    <include layout="@layout/scrollview_filters" />
+    <include layout="@layout/layout_buttons_pane" />
+</LinearLayout>

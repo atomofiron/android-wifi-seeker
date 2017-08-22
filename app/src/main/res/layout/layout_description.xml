@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/layout_description"
+    android:orientation="vertical"
+    android:background="@color/colorFrame"
+    style="?android:selectableItemBackground">
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_essid"
+        />
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_bssid"
+        />
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_capab"
+        />
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_frequ"
+        />
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_manuf"
+        />
+</LinearLayout>

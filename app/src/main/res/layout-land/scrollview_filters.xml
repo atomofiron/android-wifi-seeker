@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:scrollbarThumbVertical="@drawable/scroll_vertical"
+    android:background="@color/colorFrame"
+    android:gravity="center_horizontal|center_vertical">
+
+    <include layout="@layout/layout_filters_pane" />
+</ScrollView>

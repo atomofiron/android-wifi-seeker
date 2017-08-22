@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="similar_orientation">1</integer>
+    <integer name="dissimilar_orientation">0</integer>
+
+    <integer name="buttons_pane_width">-1</integer> <!-- match_parent -->
+    <integer name="buttons_pane_height">-2</integer> <!-- wrap_content -->
+</resources>

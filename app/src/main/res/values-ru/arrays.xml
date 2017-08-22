@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="delay_arr">
+        <item>3 сек</item>
+        <item>5 сек</item>
+        <item>10 сек</item>
+        <item>30 сек</item>
+        <item>1 мин</item>
+        <item>3 мин</item>
+        <item>5 мин</item>
+    </string-array>
+</resources>
