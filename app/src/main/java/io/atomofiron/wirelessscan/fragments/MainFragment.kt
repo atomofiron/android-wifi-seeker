@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
 import android.content.*
 import android.content.Context.WIFI_SERVICE
+import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.*
 import android.view.*
@@ -74,6 +75,7 @@ class MainFragment : Fragment() {
                 listAdapter.connectionInfo = wifiManager.connectionInfo
             }
         }
+        activity.registerReceiver(connectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onDestroy() {
@@ -82,6 +84,7 @@ class MainFragment : Fragment() {
             stopScanService()
 
         scanConnection.unbindService(activity)
+        activity.unregisterReceiver(connectionReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
