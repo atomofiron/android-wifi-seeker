@@ -2,9 +2,7 @@ package io.atomofiron.wirelessscan
 
 import android.Manifest
 import android.annotation.TargetApi
-import android.app.Activity
-import android.app.AlertDialog
-import android.app.Fragment
+import android.app.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import io.atomofiron.wirelessscan.fragments.MainFragment
@@ -46,6 +44,7 @@ class MainActivity : Activity() {
         fragmentManager.beginTransaction()
                 .addToBackStack(fragment.javaClass.name)
                 .replace(R.id.fragment_container, fragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commitAllowingStateLoss()
     }
 
