@@ -28,8 +28,12 @@ kapt {
     generateStubs = true
 }
 
+def room_version = "1.0.0-alpha9"
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile "android.arch.persistence.room:runtime:$room_version"
+    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
 }
 
 buildscript {

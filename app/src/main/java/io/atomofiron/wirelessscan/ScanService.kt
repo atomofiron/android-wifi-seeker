@@ -4,7 +4,7 @@ import android.app.IntentService
 import android.app.Notification
 import android.net.wifi.WifiManager
 import android.os.*
-import io.atomofiron.wirelessscan.utils.Node
+import io.atomofiron.wirelessscan.room.Node
 import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
 import android.app.PendingIntent
 import android.content.*

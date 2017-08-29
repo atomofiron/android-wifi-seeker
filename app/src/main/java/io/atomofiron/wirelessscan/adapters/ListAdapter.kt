@@ -14,7 +14,7 @@ import io.atomofiron.wirelessscan.I
 import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
 import kotlinx.android.synthetic.main.layout_item.view.*
 import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.utils.*
+import io.atomofiron.wirelessscan.room.Node
 
 
 class ListAdapter(private val co: Context, private val listView: ListView) : BaseAdapter() {
@@ -25,7 +25,7 @@ class ListAdapter(private val co: Context, private val listView: ListView) : Bas
     }
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
-    private val allNodes = ArrayList<Node>()
+    val allNodes = ArrayList<Node>()
     private val nodes = ArrayList<Node>()
     var focuse: Node? = null
         private set

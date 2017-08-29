@@ -1,47 +1,58 @@
-package io.atomofiron.wirelessscan.utils
+package io.atomofiron.wirelessscan.room
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Ignore
 import android.content.res.Resources
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import io.atomofiron.wirelessscan.R
 
+@Entity(tableName = "nodes", primaryKeys = arrayOf("bssid"))
 class Node {
     var level = 0
         set(value) { field = value; pwColor = getPowerColor(value) }
     var frequency = 0
-        private set(value) { field = value; parseFrequency(value) }
+        set(value) { field = value; parseFrequency(value) }
     var capabilities = ""
-        private set(value) { field = value; parseCapabilities(value) }
+        set(value) { field = value; parseCapabilities(value) }
     var essid = ""
-        private set(value) { field = value; essidColor = if (value.isEmpty()) yellow else grey }
+        set(value) { field = value; essidColor = if (value.isEmpty()) yellow else grey }
     var bssid = ""
-        private set
 
     var ch = 0
-        private set
+    @Ignore
     lateinit var enc: String
         private set
+    @Ignore
     lateinit var chi: String
         private set
+    @Ignore
     lateinit var wps: String
         private set
 
+    @Ignore
     var pwColor = 0
         private set
+    @Ignore
     var chColor = 0
         private set
+    @Ignore
     var encColor = 0
         private set
+    @Ignore
     var chiColor = 0
         private set
+    @Ignore
     var wpsColor = 0
         private set
+    @Ignore
     var essidColor = 0
         private set
+    @Ignore
     val bssidColor = grey
 
-    private constructor()
+    internal constructor()
 
     constructor(sr: ScanResult) : this() {
         level = sr.level
