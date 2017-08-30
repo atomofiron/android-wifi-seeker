@@ -6,10 +6,24 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import android.os.Parcel
+import android.os.Parcelable
 import io.atomofiron.wirelessscan.R
 
 @Entity(tableName = "nodes", primaryKeys = arrayOf("bssid"))
-class Node {
+class Node : Parcelable {
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(level)
+        dest.writeInt(frequency)
+        dest.writeString(capabilities)
+        dest.writeString(essid)
+        dest.writeString(bssid)
+        dest.writeInt(ch)
+        dest.writeString(manufacturer)
+    }
+
+    override fun describeContents(): Int = 0
+
     var level = 0
         set(value) { field = value; pwColor = getPowerColor(value) }
     var frequency = 0
@@ -30,6 +44,7 @@ class Node {
     @Ignore
     lateinit var wps: String
         private set
+    var manufacturer = ""
 
     @Ignore
     var pwColor = 0

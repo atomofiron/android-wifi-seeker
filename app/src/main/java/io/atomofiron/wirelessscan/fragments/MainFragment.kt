@@ -33,6 +33,7 @@ import kotlinx.android.synthetic.main.layout_item.view.*
 class MainFragment : Fragment() {
     companion object {
         private val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
+        private val EXTRA_NODES = "EXTRA_NODES"
     }
     private lateinit var sp: SharedPreferences
     private lateinit var wifiManager: WifiManager
@@ -68,8 +69,11 @@ class MainFragment : Fragment() {
                 this@MainFragment.handleMessage(msg)
             }
         })
+        val appIsStarted = savedInstanceState == null
         scanConnection.onServiceConnectedListener = {
-            scanConnection.sendGetRequest()
+            if (appIsStarted)
+                scanConnection.sendGetRequest()
+
             sendScanDelay()
         }
         scanConnection.bindService(activity)
@@ -97,6 +101,7 @@ class MainFragment : Fragment() {
         keepServiceStarted = true
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, view?.button_resume?.isActivated ?: false)
+        outState.putParcelableArrayList(EXTRA_NODES, listAdapter.allNodes)
     }
 
     override fun onDestroyView() {
@@ -131,6 +136,9 @@ class MainFragment : Fragment() {
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
             startScanServiceIfWifiEnabled(view.button_resume)
+
+        if (savedInstanceState != null)
+            listAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_NODES))
 
         return view
     }
