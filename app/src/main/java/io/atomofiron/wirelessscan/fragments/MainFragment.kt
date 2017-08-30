@@ -57,7 +57,7 @@ class MainFragment : Fragment() {
                 view.flash.visibility = View.VISIBLE
             }
             override fun onAnimationEnd(animation: Animation) {
-                view.flash.visibility = View.GONE
+                view?.flash?.visibility = View.GONE
             }
             override fun onAnimationRepeat(animation: Animation) {}
         })
@@ -110,6 +110,8 @@ class MainFragment : Fragment() {
                     fragmentView!!.layout_description,
                     if (sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) listAdapter.focuse else null
             )
+
+            fragmentView!!.flash.visibility = View.GONE
 
             return fragmentView
         }
