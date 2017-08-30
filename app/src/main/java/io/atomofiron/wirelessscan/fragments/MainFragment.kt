@@ -31,6 +31,9 @@ import kotlinx.android.synthetic.main.layout_filters_pane.view.*
 import kotlinx.android.synthetic.main.layout_item.view.*
 
 class MainFragment : Fragment() {
+    companion object {
+        private val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
+    }
     private lateinit var sp: SharedPreferences
     private lateinit var wifiManager: WifiManager
     private lateinit var scanConnection: ScanConnection
@@ -92,8 +95,10 @@ class MainFragment : Fragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        keepServiceStarted = true
         super.onSaveInstanceState(outState)
+        keepServiceStarted = true
+
+        outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, view?.button_resume?.isActivated ?: false)
     }
 
     override fun onDestroyView() {
@@ -124,7 +129,8 @@ class MainFragment : Fragment() {
         initFilters(view.layout_filters)
         initButtons(view.layout_buttons, view.label)
 
-        startScanServiceIfWifiEnabled(view.button_resume)
+        if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
+            startScanServiceIfWifiEnabled(view.button_resume)
 
         return view
     }
