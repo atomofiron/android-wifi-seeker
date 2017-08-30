@@ -35,6 +35,12 @@ class SnapshotFragment : Fragment() {
         menu?.clear()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        fragmentView = view
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (fragmentView != null)
             return fragmentView
