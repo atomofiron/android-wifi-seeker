@@ -13,6 +13,7 @@ import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
 import io.atomofiron.wirelessscan.fragments.PrefFragment
+import io.atomofiron.wirelessscan.fragments.SnapshotFragment
 import io.atomofiron.wirelessscan.fragments.SnapshotsListFragment
 
 class MainActivity : Activity() {
@@ -60,7 +61,7 @@ class MainActivity : Activity() {
 
         when (intent?.action) {
             ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotsListFragment())
-            ACTION_OPEN_SNAPSHOT -> { /* todo open snapshot */ }
+            ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)))
         }
     }
 
