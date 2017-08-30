@@ -75,7 +75,8 @@ class MainFragment : Fragment() {
 
         connectionReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                listAdapter.connectionInfo = wifiManager.connectionInfo
+                if (view != null)
+                    listAdapter.connectionInfo = wifiManager.connectionInfo
             }
         }
         activity.registerReceiver(connectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
@@ -118,6 +119,7 @@ class MainFragment : Fragment() {
         listAdapter = ListAdapter(activity, view.list_view)
         view.list_view.adapter = listAdapter
         listAdapter.onNodeClickListener = { node -> showDescriptionIfNecessary(getView().layout_description, node) }
+        listAdapter.connectionInfo = wifiManager.connectionInfo
 
         initFilters(view.layout_filters)
         initButtons(view.layout_buttons, view.label)
@@ -202,8 +204,10 @@ class MainFragment : Fragment() {
 
     private fun stopScanService() = scanConnection.stopScanService()
 
-    private fun sendScanDelay() =
-        scanConnection.sendScanDelay(resources.getIntArray(R.array.delay_arr_int)[view.spinner_delay.selectedItemPosition])
+    private fun sendScanDelay() {
+        scanConnection.sendScanDelay(resources.getIntArray(R.array.delay_arr_int)
+                [view?.spinner_delay?.selectedItemPosition ?: return])
+    }
 
     private fun handleMessage(msg: Message?) {
         I.log("R: what: ${msg?.what ?: "null"}")
