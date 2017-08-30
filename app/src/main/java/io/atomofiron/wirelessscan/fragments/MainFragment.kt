@@ -25,7 +25,7 @@ import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.TextView
 import io.atomofiron.wirelessscan.*
-import io.atomofiron.wirelessscan.utils.SnapshotMaker
+import io.atomofiron.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.layout_description.view.*
 import kotlinx.android.synthetic.main.layout_filters_pane.view.*
 import kotlinx.android.synthetic.main.layout_item.view.*
@@ -36,7 +36,7 @@ class MainFragment : Fragment() {
     private lateinit var scanConnection: ScanConnection
     private lateinit var listAdapter: ListAdapter
     private lateinit var connectionReceiver: BroadcastReceiver
-    private lateinit var snapshotMaker: SnapshotMaker
+    private lateinit var snapshotMaker: SnapshotManager
 
     private lateinit var flash: Animation
     private var keepServiceStarted = false
@@ -48,7 +48,7 @@ class MainFragment : Fragment() {
         setHasOptionsMenu(true)
         sp = I.sp(activity)
         wifiManager = activity.getSystemService(WIFI_SERVICE) as WifiManager
-        snapshotMaker = SnapshotMaker(activity)
+        snapshotMaker = SnapshotManager(activity)
 
         flash = AnimationUtils.loadAnimation(activity, R.anim.flash)
         flash.setAnimationListener(object : Animation.AnimationListener {
@@ -157,7 +157,7 @@ class MainFragment : Fragment() {
         buttons.button_save.setOnClickListener {
             if (listAdapter.allNodes.size != 0) {
                 view.flash.startAnimation(flash)
-                snapshotMaker.execute(listAdapter.allNodes)
+                snapshotMaker.put(listAdapter.allNodes)
             }
         }
         buttons.button_resume.setOnClickListener { v: View ->
