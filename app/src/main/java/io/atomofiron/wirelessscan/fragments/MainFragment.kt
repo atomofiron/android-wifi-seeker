@@ -24,7 +24,7 @@ import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.TextView
-import io.atomofiron.wirelessscan.toBoolean
+import io.atomofiron.wirelessscan.*
 import io.atomofiron.wirelessscan.utils.SnapshotMaker
 import kotlinx.android.synthetic.main.layout_description.view.*
 import kotlinx.android.synthetic.main.layout_filters_pane.view.*
@@ -179,7 +179,12 @@ class MainFragment : Fragment() {
             scanConnection.clearNodesList()
             label.text = listAdapter.clear()
         }).onClickListener { listAdapter.resetFocus(); true })
-        buttons.button_list.setOnClickListener {  }
+        buttons.button_list.setOnClickListener {
+            activity.startActivity(
+                    Intent(activity, MainActivity::class.java)
+                            .setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
+            )
+        }
     }
 
     private fun startScanServiceIfWifiEnabled(buttonResume: View) {

@@ -3,6 +3,7 @@ package io.atomofiron.wirelessscan
 import android.Manifest
 import android.annotation.TargetApi
 import android.app.*
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import io.atomofiron.wirelessscan.fragments.MainFragment
@@ -12,8 +13,14 @@ import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
 import io.atomofiron.wirelessscan.fragments.PrefFragment
+import io.atomofiron.wirelessscan.fragments.SnapshotsListFragment
 
 class MainActivity : Activity() {
+    companion object {
+        val ACTION_OPEN_SNAPSHOTS_LIST = "ACTION_OPEN_SNAPSHOTS_LIST"
+        val ACTION_OPEN_SNAPSHOT = "ACTION_OPEN_SNAPSHOT"
+        val EXTRA_SNAPSHOT_NAME = "EXTRA_SNAPSHOT_NAME"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +53,15 @@ class MainActivity : Activity() {
                 .replace(R.id.fragment_container, fragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commitAllowingStateLoss()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        when (intent?.action) {
+            ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotsListFragment())
+            ACTION_OPEN_SNAPSHOT -> { /* todo open snapshot */ }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
