@@ -13,6 +13,10 @@ class OnDoubleClickListener() : View.OnClickListener {
     var delay = 300L
     set(value) { field = if (value > 0) value else 0 }
 
+    constructor(delay: Long) : this() {
+        this.delay = delay
+    }
+
     constructor(onDoubleClickListener: (v: View) -> Unit) : this() {
         this.onDoubleClickListener = onDoubleClickListener
     }
