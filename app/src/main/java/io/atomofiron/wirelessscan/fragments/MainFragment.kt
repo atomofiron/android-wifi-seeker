@@ -1,5 +1,6 @@
 package io.atomofiron.wirelessscan.fragments
 
+import android.app.AlertDialog
 import io.atomofiron.wirelessscan.adapters.ListAdapter
 import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
 
@@ -21,14 +22,13 @@ import io.atomofiron.wirelessscan.connection.ScanConnection
 import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import io.atomofiron.wirelessscan.*
 import io.atomofiron.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.layout_description.view.*
 import kotlinx.android.synthetic.main.layout_filters_pane.view.*
 import kotlinx.android.synthetic.main.layout_item.view.*
+import java.io.File
 
 class MainFragment : Fragment() {
     companion object {
@@ -170,12 +170,14 @@ class MainFragment : Fragment() {
             updateCounters(listAdapter.filter(v.isActivated))
             view.layout_filters.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
-        buttons.button_save.setOnClickListener {
+        var snapshotFileName = ""
+        buttons.button_save.setOnClickListener(OnDoubleClickListener(1000L).onClickListener {
             if (listAdapter.allNodes.size != 0) {
                 view.flash.startAnimation(flash)
-                SnapshotManager(activity).put(listAdapter.allNodes)
+
+                snapshotFileName = SnapshotManager(activity).put(listAdapter.allNodes)
             }
-        }
+        }.onDoubleClickListener { renameSnapshot(snapshotFileName) })
         buttons.button_resume.setOnClickListener { v: View ->
             v.isActivated = !v.isActivated
 
@@ -247,6 +249,32 @@ class MainFragment : Fragment() {
 
     private fun updateCounters(counters: String) {
         view.label.text = counters
+    }
+
+    private fun renameSnapshot(lastName: String) {
+        val file = activity.getDatabasePath(lastName)
+        if (file.exists()) {
+            val editText = EditText(activity)
+            editText.setText(lastName)
+            AlertDialog.Builder(activity)
+                    .setTitle(R.string.rename_to)
+                    .setView(editText)
+                    .setCancelable(false)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.ok, { _, _ ->
+                        var text = editText.text.toString()
+
+                        if (text.isEmpty())
+                            return@setPositiveButton
+
+                        if (!text.endsWith(".db"))
+                            text += ".db"
+
+                        val success = file.renameTo(File(file.parent, text))
+                        Toast.makeText(activity, if (success) R.string.success else R.string.failure, Toast.LENGTH_SHORT).show()
+                    }).create().show()
+        } else
+            Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
     private fun showDescriptionIfNecessary(description: View, node: Node?) {

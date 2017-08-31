@@ -20,7 +20,7 @@
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
         android:id="@+id/button_save"
-        android:src="@drawable/ic_save"
+        android:src="@drawable/ic_save_state"
         android:layout_weight="1"
         style="?android:borderlessButtonStyle"
         />

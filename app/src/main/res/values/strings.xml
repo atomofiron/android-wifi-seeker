@@ -6,6 +6,10 @@
     <string name="stop">Stop</string>
     <string name="ok">OK</string>
     <string name="no_activity">You have no application able to perform this action</string>
+    <string name="cancel">Cancel</string>
+    <string name="rename_to">Rename to</string>
+    <string name="success">Success</string>
+    <string name="failure">Failure</string>
 
     <!-- prefs -->
     <string name="default_delay">Default delay</string>

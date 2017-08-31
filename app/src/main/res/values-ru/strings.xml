@@ -6,6 +6,10 @@
     <string name="stop">Остановить</string>
     <string name="ok">ОК</string>
     <string name="no_activity">У вас нет приложения, способного выполнить данное действие</string>
+    <string name="cancel">Отмена</string>
+    <string name="rename_to">Переименовать</string>
+    <string name="success">Успех</string>
+    <string name="failure">Ошибка</string>
 
     <!-- prefs -->
     <string name="default_delay">Задержка по умолчанию</string>
