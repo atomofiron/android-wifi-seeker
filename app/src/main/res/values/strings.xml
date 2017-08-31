@@ -12,6 +12,10 @@
     <string name="success">Success</string>
     <string name="failure">Failure</string>
 
+    <!-- Fragment titles -->
+    <string name="title_snapshots">Snapshots</string>
+    <string name="title_preferences">Settings</string>
+
     <!-- prefs -->
     <string name="default_delay">Default delay</string>
     <string name="show_description">Show extended network\'s details</string>
@@ -42,4 +46,8 @@
     <string name="need_coarse_location">For the program to process on Android 6 and above must have permission to the COARSE location</string>
     <string name="get_perm_by_settings">Allow permission for the location in system settings</string>
     <string name="no_perm">Permission denied</string>
+    <string name="clone_detected">The clone of your AP was found</string>
+    <string name="wifi_was_disabled">WiFi was diabled</string>
+    <string name="allow_network">Allow that network</string>
+    <string name="turn_wifi_on">Turn WiFi on</string>
 </resources>

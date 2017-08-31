@@ -31,6 +31,12 @@ class SnapshotsListFragment : Fragment() {
         fragmentView = view
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        activity.setTitle(R.string.title_snapshots)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (fragmentView != null)
             return fragmentView

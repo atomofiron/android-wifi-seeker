@@ -110,6 +110,12 @@ class MainFragment : Fragment() {
         fragmentView = view
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        activity.setTitle(R.string.app_name)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (fragmentView != null) {
             showDescriptionIfNecessary( // когда возвращаемся из настроек

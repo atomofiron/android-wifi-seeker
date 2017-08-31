@@ -3,8 +3,7 @@ package io.atomofiron.wirelessscan.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.*
-import android.view.Menu
-import android.view.MenuInflater
+import android.view.*
 
 import io.atomofiron.wirelessscan.I
 import io.atomofiron.wirelessscan.R
@@ -23,6 +22,12 @@ class PrefFragment : PreferenceFragment(), Preference.OnPreferenceChangeListener
 
         findPreference(I.PREF_ATTACK_SCREEN).isEnabled = (findPreference(I.PREF_DETECT_ATTACKS) as TwoStatePreference).isChecked
         findPreference(I.PREF_NO_SCAN_IN_BG).isEnabled = (findPreference(I.PREF_AUTO_OFF_WIFI) as TwoStatePreference).isChecked
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        activity.setTitle(R.string.title_preferences)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater?) {

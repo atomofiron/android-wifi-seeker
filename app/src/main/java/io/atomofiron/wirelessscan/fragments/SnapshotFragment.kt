@@ -42,6 +42,12 @@ class SnapshotFragment : Fragment() {
         fragmentView = view
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        activity.title = arguments.getString(EXTRA_NAME)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (fragmentView != null)
             return fragmentView
