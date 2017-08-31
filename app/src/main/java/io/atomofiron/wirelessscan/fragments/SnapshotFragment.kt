@@ -65,7 +65,7 @@ class SnapshotFragment : Fragment() {
             description.tv_bssid.text = getString(R.string.bssid_format, node.bssid)
             description.tv_capab.text = getString(R.string.capab_format, node.capabilities)
             description.tv_frequ.text = getString(R.string.frequ_format, node.frequency, node.ch)
-            description.tv_manuf.text = getString(R.string.manuf_format, "")
+            description.tv_manuf.text = getString(R.string.manuf_format, node.manufacturer)
         } else
             description.visibility = View.GONE
     }

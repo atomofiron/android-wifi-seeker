@@ -11,6 +11,7 @@ import android.content.*
 import android.os.Build
 import android.graphics.drawable.Icon
 import android.net.ConnectivityManager
+import io.atomofiron.wirelessscan.utils.OuiManager
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -36,6 +37,7 @@ class ScanService : IntentService("ScanService") {
     private lateinit var wifiManager: WifiManager
     private lateinit var commandMessenger: Messenger
     private lateinit var sp: SharedPreferences
+    private lateinit var ouiManager: OuiManager
     private var resultMessenger: Messenger? = null
     private val nodes = ArrayList<Node>()
     private var trustedPoints: ArrayList<Node> = ArrayList()
@@ -61,12 +63,14 @@ class ScanService : IntentService("ScanService") {
             }
         })
         sp = I.sp(baseContext)
+        ouiManager = OuiManager(baseContext)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         I.log("ScanService: onDestroy()")
         unregisterReceiver(receiver)
+        ouiManager.close()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
@@ -130,8 +134,11 @@ class ScanService : IntentService("ScanService") {
     private fun updateNodes() {
         val currentNodes = Node.parseScanResults(wifiManager.scanResults)
 
+        currentNodes.forEach { it.manufacturer = ouiManager.find(it.bssid) }
+
         nodes.removeAll(currentNodes)
         nodes.forEach { it -> it.level = Node.MIN_LEVEL }
+
         nodes.addAll(currentNodes)
         nodes.sortWith(Comparator { o1, o2 -> o2.level - o1.level })
     }
