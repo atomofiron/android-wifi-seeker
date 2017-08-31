@@ -27,6 +27,11 @@
             </intent-filter>
         </activity>
         <service android:name=".ScanService" android:exported="false" />
+        <provider
+            android:name=".utils.FileContentProvider"
+            android:authorities="io.atomofiron.wirelessscan"
+            android:exported="true"
+            />
     </application>
 
 </manifest>

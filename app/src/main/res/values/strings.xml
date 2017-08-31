@@ -5,6 +5,7 @@
     <string name="touch_to_look">Touch to look</string>
     <string name="stop">Stop</string>
     <string name="ok">OK</string>
+    <string name="no_activity">You have no application able to perform this action</string>
 
     <!-- prefs -->
     <string name="default_delay">Default delay</string>

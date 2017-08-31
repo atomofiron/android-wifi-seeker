@@ -2,8 +2,10 @@ package io.atomofiron.wirelessscan.fragments
 
 import android.app.Fragment
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import io.atomofiron.wirelessscan.MainActivity
 import io.atomofiron.wirelessscan.R
 import io.atomofiron.wirelessscan.adapters.SnapshotsListAdapter
@@ -50,6 +52,13 @@ class SnapshotsListFragment : Fragment() {
     }
 
     private fun share(name: String) {
-        // todo share snapshot
+        val intent = Intent(Intent.ACTION_SEND)
+                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://io.atomofiron.wirelessscan/$name"))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setType("*/*")
+
+        if (intent.resolveActivity(activity.packageManager) != null)
+            startActivity(intent)
+        else
+            Toast.makeText(activity, R.string.no_activity, Toast.LENGTH_SHORT).show()
     }
 }
