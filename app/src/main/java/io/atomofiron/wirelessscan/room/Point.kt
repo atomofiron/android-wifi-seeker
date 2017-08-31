@@ -10,8 +10,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import io.atomofiron.wirelessscan.R
 
-@Entity(tableName = "nodes", primaryKeys = arrayOf("bssid"))
-class Node : Parcelable {
+@Entity(tableName = "points", primaryKeys = arrayOf("bssid"))
+class Point : Parcelable {
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeInt(level)
         dest.writeInt(frequency)
@@ -123,21 +123,21 @@ class Node : Parcelable {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null || other::class.java != Node::class.java)
+        if (other == null || other::class.java != Point::class.java)
             return false
 
-        val o = other as Node
+        val o = other as Point
         return o.essid == essid && o.bssid == bssid
     }
 
     fun compare(bssid: String, essid: String, hidden: Boolean): Boolean =
             this.bssid == bssid && (this.essid == essid || this.level > MIN_LEVEL && this.essid.isEmpty() && hidden)
 
-    fun compare(node: Node, smart: Boolean): Boolean = this.essid == node.essid &&
+    fun compare(point: Point, smart: Boolean): Boolean = this.essid == point.essid &&
             if (smart)
-                this.bssid.startsWith(node.bssid.substring(0, 8))
+                this.bssid.startsWith(point.bssid.substring(0, 8))
             else
-                this.bssid == node.bssid
+                this.bssid == point.bssid
 
     fun getNotEmptyESSID(): String = if (essid.isEmpty()) bssid else essid
 
@@ -247,17 +247,17 @@ class Node : Parcelable {
             return ans
         }
 
-        fun parseScanResults(list: List<ScanResult>) : ArrayList<Node> {
-            val nodes = ArrayList<Node>()
-            list.forEach { it -> nodes.add(Node(it)) }
+        fun parseScanResults(list: List<ScanResult>) : ArrayList<Point> {
+            val points = ArrayList<Point>()
+            list.forEach { it -> points.add(Point(it)) }
 
-            return nodes
+            return points
         }
     }
 
-/*    private val CREATOR: Parcelable.Creator<Node> = object : Parcelable.Creator<Node> {
-        override fun createFromParcel(parcel: Parcel): Node {
-            val node = Node()
+/*    private val CREATOR: Parcelable.Creator<Point> = object : Parcelable.Creator<Point> {
+        override fun createFromParcel(parcel: Parcel): Point {
+            val node = Point()
             node.level = parcel.readInt()
             node.frequency = parcel.readInt()
             node.capabilities = parcel.readString()
@@ -267,7 +267,7 @@ class Node : Parcelable {
             return node
         }
 
-        override fun newArray(size: Int): Array<Node?> {
+        override fun newArray(size: Int): Array<Point?> {
             return arrayOfNulls(size)
         }
     }*/

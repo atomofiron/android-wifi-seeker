@@ -1,12 +1,12 @@
 package io.atomofiron.wirelessscan.fragments
 
 import android.app.AlertDialog
-import io.atomofiron.wirelessscan.adapters.ListAdapter
+import io.atomofiron.wirelessscan.adapters.PointsListAdapter
 import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
 
 import io.atomofiron.wirelessscan.R
 import io.atomofiron.wirelessscan.ScanService
-import io.atomofiron.wirelessscan.room.Node
+import io.atomofiron.wirelessscan.room.Point
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
@@ -34,12 +34,12 @@ import java.io.File
 class MainFragment : Fragment() {
     companion object {
         private val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
-        private val EXTRA_NODES = "EXTRA_NODES"
+        private val EXTRA_POINTS = "EXTRA_POINTS"
     }
     private lateinit var sp: SharedPreferences
     private lateinit var wifiManager: WifiManager
     private lateinit var scanConnection: ScanConnection
-    private lateinit var listAdapter: ListAdapter
+    private lateinit var pointsListAdapter: PointsListAdapter
     private lateinit var connectionReceiver: BroadcastReceiver
 
     private lateinit var flash: Animation
@@ -82,7 +82,7 @@ class MainFragment : Fragment() {
         connectionReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (view != null)
-                    listAdapter.connectionInfo = wifiManager.connectionInfo
+                    pointsListAdapter.connectionInfo = wifiManager.connectionInfo
             }
         }
         activity.registerReceiver(connectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
@@ -102,7 +102,7 @@ class MainFragment : Fragment() {
         keepServiceStarted = true
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, view?.button_resume?.isActivated ?: false)
-        outState.putParcelableArrayList(EXTRA_NODES, listAdapter.allNodes)
+        outState.putParcelableArrayList(EXTRA_POINTS, pointsListAdapter.allPoints)
     }
 
     override fun onDestroyView() {
@@ -114,7 +114,7 @@ class MainFragment : Fragment() {
         if (fragmentView != null) {
             showDescriptionIfNecessary( // когда возвращаемся из настроек
                     fragmentView!!.layout_description,
-                    if (sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) listAdapter.focuse else null
+                    if (sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) pointsListAdapter.focuse else null
             )
 
             fragmentView!!.flash.visibility = View.GONE
@@ -127,10 +127,10 @@ class MainFragment : Fragment() {
         if (WIDE_MODE)
             view.layout_item.bssid.visibility = View.VISIBLE
 
-        listAdapter = ListAdapter(activity, view.list_view)
-        view.list_view.adapter = listAdapter
-        listAdapter.onNodeClickListener = { node -> showDescriptionIfNecessary(getView().layout_description, node) }
-        listAdapter.connectionInfo = wifiManager.connectionInfo
+        pointsListAdapter = PointsListAdapter(activity, view.list_view)
+        view.list_view.adapter = pointsListAdapter
+        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(getView().layout_description, point) }
+        pointsListAdapter.connectionInfo = wifiManager.connectionInfo
 
         initFilters(view.layout_filters)
         initButtons(view.layout_buttons, view.label)
@@ -139,27 +139,27 @@ class MainFragment : Fragment() {
             startScanServiceIfWifiEnabled(view.button_resume)
 
         if (savedInstanceState != null)
-            listAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_NODES))
+            pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS))
 
         return view
     }
 
     private fun initFilters(filters: ViewGroup) {
         val listener = View.OnClickListener { v ->
-            var state = ListAdapter.FILTER_DEFAULT
+            var state = PointsListAdapter.FILTER_DEFAULT
             when {
                 v.isSelected -> v.isSelected = false
                 v.isActivated -> {
                     v.isActivated = false
                     v.isSelected = true
-                    state = ListAdapter.FILTER_EXCLUDE
+                    state = PointsListAdapter.FILTER_EXCLUDE
                 }
                 else -> {
                     v.isActivated = true
-                    state = ListAdapter.FILTER_INCLUDE
+                    state = PointsListAdapter.FILTER_INCLUDE
                 }
             }
-            updateCounters(listAdapter.updateFilter(filters.indexOfChild(v), state))
+            updateCounters(pointsListAdapter.updateFilter(filters.indexOfChild(v), state))
         }
         for (i in 0 until filters.childCount)
             filters.getChildAt(i).setOnClickListener(listener)
@@ -168,15 +168,15 @@ class MainFragment : Fragment() {
     private fun initButtons(buttons: View, label: TextView) {
         buttons.button_filter.setOnClickListener { v ->
             v.isActivated = !v.isActivated
-            updateCounters(listAdapter.filter(v.isActivated))
+            updateCounters(pointsListAdapter.filter(v.isActivated))
             view.layout_filters.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
         var snapshotFileName = ""
         buttons.button_save.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
-            if (listAdapter.allNodes.size != 0) {
+            if (pointsListAdapter.allPoints.size != 0) {
                 view.flash.startAnimation(flash)
 
-                snapshotFileName = SnapshotManager(activity).put(listAdapter.allNodes)
+                snapshotFileName = SnapshotManager(activity).put(pointsListAdapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName) })
         buttons.button_resume.setOnClickListener { v: View ->
@@ -195,9 +195,9 @@ class MainFragment : Fragment() {
             }
         }
         buttons.button_clear.setOnClickListener(DoubleClickMaster({
-            scanConnection.clearNodesList()
-            label.text = listAdapter.clear()
-        }).onClickListener { listAdapter.resetFocus() })
+            scanConnection.clearPointsList()
+            label.text = pointsListAdapter.clear()
+        }).onClickListener { pointsListAdapter.resetFocus() })
         buttons.button_list.setOnClickListener {
             activity.startActivity(
                     Intent(activity, MainActivity::class.java)
@@ -231,20 +231,20 @@ class MainFragment : Fragment() {
         if (view == null) return
 
         when (msg?.what) {
-            START_SCAN.ordinal -> listAdapter.animScan(true)
+            START_SCAN.ordinal -> pointsListAdapter.animScan(true)
             RESULTS.ordinal -> { updateList(msg) }
             STOPPED.ordinal -> {
                 view.button_resume.isActivated = false
-                listAdapter.animScan(false)
+                pointsListAdapter.animScan(false)
             }
         }
     }
 
     private fun updateList(msg: Message) {
-        if (msg.obj.javaClass == ArrayList<Node>().javaClass) {
+        if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
             view.button_resume.isActivated = msg.arg1.toBoolean()
 
-            updateCounters(listAdapter.updateList(msg.obj as ArrayList<Node>))
+            updateCounters(pointsListAdapter.updateList(msg.obj as ArrayList<Point>))
         }
     }
 
@@ -278,15 +278,15 @@ class MainFragment : Fragment() {
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showDescriptionIfNecessary(description: View, node: Node?) {
-        if (node != null && sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) {
+    private fun showDescriptionIfNecessary(description: View, point: Point?) {
+        if (point != null && sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) {
             description.visibility = View.VISIBLE
 
-            description.tv_essid.text = getString(R.string.essid_format, node.getNotEmptyESSID())
-            description.tv_bssid.text = getString(R.string.bssid_format, node.bssid)
-            description.tv_capab.text = getString(R.string.capab_format, node.capabilities)
-            description.tv_frequ.text = getString(R.string.frequ_format, node.frequency, node.ch)
-            description.tv_manuf.text = getString(R.string.manuf_format, node.manufacturer)
+            description.tv_essid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
+            description.tv_bssid.text = getString(R.string.bssid_format, point.bssid)
+            description.tv_capab.text = getString(R.string.capab_format, point.capabilities)
+            description.tv_frequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tv_manuf.text = getString(R.string.manuf_format, point.manufacturer)
         } else
             description.visibility = View.GONE
     }

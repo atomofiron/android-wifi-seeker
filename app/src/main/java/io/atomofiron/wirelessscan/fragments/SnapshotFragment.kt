@@ -4,8 +4,8 @@ import android.app.Fragment
 import android.os.Bundle
 import android.view.*
 import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.adapters.ListAdapter
-import io.atomofiron.wirelessscan.room.Node
+import io.atomofiron.wirelessscan.adapters.PointsListAdapter
+import io.atomofiron.wirelessscan.room.Point
 import io.atomofiron.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_description.view.*
@@ -48,24 +48,24 @@ class SnapshotFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_snapshot, container, false)
 
-        val adapter = ListAdapter(activity, view.list_view)
+        val adapter = PointsListAdapter(activity, view.list_view)
         view.list_view.adapter = adapter
-        adapter.onNodeClickListener = { node -> showDescription(view.layout_description, node) }
+        adapter.onPointClickListener = { point -> showDescription(view.layout_description, point) }
 
         adapter.updateList(SnapshotManager(activity).get(arguments.getString(EXTRA_NAME)))
 
         return view
     }
 
-    private fun showDescription(description: View, node: Node?) {
-        if (node != null) {
+    private fun showDescription(description: View, point: Point?) {
+        if (point != null) {
             description.visibility = View.VISIBLE
 
-            description.tv_essid.text = getString(R.string.essid_format, node.getNotEmptyESSID())
-            description.tv_bssid.text = getString(R.string.bssid_format, node.bssid)
-            description.tv_capab.text = getString(R.string.capab_format, node.capabilities)
-            description.tv_frequ.text = getString(R.string.frequ_format, node.frequency, node.ch)
-            description.tv_manuf.text = getString(R.string.manuf_format, node.manufacturer)
+            description.tv_essid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
+            description.tv_bssid.text = getString(R.string.bssid_format, point.bssid)
+            description.tv_capab.text = getString(R.string.capab_format, point.capabilities)
+            description.tv_frequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tv_manuf.text = getString(R.string.manuf_format, point.manufacturer)
         } else
             description.visibility = View.GONE
     }

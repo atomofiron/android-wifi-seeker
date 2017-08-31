@@ -7,10 +7,10 @@ import android.arch.persistence.room.Query;
 import java.util.ArrayList;
 
 @Dao
-public interface NodeDao {
-	@Query("SELECT * FROM nodes")
-	Node[] get();
+public interface PointDao {
+	@Query("SELECT * FROM points")
+	Point[] get();
 
 	@Insert
-	void put(ArrayList<Node> node);
+	void put(ArrayList<Point> point);
 }

@@ -14,10 +14,10 @@ import io.atomofiron.wirelessscan.I
 import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
 import kotlinx.android.synthetic.main.layout_item.view.*
 import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.room.Node
+import io.atomofiron.wirelessscan.room.Point
 
 
-class ListAdapter(private val co: Context, private val listView: ListView) : BaseAdapter() {
+class PointsListAdapter(private val co: Context, private val listView: ListView) : BaseAdapter() {
     companion object {
         val FILTER_DEFAULT = 0
         val FILTER_INCLUDE = 1
@@ -25,23 +25,23 @@ class ListAdapter(private val co: Context, private val listView: ListView) : Bas
     }
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
-    val allNodes = ArrayList<Node>()
-    private val nodes = ArrayList<Node>()
-    var focuse: Node? = null
+    val allPoints = ArrayList<Point>()
+    private val points = ArrayList<Point>()
+    var focuse: Point? = null
         private set
     private var transparent = 0
     private var filtering = false
     var connectionInfo: WifiInfo? = null
         set(value) { field = value; notifyDataSetChanged() }
 
-    var onNodeClickListener: (node: Node?) -> Unit = {}
+    var onPointClickListener: (point: Point?) -> Unit = {}
 
     init {
-        Node.initColors(co.resources)
+        Point.initColors(co.resources)
         transparent = co.resources.getColor(R.color.transparent)
         listView.setOnItemClickListener { _, _, position, _ ->
-            focuse = nodes[position]
-            onNodeClickListener(focuse)
+            focuse = points[position]
+            onPointClickListener(focuse)
             notifyDataSetChanged()
         }
     }
@@ -62,70 +62,70 @@ class ListAdapter(private val co: Context, private val listView: ListView) : Bas
         } else
             holder = convertView.tag as ViewHolder
 
-        fillView(holder, nodes[position], position)
+        fillView(holder, points[position], position)
 
         return convertView
     }
 
-    private fun fillView(holder: ViewHolder, node: Node, position: Int) {
-        drawItemRoot(holder.root, node, position)
+    private fun fillView(holder: ViewHolder, point: Point, position: Int) {
+        drawItemRoot(holder.root, point, position)
 
-        // node.level == -1 experiment
-        holder.pw.setTextColor(if (node.level == -1) -65281 else node.pwColor)
+        // point.level == -1 experiment
+        holder.pw.setTextColor(if (point.level == -1) -65281 else point.pwColor)
 
-        holder.ch.text = node.ch.toString()
-        holder.ch.setTextColor(node.chColor)
+        holder.ch.text = point.ch.toString()
+        holder.ch.setTextColor(point.chColor)
 
-        holder.enc.text = node.enc
-        holder.enc.setTextColor(node.encColor)
+        holder.enc.text = point.enc
+        holder.enc.setTextColor(point.encColor)
 
-        holder.chi.text = node.chi
-        holder.chi.setTextColor(node.chiColor)
+        holder.chi.text = point.chi
+        holder.chi.setTextColor(point.chiColor)
 
-        holder.wps.text = node.wps
-        holder.wps.setTextColor(node.wpsColor)
+        holder.wps.text = point.wps
+        holder.wps.setTextColor(point.wpsColor)
 
-        val connected = connectionInfo?.bssid == node.bssid
-        holder.essid.text = if (node.essid.isEmpty()) node.bssid else node.essid
-        holder.essid.setTextColor(if (connected) Node.green_light else node.essidColor)
+        val connected = connectionInfo?.bssid == point.bssid
+        holder.essid.text = if (point.essid.isEmpty()) point.bssid else point.essid
+        holder.essid.setTextColor(if (connected) Point.green_light else point.essidColor)
 
-        holder.bssid.text = node.bssid
-        holder.bssid.setTextColor(if (connected) Node.green_light else node.bssidColor)
+        holder.bssid.text = point.bssid
+        holder.bssid.setTextColor(if (connected) Point.green_light else point.bssidColor)
     }
 
-    private fun drawItemRoot(layout: LinearLayout, node: Node, position: Int) {
-        val associating = focuse?.bssid?.startsWith(node.bssid.substring(0, 8)) ?: false
+    private fun drawItemRoot(layout: LinearLayout, point: Point, position: Int) {
+        val associating = focuse?.bssid?.startsWith(point.bssid.substring(0, 8)) ?: false
         if (associating)
-            layout.setBackgroundResource(if (node.level <= Node.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
+            layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
         else
             layout.setBackgroundColor(when {
-                node.level <= Node.MIN_LEVEL -> Node.red_lite
-                position % 2 == 0 -> Node.transparent
-                else -> Node.black_lite
+                point.level <= Point.MIN_LEVEL -> Point.red_lite
+                position % 2 == 0 -> Point.transparent
+                else -> Point.black_lite
             })
 
-        if (node.level == -1)
-            I.log("WOW: node.level == -1")
+        if (point.level == -1)
+            I.log("WOW: point.level == -1")
     }
 
     fun resetFocus() {
         focuse = null
-        onNodeClickListener(null)
+        onPointClickListener(null)
     }
 
     /** @return counters like '15/22' or '5/22   15/22' */
     private fun getCounters(): String {
-        var count = allNodes.size
-        allNodes.forEach { it -> if (it.level == Node.MIN_LEVEL) count-- }
-        return "${if (filtering) "${nodes.size}/${allNodes.size}" else ""}   $count/${allNodes.size}"
+        var count = allPoints.size
+        allPoints.forEach { it -> if (it.level == Point.MIN_LEVEL) count-- }
+        return "${if (filtering) "${points.size}/${allPoints.size}" else ""}   $count/${allPoints.size}"
     }
 
-    fun updateList(list: ArrayList<Node>?) : String {
-        allNodes.clear()
-        nodes.clear()
+    fun updateList(list: ArrayList<Point>?) : String {
+        allPoints.clear()
+        points.clear()
 
         if (list != null)
-            allNodes.addAll(list)
+            allPoints.addAll(list)
 
         applyFilter()
         notifyDataSetChanged()
@@ -146,30 +146,30 @@ class ListAdapter(private val co: Context, private val listView: ListView) : Bas
     }
 
     private fun applyFilter() {
-        val prevNodes = ArrayList(nodes)
-        nodes.clear()
-        nodes.addAll(allNodes)
+        val prevPoints = ArrayList(points)
+        points.clear()
+        points.addAll(allPoints)
 
         if (filtering) {
             var n = 0
-            loop@ while (n < nodes.size) {
+            loop@ while (n < points.size) {
                 for (i in 0 until filter.size)
-                    if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != nodes[n].essid.isEmpty() ||
-                            filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != nodes[n].capabilities.contains(filterValues[i])) {
-                        nodes.removeAt(n)
+                    if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != points[n].essid.isEmpty() ||
+                            filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != points[n].capabilities.contains(filterValues[i])) {
+                        points.removeAt(n)
                         continue@loop
                     }
                 n++
             }
         }
 
-        if (prevNodes != nodes)
+        if (prevPoints != points)
             notifyDataSetChanged()
     }
 
     fun clear(): String {
-        allNodes.clear()
-        nodes.clear()
+        allPoints.clear()
+        points.clear()
 
         notifyDataSetChanged()
         return getCounters()
@@ -196,11 +196,11 @@ class ListAdapter(private val co: Context, private val listView: ListView) : Bas
                     listView.getChildAt(i).pwr.animation = null
     }
 
-    override fun getItem(position: Int): Node = nodes[position]
+    override fun getItem(position: Int): Point = points[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getCount(): Int = nodes.size
+    override fun getCount(): Int = points.size
 
     class ViewHolder(layout: LinearLayout) {
         val root = layout

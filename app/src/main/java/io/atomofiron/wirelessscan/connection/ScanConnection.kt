@@ -16,7 +16,7 @@ class ScanConnection(handler: Handler) : Connection() {
         send(message)
     }
 
-    fun clearNodesList() = send(newMessage(WHAT.CLEAR.ordinal))
+    fun clearPointsList() = send(newMessage(WHAT.CLEAR.ordinal))
 
     fun stopScanService() = send(newMessage(WHAT.STOP.ordinal))
 }

@@ -4,7 +4,7 @@ import android.app.IntentService
 import android.app.Notification
 import android.net.wifi.WifiManager
 import android.os.*
-import io.atomofiron.wirelessscan.room.Node
+import io.atomofiron.wirelessscan.room.Point
 import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
 import android.app.PendingIntent
 import android.content.*
@@ -39,8 +39,8 @@ class ScanService : IntentService("ScanService") {
     private lateinit var sp: SharedPreferences
     private lateinit var ouiManager: OuiManager
     private var resultMessenger: Messenger? = null
-    private val nodes = ArrayList<Node>()
-    private var trustedPoints: ArrayList<Node> = ArrayList()
+    private val points = ArrayList<Point>()
+    private var trustedPoints: ArrayList<Point> = ArrayList()
     private var delay = 10
     private var process = false
     private var code = 1
@@ -101,7 +101,7 @@ class ScanService : IntentService("ScanService") {
         Thread.sleep(SCAN_DELAY)
 
         if (waitForWifi()) {
-            updateNodes()
+            updatePoints()
             sendResults()
             detectAttacksIfNeeded()
         }
@@ -131,16 +131,16 @@ class ScanService : IntentService("ScanService") {
         stopForeground(true)
     }
 
-    private fun updateNodes() {
-        val currentNodes = Node.parseScanResults(wifiManager.scanResults)
+    private fun updatePoints() {
+        val currentPoints = Point.parseScanResults(wifiManager.scanResults)
 
-        currentNodes.forEach { it.manufacturer = ouiManager.find(it.bssid) }
+        currentPoints.forEach { it.manufacturer = ouiManager.find(it.bssid) }
 
-        nodes.removeAll(currentNodes)
-        nodes.forEach { it -> it.level = Node.MIN_LEVEL }
+        points.removeAll(currentPoints)
+        points.forEach { it -> it.level = Point.MIN_LEVEL }
 
-        nodes.addAll(currentNodes)
-        nodes.sortWith(Comparator { o1, o2 -> o2.level - o1.level })
+        points.addAll(currentPoints)
+        points.sortWith(Comparator { o1, o2 -> o2.level - o1.level })
     }
 
     private fun newMessage(what: Int): Message {
@@ -156,7 +156,7 @@ class ScanService : IntentService("ScanService") {
     private fun sendResults() {
         val message = newMessage(RESULTS.ordinal)
         message.arg1 = process.toInt()
-        message.obj = nodes
+        message.obj = points
         resultMessenger?.send(message)
     }
 
@@ -169,7 +169,7 @@ class ScanService : IntentService("ScanService") {
 
             when (msg.what) {
                 GET.ordinal -> sendResults()
-                CLEAR.ordinal-> nodes.clear()
+                CLEAR.ordinal-> points.clear()
                 STOP.ordinal -> stop()
                 DELAY.ordinal -> delay = msg.arg1
             }
@@ -181,7 +181,7 @@ class ScanService : IntentService("ScanService") {
         val essid = wifiManager.connectionInfo.ssid ?: ""
         val hidden = wifiManager.connectionInfo.hiddenSSID
 
-        val current = nodes.find { it.compare(bssid, essid, hidden) }
+        val current = points.find { it.compare(bssid, essid, hidden) }
         if (sp.getBoolean(I.PREF_DETECT_ATTACKS, false) && current != null) {
             val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)
 
@@ -191,7 +191,7 @@ class ScanService : IntentService("ScanService") {
                 // todo request notification
             } else {
                 trustedPoints.add(current)
-                nodes.filter { !it.compare(current, smart) }
+                points.filter { !it.compare(current, smart) }
                         .forEach { /* todo warning notification */ }
             }
         }
