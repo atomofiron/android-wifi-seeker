@@ -52,9 +52,7 @@ class SnapshotFragment : Fragment() {
         view.list_view.adapter = adapter
         adapter.onNodeClickListener = { node -> showDescription(view.layout_description, node) }
 
-        SnapshotManager(activity).get(arguments.getString(EXTRA_NAME), { list ->
-            adapter.updateList(list)
-        })
+        adapter.updateList(SnapshotManager(activity).get(arguments.getString(EXTRA_NAME)))
 
         return view
     }
