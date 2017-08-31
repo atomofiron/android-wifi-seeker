@@ -24,6 +24,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import io.atomofiron.wirelessscan.*
+import io.atomofiron.wirelessscan.utils.FileNameInputText
 import io.atomofiron.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.layout_description.view.*
 import kotlinx.android.synthetic.main.layout_filters_pane.view.*
@@ -254,7 +255,7 @@ class MainFragment : Fragment() {
     private fun renameSnapshot(lastName: String) {
         val file = activity.getDatabasePath(lastName)
         if (file.exists()) {
-            val editText = EditText(activity)
+            val editText = FileNameInputText(activity)
             editText.setText(lastName)
             AlertDialog.Builder(activity)
                     .setTitle(R.string.rename_to)
