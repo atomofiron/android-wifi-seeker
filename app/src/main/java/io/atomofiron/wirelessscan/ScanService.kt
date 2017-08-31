@@ -1,7 +1,9 @@
 package io.atomofiron.wirelessscan
 
+import android.annotation.TargetApi
 import android.app.IntentService
 import android.app.Notification
+import android.app.NotificationManager
 import android.net.wifi.WifiManager
 import android.os.*
 import io.atomofiron.wirelessscan.room.Point
@@ -18,6 +20,11 @@ import kotlin.collections.ArrayList
 class ScanService : IntentService("ScanService") {
     companion object {
         private val ACTION_STOP = "ACTION_STOP"
+        private val ACTION_ALLOW = "ACTION_ALLOW"
+        private val ACTION_TURN_WIFI_ON = "ACTION_TURN_WIFI_ON"
+
+        private val EXTRA_ID = "EXTRA_ID"
+        private val EXTRA_POINT = "EXTRA_POINT"
 
         private val SECOND = 1000L
         private val SCAN_DELAY_OFFSET = 2
@@ -25,8 +32,6 @@ class ScanService : IntentService("ScanService") {
         private val WIFI_WAITING_PERIOD = 300L
 
         private val FOREGROUND_NOTIFICATION_ID = 1
-        private val WARNING_NOTIFICATION_ID = 2
-        private val REQUEST_NOTIFICATION_ID = 3
 
         private var boundCount = 0
         fun connected() = boundCount++
@@ -38,6 +43,7 @@ class ScanService : IntentService("ScanService") {
     private lateinit var commandMessenger: Messenger
     private lateinit var sp: SharedPreferences
     private lateinit var ouiManager: OuiManager
+    private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
     private val points = ArrayList<Point>()
     private var trustedPoints: ArrayList<Point> = ArrayList()
@@ -53,6 +59,8 @@ class ScanService : IntentService("ScanService") {
         receiver = Receiver()
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         filter.addAction(ACTION_STOP)
+        filter.addAction(ACTION_ALLOW)
+        filter.addAction(ACTION_TURN_WIFI_ON)
         registerReceiver(receiver, filter)
 
         wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -64,6 +72,7 @@ class ScanService : IntentService("ScanService") {
         })
         sp = I.sp(baseContext)
         ouiManager = OuiManager(baseContext)
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
     override fun onDestroy() {
@@ -177,23 +186,34 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun detectAttacksIfNeeded() {
+        if (!sp.getBoolean(I.PREF_DETECT_ATTACKS, false))
+            return
+
         val bssid = wifiManager.connectionInfo.bssid ?: ""
-        val essid = wifiManager.connectionInfo.ssid ?: ""
+        var essid = wifiManager.connectionInfo.ssid
         val hidden = wifiManager.connectionInfo.hiddenSSID
+        essid = essid.substring(1, essid.length - 1) // necessary
 
         val current = points.find { it.compare(bssid, essid, hidden) }
-        if (sp.getBoolean(I.PREF_DETECT_ATTACKS, false) && current != null) {
+        if (current != null) {
             val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)
 
-            if (sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) &&
-                trustedPoints.find { !it.compare(current, smart) } != null) {
-                wifiManager.isWifiEnabled = false
-                // todo request notification
-            } else {
-                trustedPoints.add(current)
-                points.filter { !it.compare(current, smart) }
-                        .forEach { /* todo warning notification */ }
+            if (sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)) {
+                val point = trustedPoints.find { it.isSimilar(current, smart) }
+
+                if (point != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        wifiManager.isWifiEnabled = false
+                        request(point)
+                        return
+                    } else
+                        warning(point)
+                } else
+                    trustedPoints.add(current)
             }
+
+            points.filter { it.isSimilar(current, smart) && !trustedPoints.contains(it) }
+                    .forEach { warning(it) }
         }
     }
 
@@ -220,11 +240,84 @@ class ScanService : IntentService("ScanService") {
         startForeground(FOREGROUND_NOTIFICATION_ID, notification)
     }
 
+    private fun warning(point: Point) {
+        val co = applicationContext
+        val id = point.bssid.hashCode()
+
+        val builder = Notification.Builder(co)
+                .setTicker(getString(R.string.clone_detected))
+                .setContentTitle(getString(R.string.clone_detected))
+                .setContentText("${point.manufacturer} - ${point.bssid}")
+                .setContentIntent(mainPendingIntent)
+                .setSmallIcon(R.drawable.ws_yellow)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
+
+        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            builder.addAction(
+                    R.drawable.ic_check,
+                    getString(R.string.allow_network),
+                    PendingIntent.getBroadcast(co, code++,
+                            Intent(ACTION_ALLOW).putExtra(EXTRA_ID, id).putExtra(EXTRA_POINT, point),
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+            ).build()
+        } else
+            builder.notification
+
+        notificationManager.notify(id, notification)
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun request(point: Point) {
+        val co = applicationContext
+        val id = point.bssid.hashCode() + 1
+
+        val builder = Notification.Builder(co)
+                .setTicker(getString(R.string.clone_detected))
+                .setContentTitle(getString(R.string.wifi_was_disabled))
+                .setContentText("${point.manufacturer} - ${point.bssid}")
+                .setContentIntent(mainPendingIntent)
+                .setSmallIcon(R.drawable.ws_red)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
+
+        val notification = builder
+                .addAction(
+                        R.drawable.ic_check,
+                        getString(R.string.allow_network),
+                        PendingIntent.getBroadcast(co, code++,
+                                Intent(ACTION_ALLOW).putExtra(EXTRA_ID, id).putExtra(EXTRA_POINT, point),
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        )
+                ).addAction(
+                        R.drawable.ic_wifi,
+                        getString(R.string.turn_wifi_on),
+                        PendingIntent.getBroadcast(co, code++,
+                                Intent(ACTION_TURN_WIFI_ON).putExtra(EXTRA_ID, id),
+                                PendingIntent.FLAG_UPDATE_CURRENT)
+                ).build()
+
+        notificationManager.notify(id, notification)
+    }
+
     inner class Receiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 ConnectivityManager.CONNECTIVITY_ACTION -> detectAttacksIfNeeded()
                 ACTION_STOP -> stop()
+                ACTION_TURN_WIFI_ON -> {
+                    wifiManager.isWifiEnabled = true
+                    notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
+                }
+                ACTION_ALLOW -> {
+                    trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT))
+
+                    wifiManager.isWifiEnabled = true
+                    notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
+                }
             }
         }
     }

@@ -133,11 +133,11 @@ class Point : Parcelable {
     fun compare(bssid: String, essid: String, hidden: Boolean): Boolean =
             this.bssid == bssid && (this.essid == essid || this.level > MIN_LEVEL && this.essid.isEmpty() && hidden)
 
-    fun compare(point: Point, smart: Boolean): Boolean = this.essid == point.essid &&
+    fun isSimilar(point: Point, smart: Boolean): Boolean = this.essid == point.essid &&
             if (smart)
-                this.bssid.startsWith(point.bssid.substring(0, 8))
+                !this.bssid.startsWith(point.bssid.substring(0, 8))
             else
-                this.bssid == point.bssid
+                this.bssid != point.bssid
 
     fun getNotEmptyESSID(): String = if (essid.isEmpty()) bssid else essid
 
