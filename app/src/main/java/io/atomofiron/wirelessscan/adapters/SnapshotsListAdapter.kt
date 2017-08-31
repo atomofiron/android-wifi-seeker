@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.utils.OnDoubleClickListener
+import io.atomofiron.wirelessscan.utils.DoubleClickMaster
 import kotlinx.android.synthetic.main.layout_item_snapshot.view.*
 import java.io.File
 
@@ -71,7 +71,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
 
         init {
             view.share.setOnClickListener(this@SnapshotsListAdapter)
-            view.delete.setOnClickListener(OnDoubleClickListener(onDoubleClickListener))
+            view.delete.setOnClickListener(DoubleClickMaster(onDoubleClickListener))
         }
     }
 

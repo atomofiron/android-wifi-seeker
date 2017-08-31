@@ -17,7 +17,7 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.view.*
 import io.atomofiron.wirelessscan.I
-import io.atomofiron.wirelessscan.utils.OnDoubleClickListener
+import io.atomofiron.wirelessscan.utils.DoubleClickMaster
 import io.atomofiron.wirelessscan.connection.ScanConnection
 import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
 import android.view.animation.Animation
@@ -172,7 +172,7 @@ class MainFragment : Fragment() {
             view.layout_filters.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
         var snapshotFileName = ""
-        buttons.button_save.setOnClickListener(OnDoubleClickListener(1000L).onClickListener {
+        buttons.button_save.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (listAdapter.allNodes.size != 0) {
                 view.flash.startAnimation(flash)
 
@@ -194,7 +194,7 @@ class MainFragment : Fragment() {
                 sendScanDelay()
             }
         }
-        buttons.button_clear.setOnClickListener(OnDoubleClickListener({
+        buttons.button_clear.setOnClickListener(DoubleClickMaster({
             scanConnection.clearNodesList()
             label.text = listAdapter.clear()
         }).onClickListener { listAdapter.resetFocus() })

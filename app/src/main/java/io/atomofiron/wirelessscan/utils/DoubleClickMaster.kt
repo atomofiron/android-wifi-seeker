@@ -3,7 +3,7 @@ package io.atomofiron.wirelessscan.utils
 import android.view.View
 import android.widget.ImageButton
 
-class OnDoubleClickListener() : View.OnClickListener {
+class DoubleClickMaster() : View.OnClickListener {
     var onClickListener: (v: View) -> Unit = {}
     var onDoubleClickListener: (v: View) -> Unit = {}
 
@@ -57,12 +57,12 @@ class OnDoubleClickListener() : View.OnClickListener {
         onClickListener = {}
     }
 
-    fun onClickListener(callback: (v: View) -> Unit): OnDoubleClickListener {
+    fun onClickListener(callback: (v: View) -> Unit): DoubleClickMaster {
         onClickListener = callback
         return this
     }
 
-    fun onDoubleClickListener(callback: (v: View) -> Unit): OnDoubleClickListener {
+    fun onDoubleClickListener(callback: (v: View) -> Unit): DoubleClickMaster {
         onDoubleClickListener = callback
         return this
     }
