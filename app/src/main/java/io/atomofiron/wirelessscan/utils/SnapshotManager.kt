@@ -14,21 +14,30 @@ import java.util.*
 class SnapshotManager(private val co: Context) {
     private val formatter = SimpleDateFormat("YY.MM.dd-HH.mm.ss")
 
-    fun put(nodes: ArrayList<Node>) {
+    /** @return database file name*/
+    fun put(nodes: ArrayList<Node>): String {
         val name = "snapshot_${formatter.format(Date())}.db"
 
-        getDao(name).put(nodes)
+        val snapshot = getSnapshot(name)
+        snapshot.nodeDao().put(nodes)
+        snapshot.close()
+
         File(co.getDatabasePath(name).absolutePath + "-journal").delete()
 
         Toast.makeText(co, R.string.snapshot_saved, Toast.LENGTH_SHORT).show()
+        return name
     }
 
     fun get(name: String): ArrayList<Node> {
         val list = ArrayList<Node>()
-        list.addAll(getDao(name).get().toList())
+        val snapshot = getSnapshot(name)
+
+        list.addAll(snapshot.nodeDao().get().toList())
+        snapshot.close()
+
         return list
     }
 
-    private fun getDao(name: String): NodeDao =
-            Room.databaseBuilder(co, Snapshot::class.java, name).allowMainThreadQueries().build().nodeDao()
+    private fun getSnapshot(name: String): Snapshot =
+            Room.databaseBuilder(co, Snapshot::class.java, name).allowMainThreadQueries().build()
 }
