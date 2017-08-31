@@ -253,22 +253,22 @@ class Point : Parcelable {
 
             return points
         }
+
+        @Ignore @JvmField
+        val CREATOR: Parcelable.Creator<Point> = object : Parcelable.Creator<Point> {
+            override fun createFromParcel(parcel: Parcel): Point {
+                val point = Point()
+                point.level = parcel.readInt()
+                point.frequency = parcel.readInt()
+                point.capabilities = parcel.readString()
+                point.essid = parcel.readString()
+                point.bssid = parcel.readString()
+                point.ch = parcel.readInt()
+                point.manufacturer = parcel.readString()
+                return point
+            }
+
+            override fun newArray(size: Int): Array<Point?> = arrayOfNulls(size)
+        }
     }
-
-/*    private val CREATOR: Parcelable.Creator<Point> = object : Parcelable.Creator<Point> {
-        override fun createFromParcel(parcel: Parcel): Point {
-            val node = Point()
-            node.level = parcel.readInt()
-            node.frequency = parcel.readInt()
-            node.capabilities = parcel.readString()
-            node.essid = parcel.readString()
-            node.bssid = parcel.readString()
-
-            return node
-        }
-
-        override fun newArray(size: Int): Array<Point?> {
-            return arrayOfNulls(size)
-        }
-    }*/
 }
