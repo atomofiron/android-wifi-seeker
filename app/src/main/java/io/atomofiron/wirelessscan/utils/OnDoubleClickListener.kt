@@ -4,8 +4,7 @@ import android.view.View
 import android.widget.ImageButton
 
 class OnDoubleClickListener() : View.OnClickListener {
-    /** @return second click is expected */
-    var onClickListener: (v: View) -> Boolean = { true }
+    var onClickListener: (v: View) -> Unit = {}
     var onDoubleClickListener: (v: View) -> Unit = {}
 
     private var temporaryDrawableResId = 0
@@ -46,9 +45,8 @@ class OnDoubleClickListener() : View.OnClickListener {
 
     override fun onClick(v: View) {
         if (millisClickedFirst == 0L) {
-
-            if (onClickListener(v))
-                start(v)
+            start(v)
+            onClickListener(v)
         } else {
             reset(v)
             onDoubleClickListener(v)
@@ -56,10 +54,10 @@ class OnDoubleClickListener() : View.OnClickListener {
     }
 
     fun resetOnClickListener() {
-        onClickListener = { true }
+        onClickListener = {}
     }
 
-    fun onClickListener(callback: (v: View) -> Boolean): OnDoubleClickListener {
+    fun onClickListener(callback: (v: View) -> Unit): OnDoubleClickListener {
         onClickListener = callback
         return this
     }
