@@ -19,6 +19,8 @@ class SnapshotManager(private val co: Context) {
 
         getDao(name).put(nodes)
         File(co.getDatabasePath(name).absolutePath + "-journal").delete()
+
+        Toast.makeText(co, R.string.snapshot_saved, Toast.LENGTH_SHORT).show()
     }
 
     fun get(name: String): ArrayList<Node> {
