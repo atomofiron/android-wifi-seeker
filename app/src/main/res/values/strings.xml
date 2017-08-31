@@ -5,6 +5,7 @@
     <string name="touch_to_look">Touch to look</string>
     <string name="stop">Stop</string>
     <string name="ok">OK</string>
+    <string name="snapshot_saved">Snapshot was saved</string>
     <string name="no_activity">You have no application able to perform this action</string>
     <string name="cancel">Cancel</string>
     <string name="rename_to">Rename to</string>
@@ -41,5 +42,4 @@
     <string name="need_coarse_location">For the program to process on Android 6 and above must have permission to the COARSE location</string>
     <string name="get_perm_by_settings">Allow permission for the location in system settings</string>
     <string name="no_perm">Permission denied</string>
-    <string name="snapshot_saved">Snapshot was saved</string>
 </resources>
