@@ -196,7 +196,7 @@ class MainFragment : Fragment() {
         buttons.button_clear.setOnClickListener(OnDoubleClickListener({
             scanConnection.clearNodesList()
             label.text = listAdapter.clear()
-        }).onClickListener { listAdapter.resetFocus(); true })
+        }).onClickListener { listAdapter.resetFocus() })
         buttons.button_list.setOnClickListener {
             activity.startActivity(
                     Intent(activity, MainActivity::class.java)
