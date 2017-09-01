@@ -1,6 +1,7 @@
 package io.atomofiron.wirelessscan.fragments
 
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.preference.*
 import android.view.*
@@ -22,6 +23,7 @@ class PrefFragment : PreferenceFragment(), Preference.OnPreferenceChangeListener
 
         findPreference(I.PREF_ATTACK_SCREEN).isEnabled = (findPreference(I.PREF_DETECT_ATTACKS) as TwoStatePreference).isChecked
         findPreference(I.PREF_NO_SCAN_IN_BG).isEnabled = (findPreference(I.PREF_AUTO_OFF_WIFI) as TwoStatePreference).isChecked
+        findPreference(I.PREF_AUTO_OFF_WIFI).isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
     }
 
     override fun onStart() {
