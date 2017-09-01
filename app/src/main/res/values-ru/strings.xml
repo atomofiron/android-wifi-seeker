@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Wireless Scan</string>
     <string name="settings">Настройки</string>
-    <string name="scanning">Сканирование…</string>
-    <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
-    <string name="stop">Остановить</string>
     <string name="ok">ОК</string>
     <string name="snapshot_saved">Снимок сохранён</string>
     <string name="no_activity">У вас нет приложения, способного выполнить данное действие</string>
@@ -46,8 +43,13 @@
     <string name="need_coarse_location">Для функционирования программы на Android 6 и выше необходимо разрешение на ПРИБЛИЗИТЕЛЬНОЕ местоположение</string>
     <string name="get_perm_by_settings">Дайте разрешение на местоположение в настройках системы</string>
     <string name="no_perm">Нет доступа</string>
-    <string name="clone_detected">The clone of your AP was found</string>
-    <string name="wifi_was_disabled">WiFi was diabled</string>
-    <string name="allow_network">Allow that network</string>
-    <string name="turn_wifi_on">Turn WiFi on</string>
+
+    <!-- Notification -->
+    <string name="scanning">Сканирование…</string>
+    <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
+    <string name="stop">Остановить</string>
+    <string name="clone_detected">Была обнаружена копия вашей точки доступа</string>
+    <string name="wifi_was_disabled">WiFi был выключен</string>
+    <string name="allow_network">Разрешить эту сеть</string>
+    <string name="turn_wifi_on">Включить WiFi</string>
 </resources>
