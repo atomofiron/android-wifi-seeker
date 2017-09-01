@@ -199,15 +199,13 @@ class ScanService : IntentService("ScanService") {
             val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)
 
             if (sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)) {
-                val point = trustedPoints.find { it.isSimilar(current, smart) }
-
-                if (point != null) {
+                if (trustedPoints.find { it.isSimilar(current, smart) } != null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         wifiManager.isWifiEnabled = false
-                        request(point)
+                        request(current)
                         return
                     } else
-                        warning(point)
+                        warning(current)
                 } else
                     trustedPoints.add(current)
             }
