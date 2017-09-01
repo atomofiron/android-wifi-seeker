@@ -194,8 +194,9 @@ class ScanService : IntentService("ScanService") {
         val hidden = wifiManager.connectionInfo.hiddenSSID
         essid = essid.substring(1, essid.length - 1) // necessary
 
+        val extras = ArrayList<String>(sp.getString(I.PREF_EXTRAS, "").split("\n"))
         val current = points.find { it.compare(bssid, essid, hidden) }
-        if (current != null) {
+        if (current != null && !extras.contains(current.essid)) {
             val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)
 
             if (sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)) {
