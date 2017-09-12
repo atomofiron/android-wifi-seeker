@@ -19,7 +19,8 @@ import kotlin.collections.ArrayList
 
 class ScanService : IntentService("ScanService") {
     companion object {
-        private val ACTION_STOP = "ACTION_STOP"
+        private val ACTION_PAUSE = "ACTION_PAUSE"
+        private val ACTION_RESUME = "ACTION_RESUME"
         private val ACTION_ALLOW = "ACTION_ALLOW"
         private val ACTION_TURN_WIFI_ON = "ACTION_TURN_WIFI_ON"
 
@@ -58,7 +59,8 @@ class ScanService : IntentService("ScanService") {
         mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
         receiver = Receiver()
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        filter.addAction(ACTION_STOP)
+        filter.addAction(ACTION_PAUSE)
+        filter.addAction(ACTION_RESUME)
         filter.addAction(ACTION_ALLOW)
         filter.addAction(ACTION_TURN_WIFI_ON)
         registerReceiver(receiver, filter)
@@ -90,7 +92,7 @@ class ScanService : IntentService("ScanService") {
 
     override fun onHandleIntent(intent: Intent) {
         I.log("ScanService: onHandleIntent()")
-        startForeground()
+        showNotification(true)
 
         process = true
         while (process)
@@ -137,7 +139,8 @@ class ScanService : IntentService("ScanService") {
     private fun stop() {
         process = false
         sendStopped()
-        stopForeground(true)
+        stopForeground(false)
+        showNotification(false)
     }
 
     private fun updatePoints() {
@@ -214,10 +217,10 @@ class ScanService : IntentService("ScanService") {
         }
     }
 
-    private fun startForeground() {
+    private fun showNotification(foreground: Boolean) {
         val co = applicationContext
         val builder = Notification.Builder(co)
-                .setContentTitle(getString(R.string.scanning))
+                .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
                 .setContentText(getString(R.string.touch_to_look))
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws)
@@ -227,14 +230,21 @@ class ScanService : IntentService("ScanService") {
 
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
             builder.addAction(
-                    R.drawable.ic_close,
-                    getString(R.string.stop),
-                    PendingIntent.getBroadcast(co, code++, Intent(ACTION_STOP), PendingIntent.FLAG_UPDATE_CURRENT)
+                    if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
+                    getString(if (foreground) R.string.pause else R.string.resume),
+                    PendingIntent.getBroadcast(
+                            co, code++,
+                            Intent(if (foreground) ACTION_PAUSE else ACTION_RESUME),
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    )
             ).build()
         else
             builder.notification
 
-        startForeground(FOREGROUND_NOTIFICATION_ID, notification)
+        if (foreground)
+            startForeground(FOREGROUND_NOTIFICATION_ID, notification)
+        else
+            notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
     }
 
     private fun warning(point: Point) {
@@ -304,7 +314,8 @@ class ScanService : IntentService("ScanService") {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 ConnectivityManager.CONNECTIVITY_ACTION -> detectAttacksIfNeeded()
-                ACTION_STOP -> stop()
+                ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
+                ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
                 ACTION_TURN_WIFI_ON -> {
                     wifiManager.isWifiEnabled = true
                     notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))

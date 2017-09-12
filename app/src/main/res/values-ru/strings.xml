@@ -46,8 +46,10 @@
 
     <!-- Notification -->
     <string name="scanning">Сканирование…</string>
+    <string name="scanning_was_paused">Сканирование приостановлено</string>
     <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
-    <string name="stop">Остановить</string>
+    <string name="pause">Приостановить</string>
+    <string name="resume">Возобновить</string>
     <string name="clone_detected">Была обнаружена копия вашей точки доступа</string>
     <string name="wifi_was_disabled">WiFi был выключен</string>
     <string name="allow_network">Разрешить эту сеть</string>
