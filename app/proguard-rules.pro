@@ -23,3 +23,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class io.atomofiron.wirelessscan.App
+-keep class io.atomofiron.wirelessscan.MainActivity
+-keep class io.atomofiron.wirelessscan.ScanService
+-keep class io.atomofiron.wirelessscan.utils.FileContentProvider
