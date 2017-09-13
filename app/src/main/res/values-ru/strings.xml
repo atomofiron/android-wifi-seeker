@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Wireless Scan</string>
     <string name="settings">Настройки</string>
+    <string name="email_dev">Написать разработчику</string>
     <string name="ok">ОК</string>
     <string name="snapshot_saved">Снимок сохранён</string>
     <string name="no_activity">У вас нет приложения, способного выполнить данное действие</string>
@@ -54,4 +55,8 @@
     <string name="wifi_was_disabled">WiFi был выключен</string>
     <string name="allow_network">Разрешить эту сеть</string>
     <string name="turn_wifi_on">Включить WiFi</string>
+
+    <!-- Other -->
+    <string name="send_email">Отправить письмо</string>
+    <string name="dear_dev">Дорогой разработчик, </string>
 </resources>

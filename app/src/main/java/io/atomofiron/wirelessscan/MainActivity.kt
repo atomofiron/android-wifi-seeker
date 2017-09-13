@@ -9,9 +9,11 @@ import android.os.Bundle
 import io.atomofiron.wirelessscan.fragments.MainFragment
 import android.content.res.Configuration
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import io.atomofiron.wirelessscan.fragments.PrefFragment
 import io.atomofiron.wirelessscan.fragments.SnapshotFragment
 import io.atomofiron.wirelessscan.fragments.SnapshotsListFragment
@@ -71,8 +73,25 @@ class MainActivity : Activity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        setFragment(PrefFragment())
+        when (item?.itemId) {
+            R.id.settings -> setFragment(PrefFragment())
+            R.id.mail_to_dev -> mailToDeveloper()
+        }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun mailToDeveloper() {
+        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "atomofiron@gmail.com", null))
+                .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+                .putExtra(Intent.EXTRA_TEXT, getString(R.string.dear_dev))
+
+        if (intent.resolveActivity(packageManager) != null)
+            startActivity(
+                    Intent.createChooser(intent, getString(R.string.send_email))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        else
+            Toast.makeText(this, R.string.no_activity, Toast.LENGTH_SHORT).show()
     }
 
     private fun requestPermission() {
