@@ -67,12 +67,18 @@ class PrefFragment : PreferenceFragment(), Preference.OnPreferenceChangeListener
         updateSummary(preference, newValue)
         when (preference.key) {
             I.PREF_DETECT_ATTACKS -> findPreference(I.PREF_ATTACK_SCREEN).isEnabled = newValue as Boolean
-            I.PREF_AUTO_OFF_WIFI -> {
-                findPreference(I.PREF_NO_SCAN_IN_BG).isEnabled = newValue as Boolean
-                if (newValue && !(findPreference(I.PREF_WORK_IN_BG) as TwoStatePreference).isChecked)
-                    I.longToast(activity, R.string.recom)
-            }
+            I.PREF_AUTO_OFF_WIFI -> updateNoScanPreference(newValue as Boolean)
         }
         return true
+    }
+
+    private fun updateNoScanPreference(value: Boolean) {
+        findPreference(I.PREF_NO_SCAN_IN_BG).isEnabled = value
+
+        if (!value)
+            (findPreference(I.PREF_NO_SCAN_IN_BG) as CheckBoxPreference).isChecked = false
+        else
+            if (!sp.getBoolean(I.PREF_WORK_IN_BG, false))
+                I.longToast(activity, R.string.recom)
     }
 }
