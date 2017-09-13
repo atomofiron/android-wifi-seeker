@@ -37,8 +37,9 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
         list.clear()
 
         dbDir.listFiles()
-                .filter { it.name.endsWith(".db") }
-                .forEach { list.add(it.name) }
+                ?.filter { it.name.endsWith(".db") }
+                ?.forEach { list.add(it.name) }
+                ?: return
 
         notifyDataSetChanged()
     }
