@@ -12,9 +12,9 @@ import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
 import android.content.*
 import android.content.Context.WIFI_SERVICE
-import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.*
+import android.text.format.Formatter
 import android.view.*
 import io.atomofiron.wirelessscan.I
 import io.atomofiron.wirelessscan.utils.DoubleClickMaster
@@ -81,11 +81,14 @@ class MainFragment : Fragment() {
 
         connectionReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (view != null)
-                    pointsListAdapter.connectionInfo = wifiManager.connectionInfo
+                updateConnectionInfo()
             }
         }
-        activity.registerReceiver(connectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        val filter = IntentFilter()
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        activity.registerReceiver(connectionReceiver, filter)
     }
 
     override fun onDestroy() {
@@ -113,7 +116,7 @@ class MainFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        activity.setTitle(R.string.app_name)
+        updateConnectionInfo()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -136,7 +139,6 @@ class MainFragment : Fragment() {
         pointsListAdapter = PointsListAdapter(activity, view.list_view)
         view.list_view.adapter = pointsListAdapter
         pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(getView().layout_description, point) }
-        pointsListAdapter.connectionInfo = wifiManager.connectionInfo
 
         initFilters(view.layout_filters)
         initButtons(view.layout_buttons, view.label)
@@ -295,5 +297,12 @@ class MainFragment : Fragment() {
             description.tv_manuf.text = getString(R.string.manuf_format, point.manufacturer)
         } else
             description.visibility = View.GONE
+    }
+
+    private fun updateConnectionInfo() {
+        if (view != null)
+            pointsListAdapter.connectionInfo = wifiManager.connectionInfo
+
+        activity.title = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
     }
 }
