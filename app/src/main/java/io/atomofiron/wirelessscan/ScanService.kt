@@ -12,7 +12,6 @@ import android.app.PendingIntent
 import android.content.*
 import android.os.Build
 import android.graphics.drawable.Icon
-import android.net.ConnectivityManager
 import io.atomofiron.wirelessscan.utils.OuiManager
 import java.util.*
 import kotlin.collections.ArrayList
@@ -58,12 +57,20 @@ class ScanService : IntentService("ScanService") {
 
         mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
         receiver = Receiver()
-        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        var filter = IntentFilter()
         filter.addAction(ACTION_PAUSE)
         filter.addAction(ACTION_RESUME)
         filter.addAction(ACTION_ALLOW)
         filter.addAction(ACTION_TURN_WIFI_ON)
         registerReceiver(receiver, filter)
+
+        filter = IntentFilter()
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) = detectAttacksIfNeeded()
+        }, filter)
 
         wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
         commandMessenger = Messenger(object : Handler() {
@@ -313,7 +320,6 @@ class ScanService : IntentService("ScanService") {
     inner class Receiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                ConnectivityManager.CONNECTIVITY_ACTION -> detectAttacksIfNeeded()
                 ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
                 ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
                 ACTION_TURN_WIFI_ON -> {
