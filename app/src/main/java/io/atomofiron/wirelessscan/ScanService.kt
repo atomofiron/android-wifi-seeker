@@ -93,6 +93,7 @@ class ScanService : IntentService("ScanService") {
     override fun onHandleIntent(intent: Intent) {
         I.log("ScanService: onHandleIntent()")
         showNotification(true)
+        sendStarted()
 
         process = true
         while (process)
@@ -181,6 +182,8 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal))
+
+    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal))
 
     private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal))
 

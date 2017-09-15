@@ -13,7 +13,7 @@ import io.atomofiron.wirelessscan.I
 import io.atomofiron.wirelessscan.ScanService
 
 open class Connection(var onServiceConnectedListener: () -> Unit = {}) : ServiceConnection {
-    enum class WHAT { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED }
+    enum class WHAT { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED, STARTED }
 
     private var commandMessenger: Messenger? = null
     private var replyMessenger: Messenger? = null

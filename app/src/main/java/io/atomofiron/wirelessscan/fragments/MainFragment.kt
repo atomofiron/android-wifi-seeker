@@ -188,12 +188,10 @@ class MainFragment : Fragment() {
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName) })
         buttons.button_resume.setOnClickListener { v: View ->
-            v.isActivated = !v.isActivated
-
             if (v.isActivated)
-                startScanService()
-            else
                 stopScanService()
+            else
+                startScanService()
         }
         (buttons.spinner_delay as Spinner).setSelection(sp.getString(I.PREF_DEFAULT_DELAY, "1").toInt())
         buttons.spinner_delay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -241,6 +239,7 @@ class MainFragment : Fragment() {
         when (msg?.what) {
             START_SCAN.ordinal -> pointsListAdapter.animScan(true)
             RESULTS.ordinal -> { updateList(msg) }
+            STARTED.ordinal -> view.button_resume.isActivated = true
             STOPPED.ordinal -> {
                 view.button_resume.isActivated = false
                 pointsListAdapter.animScan(false)
