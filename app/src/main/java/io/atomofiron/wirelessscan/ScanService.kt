@@ -56,15 +56,8 @@ class ScanService : IntentService("ScanService") {
         super.onCreate()
 
         mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-        receiver = Receiver()
-        var filter = IntentFilter()
-        filter.addAction(ACTION_PAUSE)
-        filter.addAction(ACTION_RESUME)
-        filter.addAction(ACTION_ALLOW)
-        filter.addAction(ACTION_TURN_WIFI_ON)
-        registerReceiver(receiver, filter)
 
-        filter = IntentFilter()
+        val filter = IntentFilter()
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
@@ -92,7 +85,7 @@ class ScanService : IntentService("ScanService") {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
-            if (process)
+            if (isNotificationAction(intent) || process)
                 START_NOT_STICKY
             else
                 super.onStartCommand(intent, flags, startId)
@@ -107,6 +100,25 @@ class ScanService : IntentService("ScanService") {
     }
 
     override fun onBind(intent: Intent?): IBinder = commandMessenger.binder
+
+    private fun isNotificationAction(intent: Intent?): Boolean {
+        when (intent?.action) {
+            ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
+            ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
+            ACTION_TURN_WIFI_ON -> {
+                wifiManager.isWifiEnabled = true
+                notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
+            }
+            ACTION_ALLOW -> {
+                trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT))
+
+                wifiManager.isWifiEnabled = true
+                notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
+            }
+            else -> return false
+        }
+        return true
+    }
 
     private fun scan() {
         I.log("scan()")
@@ -239,9 +251,10 @@ class ScanService : IntentService("ScanService") {
             builder.addAction(
                     if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
                     getString(if (foreground) R.string.pause else R.string.resume),
-                    PendingIntent.getBroadcast(
+                    PendingIntent.getService(
                             co, code++,
-                            Intent(if (foreground) ACTION_PAUSE else ACTION_RESUME),
+                            Intent(co, ScanService::class.java)
+                                    .setAction(if (foreground) ACTION_PAUSE else ACTION_RESUME),
                             PendingIntent.FLAG_UPDATE_CURRENT
                     )
             ).build()
@@ -272,8 +285,11 @@ class ScanService : IntentService("ScanService") {
             builder.addAction(
                     R.drawable.ic_check,
                     getString(R.string.allow_network),
-                    PendingIntent.getBroadcast(co, code++,
-                            Intent(ACTION_ALLOW).putExtra(EXTRA_ID, id).putExtra(EXTRA_POINT, point),
+                    PendingIntent.getService(co, code++,
+                            Intent(co, ScanService::class.java)
+                                    .setAction(ACTION_ALLOW)
+                                    .putExtra(EXTRA_ID, id)
+                                    .putExtra(EXTRA_POINT, point),
                             PendingIntent.FLAG_UPDATE_CURRENT
                     )
             ).build()
@@ -302,37 +318,23 @@ class ScanService : IntentService("ScanService") {
                 .addAction(
                         R.drawable.ic_check,
                         getString(R.string.allow_network),
-                        PendingIntent.getBroadcast(co, code++,
-                                Intent(ACTION_ALLOW).putExtra(EXTRA_ID, id).putExtra(EXTRA_POINT, point),
+                        PendingIntent.getService(co, code++,
+                                Intent(co, ScanService::class.java)
+                                        .setAction(ACTION_ALLOW)
+                                        .putExtra(EXTRA_ID, id)
+                                        .putExtra(EXTRA_POINT, point),
                                 PendingIntent.FLAG_UPDATE_CURRENT
                         )
                 ).addAction(
                         R.drawable.ic_wifi,
                         getString(R.string.turn_wifi_on),
-                        PendingIntent.getBroadcast(co, code++,
-                                Intent(ACTION_TURN_WIFI_ON).putExtra(EXTRA_ID, id),
+                        PendingIntent.getService(co, code++,
+                                Intent(co, ScanService::class.java)
+                                        .setAction(ACTION_TURN_WIFI_ON)
+                                        .putExtra(EXTRA_ID, id),
                                 PendingIntent.FLAG_UPDATE_CURRENT)
                 ).build()
 
         notificationManager.notify(id, notification)
-    }
-
-    inner class Receiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
-                ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
-                ACTION_TURN_WIFI_ON -> {
-                    wifiManager.isWifiEnabled = true
-                    notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
-                }
-                ACTION_ALLOW -> {
-                    trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT))
-
-                    wifiManager.isWifiEnabled = true
-                    notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
-                }
-            }
-        }
     }
 }
