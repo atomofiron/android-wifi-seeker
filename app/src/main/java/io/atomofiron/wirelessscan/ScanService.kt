@@ -55,8 +55,6 @@ class ScanService : IntentService("ScanService") {
         I.log("ScanService: onCreate()")
         super.onCreate()
 
-        mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-
         val filter = IntentFilter()
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
@@ -72,9 +70,11 @@ class ScanService : IntentService("ScanService") {
                 this@ScanService.handleMessage(msg)
             }
         })
+
         sp = I.sp(baseContext)
         ouiManager = OuiManager(baseContext)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     override fun onDestroy() {
@@ -197,9 +197,7 @@ class ScanService : IntentService("ScanService") {
     fun handleMessage(msg: Message?) {
         I.log("CH: what: ${msg?.what ?: "null"}")
         if (msg != null) {
-            //resultMessenger = msg.replyTo ?: resultMessenger
-            if (msg.replyTo != null)
-                resultMessenger = msg.replyTo
+            resultMessenger = msg.replyTo ?: resultMessenger
 
             when (msg.what) {
                 GET.ordinal -> sendResults()

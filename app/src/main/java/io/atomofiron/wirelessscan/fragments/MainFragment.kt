@@ -80,9 +80,7 @@ class MainFragment : Fragment() {
         scanConnection.bindService(activity)
 
         connectionReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                updateConnectionInfo()
-            }
+            override fun onReceive(context: Context?, intent: Intent?) = updateConnectionInfo()
         }
         val filter = IntentFilter()
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
@@ -238,7 +236,7 @@ class MainFragment : Fragment() {
 
         when (msg?.what) {
             START_SCAN.ordinal -> pointsListAdapter.animScan(true)
-            RESULTS.ordinal -> { updateList(msg) }
+            RESULTS.ordinal -> updateList(msg)
             STARTED.ordinal -> view.button_resume.isActivated = true
             STOPPED.ordinal -> {
                 view.button_resume.isActivated = false
