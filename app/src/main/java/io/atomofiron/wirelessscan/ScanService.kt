@@ -140,16 +140,16 @@ class ScanService : IntentService("ScanService") {
         }
 
         var i = SCAN_DELAY_OFFSET
-        while ((i++ < delay || noScan()) && process)
+        while ((i++ < delay || scanningIsNotRequired()) && process)
             sleepAndUpdateNotificationIfNeeded(SECOND)
     }
 
-    private fun noScan(): Boolean =
+    private fun scanningIsNotRequired(): Boolean =
             sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && sp.getBoolean(I.PREF_NO_SCAN_IN_BG, false) && boundCount <= 1
 
     /** @return process */
     private fun waitForWifi(): Boolean {
-        while (!wifiManager.isWifiEnabled || noScan()) {
+        while (!wifiManager.isWifiEnabled || scanningIsNotRequired()) {
             sleepAndUpdateNotificationIfNeeded(WIFI_WAITING_PERIOD)
 
             if (!process)
@@ -259,8 +259,8 @@ class ScanService : IntentService("ScanService") {
         val builder = Notification.Builder(co)
                 .setContentTitle(getString(
                         if (foreground)
-                            if (noScan())
-                                R.string.scanning_no_scan
+                            if (scanningIsNotRequired())
+                                R.string.scanning_battery_save
                             else
                                 R.string.scanning
                         else R.string.scanning_was_paused)
