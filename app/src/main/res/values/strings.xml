@@ -47,6 +47,7 @@
 
     <!-- Notification -->
     <string name="scanning">Scanning…</string>
+    <string name="scanning_no_scan">Scanning… (battery save)</string>
     <string name="scanning_was_paused">Scanning was paused</string>
     <string name="touch_to_look">Touch to look</string>
     <string name="pause">Pause</string>

@@ -47,6 +47,7 @@
 
     <!-- Notification -->
     <string name="scanning">Сканирование…</string>
+    <string name="scanning_no_scan">Сканирование… (экономия заряда)</string>
     <string name="scanning_was_paused">Сканирование приостановлено</string>
     <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
     <string name="pause">Приостановить</string>

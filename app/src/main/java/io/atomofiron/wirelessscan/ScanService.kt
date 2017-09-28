@@ -47,6 +47,8 @@ class ScanService : IntentService("ScanService") {
     private var resultMessenger: Messenger? = null
     private val points = ArrayList<Point>()
     private var trustedPoints: ArrayList<Point> = ArrayList()
+    private var isStartedForeground = false
+    private var lastBoundCount = 0
     private var delay = 10
     private var process = false
     private var code = 1
@@ -129,7 +131,7 @@ class ScanService : IntentService("ScanService") {
 
         sendStartScan()
         wifiManager.startScan()
-        Thread.sleep(SCAN_DELAY)
+        sleepAndUpdateNotificationIfNeeded(SCAN_DELAY)
 
         if (waitForWifi()) {
             updatePoints()
@@ -139,7 +141,7 @@ class ScanService : IntentService("ScanService") {
 
         var i = SCAN_DELAY_OFFSET
         while ((i++ < delay || noScan()) && process)
-            Thread.sleep(SECOND)
+            sleepAndUpdateNotificationIfNeeded(SECOND)
     }
 
     private fun noScan(): Boolean =
@@ -148,12 +150,25 @@ class ScanService : IntentService("ScanService") {
     /** @return process */
     private fun waitForWifi(): Boolean {
         while (!wifiManager.isWifiEnabled || noScan()) {
-            Thread.sleep(WIFI_WAITING_PERIOD)
+            sleepAndUpdateNotificationIfNeeded(WIFI_WAITING_PERIOD)
 
             if (!process)
                 return false
         }
         return process
+    }
+
+    private fun sleepAndUpdateNotificationIfNeeded(millis: Long) {
+        updateNotificationIfNeeded()
+        Thread.sleep(millis)
+        updateNotificationIfNeeded()
+    }
+
+    private fun updateNotificationIfNeeded() {
+        if (isStartedForeground && (lastBoundCount <= 1 && boundCount > 1 || lastBoundCount > 1 && boundCount <=1))
+            showNotification(true)
+
+        lastBoundCount = boundCount
     }
 
     private fun stop() {
@@ -238,10 +253,18 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun showNotification(foreground: Boolean) {
+        isStartedForeground = foreground
+
         val co = applicationContext
         val builder = Notification.Builder(co)
-                .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
-                .setContentText(getString(R.string.touch_to_look))
+                .setContentTitle(getString(
+                        if (foreground)
+                            if (noScan())
+                                R.string.scanning_no_scan
+                            else
+                                R.string.scanning
+                        else R.string.scanning_was_paused)
+                ).setContentText(getString(R.string.touch_to_look))
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws)
 
