@@ -1,7 +1,6 @@
-package io.atomofiron.wirelessscan.adapters
+package ru.raslav.wirelessscan.adapters
 
 import android.content.Context
-import android.net.NetworkInfo
 import android.net.wifi.WifiInfo
 import android.view.LayoutInflater
 import android.view.View
@@ -10,11 +9,11 @@ import android.view.animation.AnimationUtils
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.ListView
-import io.atomofiron.wirelessscan.I
-import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
+import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
 import kotlinx.android.synthetic.main.layout_item.view.*
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.room.Point
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.room.Point
 
 
 class PointsListAdapter(private val co: Context, private val listView: ListView) : BaseAdapter() {

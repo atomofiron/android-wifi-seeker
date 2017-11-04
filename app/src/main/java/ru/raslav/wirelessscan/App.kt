@@ -1,9 +1,9 @@
-package io.atomofiron.wirelessscan
+package ru.raslav.wirelessscan
 
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import io.atomofiron.wirelessscan.connection.Connection
+import ru.raslav.wirelessscan.connection.Connection
 
 class App : Application() {
 

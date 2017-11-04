@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan
+package ru.raslav.wirelessscan
 
 import android.annotation.TargetApi
 import android.app.IntentService
@@ -6,13 +6,13 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.net.wifi.WifiManager
 import android.os.*
-import io.atomofiron.wirelessscan.room.Point
-import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
+import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.connection.Connection.WHAT.*
 import android.app.PendingIntent
 import android.content.*
 import android.os.Build
 import android.graphics.drawable.Icon
-import io.atomofiron.wirelessscan.utils.OuiManager
+import ru.raslav.wirelessscan.utils.OuiManager
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -350,7 +350,7 @@ class ScanService : IntentService("ScanService") {
                                 PendingIntent.FLAG_UPDATE_CURRENT
                         )
                 ).addAction(
-                        R.drawable.ic_wifi,
+                R.drawable.ic_wifi,
                         getString(R.string.turn_wifi_on),
                         PendingIntent.getService(co, code++,
                                 Intent(co, ScanService::class.java)

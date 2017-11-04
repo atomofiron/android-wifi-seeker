@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="@integer/similar_orientation"
-    tools:context="io.atomofiron.wirelessscan.MainActivity">
+    tools:context="ru.raslav.wirelessscan.MainActivity">
 
     <include layout="@layout/layout_description" android:visibility="gone" />
     <RelativeLayout

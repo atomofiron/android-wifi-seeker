@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.connection
+package ru.raslav.wirelessscan.connection
 
 import android.os.Handler
 

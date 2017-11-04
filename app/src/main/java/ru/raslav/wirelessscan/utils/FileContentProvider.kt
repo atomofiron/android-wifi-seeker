@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.utils
+package ru.raslav.wirelessscan.utils
 
 import android.net.Uri
 import android.os.ParcelFileDescriptor

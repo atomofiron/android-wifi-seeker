@@ -24,7 +24,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class io.atomofiron.wirelessscan.App
--keep class io.atomofiron.wirelessscan.MainActivity
--keep class io.atomofiron.wirelessscan.ScanService
--keep class io.atomofiron.wirelessscan.utils.FileContentProvider
+-keep class ru.raslav.wirelessscan.App
+-keep class ru.raslav.wirelessscan.MainActivity
+-keep class ru.raslav.wirelessscan.ScanService
+-keep class ru.raslav.wirelessscan.utils.FileContentProvider

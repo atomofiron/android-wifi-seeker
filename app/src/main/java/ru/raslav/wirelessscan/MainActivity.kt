@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan
+package ru.raslav.wirelessscan
 
 import android.Manifest
 import android.annotation.TargetApi
@@ -6,7 +6,6 @@ import android.app.*
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import io.atomofiron.wirelessscan.fragments.MainFragment
 import android.content.res.Configuration
 import android.graphics.Point
 import android.net.Uri
@@ -14,9 +13,10 @@ import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import io.atomofiron.wirelessscan.fragments.PrefFragment
-import io.atomofiron.wirelessscan.fragments.SnapshotFragment
-import io.atomofiron.wirelessscan.fragments.SnapshotsListFragment
+import ru.raslav.wirelessscan.fragments.MainFragment
+import ru.raslav.wirelessscan.fragments.PrefFragment
+import ru.raslav.wirelessscan.fragments.SnapshotFragment
+import ru.raslav.wirelessscan.fragments.SnapshotsListFragment
 
 class MainActivity : Activity() {
     companion object {

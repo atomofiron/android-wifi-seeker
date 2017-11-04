@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan
+package ru.raslav.wirelessscan
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import ru.raslav.wirelessscan.BuildConfig
 
 class I {
 

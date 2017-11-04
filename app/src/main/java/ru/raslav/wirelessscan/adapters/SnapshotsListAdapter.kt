@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.adapters
+package ru.raslav.wirelessscan.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import kotlinx.android.synthetic.main.layout_item_snapshot.view.*
 import java.io.File
 

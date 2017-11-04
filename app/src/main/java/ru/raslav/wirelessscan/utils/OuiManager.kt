@@ -1,12 +1,12 @@
-package io.atomofiron.wirelessscan.utils
+package ru.raslav.wirelessscan.utils
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 
 import java.io.File
 
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.I
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.I
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream

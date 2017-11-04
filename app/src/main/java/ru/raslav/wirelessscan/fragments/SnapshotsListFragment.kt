@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.fragments
+package ru.raslav.wirelessscan.fragments
 
 import android.app.Fragment
 import android.content.Intent
@@ -6,11 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import io.atomofiron.wirelessscan.MainActivity
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.adapters.SnapshotsListAdapter
+import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
 
 import kotlinx.android.synthetic.main.layout_list.view.*
+import ru.raslav.wirelessscan.MainActivity
+import ru.raslav.wirelessscan.R
 
 class SnapshotsListFragment : Fragment() {
     private var fragmentView: View? = null
@@ -59,7 +59,7 @@ class SnapshotsListFragment : Fragment() {
 
     private fun share(name: String) {
         val intent = Intent(Intent.ACTION_SEND)
-                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://io.atomofiron.wirelessscan/$name"))
+                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://ru.raslav.wirelessscan/$name"))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setType("*/*")
 
         if (intent.resolveActivity(activity.packageManager) != null)

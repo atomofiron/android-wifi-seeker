@@ -1,12 +1,10 @@
-package io.atomofiron.wirelessscan.fragments
+package ru.raslav.wirelessscan.fragments
 
 import android.app.AlertDialog
-import io.atomofiron.wirelessscan.adapters.PointsListAdapter
-import io.atomofiron.wirelessscan.I.Companion.WIDE_MODE
+import ru.raslav.wirelessscan.adapters.PointsListAdapter
+import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
 
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.ScanService
-import io.atomofiron.wirelessscan.room.Point
+import ru.raslav.wirelessscan.room.Point
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
@@ -16,19 +14,18 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.text.format.Formatter
 import android.view.*
-import io.atomofiron.wirelessscan.I
-import io.atomofiron.wirelessscan.utils.DoubleClickMaster
-import io.atomofiron.wirelessscan.connection.ScanConnection
-import io.atomofiron.wirelessscan.connection.Connection.WHAT.*
+import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.connection.ScanConnection
+import ru.raslav.wirelessscan.connection.Connection.WHAT.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
-import io.atomofiron.wirelessscan.*
-import io.atomofiron.wirelessscan.utils.FileNameInputText
-import io.atomofiron.wirelessscan.utils.SnapshotManager
+import ru.raslav.wirelessscan.utils.FileNameInputText
+import ru.raslav.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.layout_description.view.*
 import kotlinx.android.synthetic.main.layout_filters_pane.view.*
 import kotlinx.android.synthetic.main.layout_item.view.*
+import ru.raslav.wirelessscan.*
 import java.io.File
 
 class MainFragment : Fragment() {

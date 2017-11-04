@@ -1,11 +1,11 @@
-package io.atomofiron.wirelessscan.utils
+package ru.raslav.wirelessscan.utils
 
 import android.arch.persistence.room.Room
 import android.content.Context
 import android.widget.Toast
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.room.Point
-import io.atomofiron.wirelessscan.room.Snapshot
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.room.Snapshot
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*

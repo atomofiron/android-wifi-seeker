@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.connection
+package ru.raslav.wirelessscan.connection
 
 import android.app.Activity
 import android.content.ComponentName
@@ -9,8 +9,8 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
-import io.atomofiron.wirelessscan.I
-import io.atomofiron.wirelessscan.ScanService
+import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.ScanService
 
 open class Connection(var onServiceConnectedListener: () -> Unit = {}) : ServiceConnection {
     enum class WHAT { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED, STARTED }

@@ -1,13 +1,12 @@
-package io.atomofiron.wirelessscan.fragments
+package ru.raslav.wirelessscan.fragments
 
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.preference.*
 import android.view.*
-
-import io.atomofiron.wirelessscan.I
-import io.atomofiron.wirelessscan.R
+import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.R
 
 class PrefFragment : PreferenceFragment(), Preference.OnPreferenceChangeListener {
     private lateinit var sp: SharedPreferences

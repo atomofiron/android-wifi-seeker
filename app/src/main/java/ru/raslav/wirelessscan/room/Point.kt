@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.room
+package ru.raslav.wirelessscan.room
 
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.Ignore
@@ -8,7 +8,7 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Parcel
 import android.os.Parcelable
-import io.atomofiron.wirelessscan.R
+import ru.raslav.wirelessscan.R
 
 @Entity(tableName = "points", primaryKeys = arrayOf("bssid"))
 class Point : Parcelable {

@@ -1,4 +1,4 @@
-package io.atomofiron.wirelessscan.room;
+package ru.raslav.wirelessscan.room;
 
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;

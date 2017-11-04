@@ -1,14 +1,14 @@
-package io.atomofiron.wirelessscan.fragments
+package ru.raslav.wirelessscan.fragments
 
 import android.app.Fragment
 import android.os.Bundle
 import android.view.*
-import io.atomofiron.wirelessscan.R
-import io.atomofiron.wirelessscan.adapters.PointsListAdapter
-import io.atomofiron.wirelessscan.room.Point
-import io.atomofiron.wirelessscan.utils.SnapshotManager
+import ru.raslav.wirelessscan.adapters.PointsListAdapter
+import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_description.view.*
+import ru.raslav.wirelessscan.R
 
 class SnapshotFragment : Fragment() {
     companion object {
