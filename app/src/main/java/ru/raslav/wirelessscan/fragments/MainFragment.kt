@@ -13,7 +13,6 @@ import android.content.Context.WIFI_SERVICE
 import android.net.wifi.WifiManager
 import android.os.*
 import android.provider.Settings
-import android.provider.Settings.Secure.LOCATION_MODE
 import android.text.format.Formatter
 import android.view.*
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
@@ -221,7 +220,7 @@ class MainFragment : Fragment() {
 
         activity.startService(Intent(activity.applicationContext, ScanService::class.java))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.Secure.getInt(activity.contentResolver, LOCATION_MODE) == 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.Secure.getInt(activity.contentResolver, Settings.Secure.LOCATION_MODE) == 0)
             AlertDialog.Builder(activity)
                     .setMessage(R.string.geolocation_need)
                     .setPositiveButton(R.string.got_it, null)
