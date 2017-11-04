@@ -1,5 +1,6 @@
 package ru.raslav.wirelessscan
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.IntentService
 import android.app.Notification
@@ -66,7 +67,8 @@ class ScanService : IntentService("ScanService") {
         }, filter)
 
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        commandMessenger = Messenger(object : Handler() {
+        commandMessenger = Messenger(@SuppressLint("HandlerLeak")
+        object : Handler() {
             override fun handleMessage(msg: Message?) {
                 super.handleMessage(msg)
                 this@ScanService.handleMessage(msg)

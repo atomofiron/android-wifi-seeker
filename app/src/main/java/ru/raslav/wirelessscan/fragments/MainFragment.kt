@@ -1,5 +1,6 @@
 package ru.raslav.wirelessscan.fragments
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
@@ -62,7 +63,8 @@ class MainFragment : Fragment() {
             override fun onAnimationRepeat(animation: Animation) {}
         })
 
-        scanConnection = ScanConnection(object : Handler() {
+        scanConnection = ScanConnection(@SuppressLint("HandlerLeak")
+        object : Handler() {
             override fun handleMessage(msg: Message?) {
                 super.handleMessage(msg)
                 this@MainFragment.handleMessage(msg)
