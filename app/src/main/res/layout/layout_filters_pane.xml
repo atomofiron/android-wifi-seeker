@@ -51,7 +51,7 @@
         style="@style/FilterButtonStyle"
         android:id="@+id/filter_wpa2"
         android:text="HDDN"
-        android:maxLines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         />
 </LinearLayout>
