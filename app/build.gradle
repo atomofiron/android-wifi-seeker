@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.0"
     defaultConfig {
-        applicationId "io.atomofiron.wirelessscan"
+        applicationId "ru.raslav.wirelessscan"
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 8
         versionName "2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -28,7 +28,7 @@ kapt {
     generateStubs = true
 }
 
-def room_version = "1.0.0-alpha9"
+def room_version = "1.0.0-rc1"
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
@@ -37,7 +37,7 @@ dependencies {
 }
 
 buildscript {
-    ext.kotlin_version = '1.1.4-3'
+    ext.kotlin_version = '1.1.51'
     repositories {
         mavenCentral()
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
