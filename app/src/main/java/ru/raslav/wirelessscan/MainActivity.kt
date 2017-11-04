@@ -95,14 +95,9 @@ class MainActivity : Activity() {
     }
 
     private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION))
-                showPermissionDialog()
-            else {
-                I.shortToast(this, R.string.get_perm_by_settings)
-                finish()
-            }
-        } else if (!I.granted(this, Manifest.permission.ACCESS_WIFI_STATE)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 7)
+        else if (!I.granted(this, Manifest.permission.ACCESS_WIFI_STATE)) {
             I.shortToast(this, R.string.no_perm)
             finish()
         } else
