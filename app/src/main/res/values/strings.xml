@@ -60,4 +60,6 @@
     <!-- Other -->
     <string name="send_email">Send an email</string>
     <string name="dear_dev">Dear developer, </string>
+    <string name="geolocation_need">Starting from Android 5.0 to get a list of WiFi networks you must enable geolocation</string>
+    <string name="got_it">Got it</string>
 </resources>
