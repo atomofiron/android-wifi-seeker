@@ -4,7 +4,6 @@
         android:id="@+id/settings"
         android:title="@string/settings"
         android:icon="@drawable/ic_settings"
-        android:showAsAction="always"
         />
     <item
         android:id="@+id/mail_to_dev"
