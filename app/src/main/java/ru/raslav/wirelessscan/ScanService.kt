@@ -65,7 +65,7 @@ class ScanService : IntentService("ScanService") {
             override fun onReceive(p0: Context?, p1: Intent?) = detectAttacksIfNeeded()
         }, filter)
 
-        wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         commandMessenger = Messenger(object : Handler() {
             override fun handleMessage(msg: Message?) {
                 super.handleMessage(msg)

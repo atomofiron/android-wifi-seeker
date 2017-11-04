@@ -50,7 +50,7 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         sp = I.sp(activity)
-        wifiManager = activity.getSystemService(WIFI_SERVICE) as WifiManager
+        wifiManager = activity.applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
         flash = AnimationUtils.loadAnimation(activity, R.anim.flash)
         flash.setAnimationListener(object : Animation.AnimationListener {
