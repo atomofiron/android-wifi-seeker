@@ -28,12 +28,15 @@ kapt {
     generateStubs = true
 }
 
-def room_version = "1.0.0-rc1"
+def simple_xml_version = "2.7.1"
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile "android.arch.persistence.room:runtime:$room_version"
-    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    compile("org.simpleframework:simple-xml:$simple_xml_version"){
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
 }
 
 buildscript {

@@ -1,17 +1,17 @@
-package ru.raslav.wirelessscan.room
+package ru.raslav.wirelessscan.utils
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Ignore
 import android.content.res.Resources
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Parcel
 import android.os.Parcelable
+import org.simpleframework.xml.Element
+import org.simpleframework.xml.Root
 import ru.raslav.wirelessscan.R
 
-@Entity(tableName = "points", primaryKeys = arrayOf("bssid"))
-class Point : Parcelable {
+@Root(name = "point")
+class Point private constructor(): Parcelable {
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeInt(level)
         dest.writeInt(frequency)
@@ -24,50 +24,50 @@ class Point : Parcelable {
 
     override fun describeContents(): Int = 0
 
+    @get:Element(name = "level")
+    @set:Element(name = "level")
     var level = 0
-        set(value) { field = value; pwColor = getPowerColor(value) }
+        set(value) { field = value; pwColor = getPowerColor(value)
+        }
+    @get:Element(name = "frequency")
+    @set:Element(name = "frequency")
     var frequency = 0
         set(value) { field = value; parseFrequency(value) }
+    @get:Element(name = "capabilities")
+    @set:Element(name = "capabilities")
     var capabilities = ""
         set(value) { field = value; parseCapabilities(value) }
+    @get:Element(name = "essid")
+    @set:Element(name = "essid")
     var essid = ""
         set(value) { field = value; essidColor = if (value.isEmpty()) yellow else grey }
+    @field:Element(name = "bssid")
     var bssid = ""
 
+    @field:Element(name = "channel")
     var ch = 0
-    @Ignore
     lateinit var enc: String
         private set
-    @Ignore
     lateinit var chi: String
         private set
-    @Ignore
     lateinit var wps: String
         private set
+    @field:Element(name = "manufacturer")
     var manufacturer = ""
 
-    @Ignore
     var pwColor = 0
         private set
-    @Ignore
     var chColor = 0
         private set
-    @Ignore
     var encColor = 0
         private set
-    @Ignore
     var chiColor = 0
         private set
-    @Ignore
     var wpsColor = 0
         private set
-    @Ignore
     var essidColor = 0
         private set
-    @Ignore
     val bssidColor = grey
-
-    internal constructor()
 
     constructor(sr: ScanResult) : this() {
         level = sr.level
@@ -254,7 +254,7 @@ class Point : Parcelable {
             return points
         }
 
-        @Ignore @JvmField
+        @JvmField
         val CREATOR: Parcelable.Creator<Point> = object : Parcelable.Creator<Point> {
             override fun createFromParcel(parcel: Parcel): Point {
                 val point = Point()

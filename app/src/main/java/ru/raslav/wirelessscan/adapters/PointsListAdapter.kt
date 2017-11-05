@@ -14,7 +14,7 @@ import ru.raslav.wirelessscan.I
 import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
 import kotlinx.android.synthetic.main.layout_item.view.*
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.utils.Point
 
 
 class PointsListAdapter(private val co: Context, private val listView: ListView) : BaseAdapter() {

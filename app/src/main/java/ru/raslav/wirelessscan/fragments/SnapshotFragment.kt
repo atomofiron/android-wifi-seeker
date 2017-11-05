@@ -4,7 +4,7 @@ import android.app.Fragment
 import android.os.Bundle
 import android.view.*
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
-import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_description.view.*

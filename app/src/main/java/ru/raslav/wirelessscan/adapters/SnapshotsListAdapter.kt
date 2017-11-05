@@ -9,11 +9,12 @@ import android.widget.TextView
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import kotlinx.android.synthetic.main.layout_item_snapshot.view.*
+import ru.raslav.wirelessscan.I
 import java.io.File
 
 class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClickListener {
     private val list = ArrayList<String>()
-    private val dbDir = File(co.applicationInfo.dataDir + "/databases/")
+    private val dbDir = File(co.applicationInfo.dataDir + "/files/")
     private val onDoubleClickListener: (v: View) -> Unit = { v ->
         File(dbDir.absolutePath, (v.parent as View).title.text.toString()).delete()
         update()
@@ -27,7 +28,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
 
     fun clear() {
         dbDir.listFiles()
-                .filter { it.name.endsWith(".db") }
+                .filter { it.name.endsWith(I.SNAPSHOT_FORMAT) }
                 .forEach { it.delete() }
 
         update()
@@ -37,7 +38,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
         list.clear()
 
         dbDir.listFiles()
-                ?.filter { it.name.endsWith(".db") }
+                ?.filter { it.name.endsWith(I.SNAPSHOT_FORMAT) }
                 ?.forEach { list.add(it.name) }
                 ?: return
 

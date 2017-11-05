@@ -5,13 +5,14 @@ import android.os.ParcelFileDescriptor
 import android.content.ContentValues
 import android.content.ContentProvider
 import android.database.Cursor
+import java.io.File
 import java.io.FileNotFoundException
 
 class FileContentProvider : ContentProvider() {
 
     @Throws(FileNotFoundException::class)
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
-        val file = context.getDatabasePath(if (uri.path.contains("/"))
+        val file = File(context.filesDir, if (uri.path.contains("/"))
             uri.path.substring(uri.path.lastIndexOf("/") + 1) else uri.path)
 
         if (!file.exists())

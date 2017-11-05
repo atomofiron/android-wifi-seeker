@@ -12,6 +12,7 @@ class I {
 
     companion object {
         var WIDE_MODE = false
+        val SNAPSHOT_FORMAT = ".xml"
 
         val PREF_DEFAULT_DELAY = "default_delay"
         val PREF_SHOW_DESCRIPTION = "show_description"

@@ -62,4 +62,5 @@
     <string name="dear_dev">Дорогой разработчик, </string>
     <string name="geolocation_need">Начиная с Android 6.0, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
     <string name="got_it">Понятно</string>
+    <string name="error">Ошибка</string>
 </resources>

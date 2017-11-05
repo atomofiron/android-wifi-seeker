@@ -5,7 +5,7 @@ import android.app.AlertDialog
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
 
-import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.utils.Point
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
@@ -177,14 +177,14 @@ class MainFragment : Fragment() {
             updateCounters(pointsListAdapter.filter(v.isActivated))
             view.layout_filters.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
-        var snapshotFileName = ""
+        var snapshotFileName: String? = null
         buttons.button_save.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (pointsListAdapter.allPoints.size != 0) {
                 view.flash.startAnimation(flash)
 
                 snapshotFileName = SnapshotManager(activity).put(pointsListAdapter.allPoints)
             }
-        }.onDoubleClickListener { renameSnapshot(snapshotFileName) })
+        }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
         buttons.button_resume.setOnClickListener { v: View ->
             if (v.isActivated)
                 stopScanService()
@@ -265,7 +265,7 @@ class MainFragment : Fragment() {
     }
 
     private fun renameSnapshot(lastName: String) {
-        val file = activity.getDatabasePath(lastName)
+        val file = File(activity.filesDir, lastName)
         if (file.exists()) {
             val editText = FileNameInputText(activity)
             editText.setText(lastName)
@@ -280,8 +280,8 @@ class MainFragment : Fragment() {
                         if (text.isEmpty())
                             return@setPositiveButton
 
-                        if (!text.endsWith(".db"))
-                            text += ".db"
+                        if (!text.endsWith(I.SNAPSHOT_FORMAT))
+                            text += I.SNAPSHOT_FORMAT
 
                         val success = file.renameTo(File(file.parent, text))
                         Toast.makeText(activity, if (success) R.string.success else R.string.failure, Toast.LENGTH_SHORT).show()

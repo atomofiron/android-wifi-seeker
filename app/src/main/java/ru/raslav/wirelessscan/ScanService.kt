@@ -7,7 +7,7 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.net.wifi.WifiManager
 import android.os.*
-import ru.raslav.wirelessscan.room.Point
+import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.connection.Connection.WHAT.*
 import android.app.PendingIntent
 import android.content.*

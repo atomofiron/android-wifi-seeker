@@ -1,42 +1,61 @@
 package ru.raslav.wirelessscan.utils
 
-import android.arch.persistence.room.Room
 import android.content.Context
 import android.widget.Toast
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.room.Point
-import ru.raslav.wirelessscan.room.Snapshot
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import org.simpleframework.xml.Root
+import org.simpleframework.xml.core.Persister
+import kotlin.collections.ArrayList
+import org.simpleframework.xml.ElementList
+import ru.raslav.wirelessscan.I
+import java.io.StringWriter
 
 class SnapshotManager(private val co: Context) {
-    private val formatter = SimpleDateFormat("YY.MM.dd-HH.mm.ss")
 
-    /** @return database file name*/
-    fun put(points: ArrayList<Point>): String {
-        val name = "snapshot_${formatter.format(Date())}.db"
+    /** @return snapshot file name*/
+    fun put(points: ArrayList<Point>): String? {
+        val name = "snapshot_${SimpleDateFormat("YY.MM.dd-HH.mm.ss").format(Date())}${I.SNAPSHOT_FORMAT}"
+        val file = File(co.filesDir, name)
 
-        val snapshot = getSnapshot(name)
-        snapshot.pointDao().put(points)
-        snapshot.close()
+        if (!co.filesDir.exists() && !co.filesDir.mkdirs() || !co.filesDir.canWrite()) {
+            Toast.makeText(co, R.string.error, Toast.LENGTH_LONG).show()
+            return null
+        }
 
-        File(co.getDatabasePath(name).absolutePath + "-journal").delete()
+        try {
+            val writer = StringWriter()
+            Persister().write(Snapshot(points), writer)
+            val stream = file.outputStream()
+            stream.write(writer.toString().toByteArray(Charsets.UTF_8))
+            stream.flush()
+            stream.close()
+        } catch (e: Exception) {
+            Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
+            return null
+        }
 
         Toast.makeText(co, R.string.snapshot_saved, Toast.LENGTH_SHORT).show()
         return name
     }
 
-    fun get(name: String): ArrayList<Point> {
-        val list = ArrayList<Point>()
-        val snapshot = getSnapshot(name)
+    fun get(name: String): ArrayList<Point>? {
+        val file = File(co.filesDir, name)
 
-        list.addAll(snapshot.pointDao().get().toList())
-        snapshot.close()
+        return try {
+            Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false).points
+        } catch (e: Exception) {
+            Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
 
-        return list
+            null
+        }
     }
 
-    private fun getSnapshot(name: String): Snapshot =
-            Room.databaseBuilder(co, Snapshot::class.java, name).allowMainThreadQueries().build()
+    @Root(name = "snapshot")
+    private class Snapshot(
+        @field:ElementList(inline = true, name = "points")
+        var points: ArrayList<Point>? = null
+    )
 }
