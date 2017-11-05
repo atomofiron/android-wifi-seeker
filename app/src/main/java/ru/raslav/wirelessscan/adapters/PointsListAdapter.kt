@@ -2,6 +2,7 @@ package ru.raslav.wirelessscan.adapters
 
 import android.content.Context
 import android.net.wifi.WifiInfo
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,9 +53,11 @@ class PointsListAdapter(private val co: Context, private val listView: ListView)
             //android.view.InflateException: Binary XML file line #64: addView(View, LayoutParams) is not supported in AdapterView
             //Caused by: java.lang.UnsupportedOperationException: addView(View, LayoutParams) is not supported in AdapterView
             convertView = LayoutInflater.from(co).inflate(R.layout.layout_item, null)
-            convertView.pwr.text = "  ●" //█●
             holder = ViewHolder(convertView as LinearLayout)
             convertView.tag = holder
+
+            holder.pw.text = "\u25CF " // ●
+            holder.pw.gravity = Gravity.RIGHT
 
             if (WIDE_MODE)
                 holder.bssid.visibility = View.VISIBLE
