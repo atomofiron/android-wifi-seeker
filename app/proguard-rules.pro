@@ -28,3 +28,14 @@
 -keep class ru.raslav.wirelessscan.MainActivity
 -keep class ru.raslav.wirelessscan.ScanService
 -keep class ru.raslav.wirelessscan.utils.FileContentProvider
+-keepclasseswithmembers class ru.raslav.wirelessscan.utils.Point { *; }
+-keepclasseswithmembers class ru.raslav.wirelessscan.utils.SnapshotManager.Snapshot { *; }
+
+# Keep SimpleXml
+-dontwarn com.bea.xml.stream.**
+-dontwarn org.simpleframework.xml.stream.**
+-keep class org.simpleframework.xml.**{ *; }
+-keepclassmembers,allowobfuscation class * {
+    @org.simpleframework.xml.* <fields>;
+    @org.simpleframework.xml.* <init>(...);
+}
