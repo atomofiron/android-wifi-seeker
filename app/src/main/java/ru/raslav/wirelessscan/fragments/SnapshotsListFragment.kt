@@ -9,6 +9,7 @@ import android.widget.Toast
 import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
 
 import kotlinx.android.synthetic.main.layout_list.view.*
+import ru.raslav.wirelessscan.BuildConfig
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 
@@ -58,8 +59,9 @@ class SnapshotsListFragment : Fragment() {
     }
 
     private fun share(name: String) {
+        val suffix = if (BuildConfig.DEBUG) ".debug" else ""
         val intent = Intent(Intent.ACTION_SEND)
-                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://ru.raslav.wirelessscan/$name"))
+                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://ru.raslav.wirelessscan$suffix/$name"))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setType("*/*")
 
         if (intent.resolveActivity(activity.packageManager) != null)
