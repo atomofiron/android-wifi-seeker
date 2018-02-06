@@ -9,8 +9,8 @@ android {
         applicationId "ru.raslav.wirelessscan"
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 8
-        versionName "2.0"
+        versionCode 11
+        versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
