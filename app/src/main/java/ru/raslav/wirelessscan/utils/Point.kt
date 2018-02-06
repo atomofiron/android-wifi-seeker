@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import org.simpleframework.xml.Element
@@ -153,6 +154,7 @@ class Point private constructor(): Parcelable {
     }*/
 
     companion object {
+		private val MAX_INDICATOR_LEVEL = 512
         val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
 
         var transparent = 0
@@ -196,9 +198,16 @@ class Point private constructor(): Parcelable {
         }
 
         private fun getPowerColor(level: Int): Int {
-            val pwr = WifiManager.calculateSignalLevel(level, 512)
-            var red = if (pwr < 256) "ff" else Integer.toHexString(512 - pwr)
-            var green = if (pwr >= 256) "ff" else Integer.toHexString(pwr)
+			/* не знаю в чём причина, но, начиная с Android 8,
+			   функция WifiManager.calculateSignalLevel(int, int)
+			   возвращает неадекватные значения */
+            val pwr = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+				MAX_INDICATOR_LEVEL * (Math.min(level, -50) + 100) / 50
+			else
+				WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
+
+            var red = if (pwr < MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(MAX_INDICATOR_LEVEL - pwr)
+            var green = if (pwr >= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(pwr)
 
             if (red.length < 2)
                 red = "0" + red
