@@ -17,7 +17,7 @@ class SnapshotManager(private val co: Context) {
 
     /** @return snapshot file name*/
     fun put(points: ArrayList<Point>): String? {
-        val name = "snapshot_${SimpleDateFormat("YY.MM.dd-HH.mm.ss").format(Date())}${I.SNAPSHOT_FORMAT}"
+        val name = "snapshot_${SimpleDateFormat("YY.MM.dd-HH.mm.ss", Locale.US).format(Date())}${I.SNAPSHOT_FORMAT}"
         val file = File(co.filesDir, name)
 
         if (!co.filesDir.exists() && !co.filesDir.mkdirs() || !co.filesDir.canWrite()) {
@@ -43,7 +43,6 @@ class SnapshotManager(private val co: Context) {
 
     fun get(name: String): ArrayList<Point>? {
         val file = File(co.filesDir, name)
-
         return try {
             Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false).points
         } catch (e: Exception) {
