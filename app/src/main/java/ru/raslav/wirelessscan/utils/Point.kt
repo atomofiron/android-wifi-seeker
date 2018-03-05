@@ -206,7 +206,7 @@ class Point private constructor(): Parcelable {
 			else
 				WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
 
-            var red = if (pwr < MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(MAX_INDICATOR_LEVEL - pwr)
+            var red = if (pwr <= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(MAX_INDICATOR_LEVEL - pwr)
             var green = if (pwr >= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(pwr)
 
             if (red.length < 2)
