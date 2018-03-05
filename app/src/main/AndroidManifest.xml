@@ -26,7 +26,7 @@
         <service android:name=".ScanService" android:exported="false" />
         <provider
             android:name=".utils.FileContentProvider"
-            android:authorities="ru.raslav.wirelessscan.debug"
+            android:authorities="ru.raslav.wirelessscan"
             android:exported="true"
             />
     </application>
