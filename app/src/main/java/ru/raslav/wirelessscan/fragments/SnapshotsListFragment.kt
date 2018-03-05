@@ -62,7 +62,7 @@ class SnapshotsListFragment : Fragment() {
         val suffix = if (BuildConfig.DEBUG) ".debug" else ""
         val intent = Intent(Intent.ACTION_SEND)
                 .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://ru.raslav.wirelessscan$suffix/$name"))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setType("text/xml")
+                .setType("text/xml")
 
         if (intent.resolveActivity(activity.packageManager) != null)
             startActivity(intent)
