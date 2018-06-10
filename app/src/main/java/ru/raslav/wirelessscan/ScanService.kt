@@ -19,20 +19,20 @@ import kotlin.collections.ArrayList
 
 class ScanService : IntentService("ScanService") {
     companion object {
-        private val ACTION_PAUSE = "ACTION_PAUSE"
-        private val ACTION_RESUME = "ACTION_RESUME"
-        private val ACTION_ALLOW = "ACTION_ALLOW"
-        private val ACTION_TURN_WIFI_ON = "ACTION_TURN_WIFI_ON"
+        private const val ACTION_PAUSE = "ACTION_PAUSE"
+        private const val ACTION_RESUME = "ACTION_RESUME"
+        private const val ACTION_ALLOW = "ACTION_ALLOW"
+        private const val ACTION_TURN_WIFI_ON = "ACTION_TURN_WIFI_ON"
 
-        private val EXTRA_ID = "EXTRA_ID"
-        private val EXTRA_POINT = "EXTRA_POINT"
+        private const val EXTRA_ID = "EXTRA_ID"
+        private const val EXTRA_POINT = "EXTRA_POINT"
 
-        private val SECOND = 1000L
-        private val SCAN_DELAY_OFFSET = 2
-        private val SCAN_DELAY = SECOND * SCAN_DELAY_OFFSET
-        private val WIFI_WAITING_PERIOD = 300L
+        private const val SECOND = 1000L
+        private const val SCAN_DELAY_OFFSET = 2
+        private const val SCAN_DELAY = SECOND * SCAN_DELAY_OFFSET
+        private const val WIFI_WAITING_PERIOD = 300L
 
-        private val FOREGROUND_NOTIFICATION_ID = 1
+        private const val FOREGROUND_NOTIFICATION_ID = 1
 
         private var boundCount = 0
         fun connected() = boundCount++
