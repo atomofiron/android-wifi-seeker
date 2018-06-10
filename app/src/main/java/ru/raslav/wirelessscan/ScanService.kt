@@ -2,9 +2,7 @@ package ru.raslav.wirelessscan
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.IntentService
-import android.app.Notification
-import android.app.NotificationManager
+import android.app.*
 import android.net.wifi.WifiManager
 import android.os.*
 import ru.raslav.wirelessscan.utils.Point
@@ -33,6 +31,7 @@ class ScanService : IntentService("ScanService") {
         private const val WIFI_WAITING_PERIOD = 300L
 
         private const val FOREGROUND_NOTIFICATION_ID = 1
+        private const val NOTIFICATION_CHANNEL = "channel_wtf"
 
         private var boundCount = 0
         fun connected() = boundCount++
@@ -79,6 +78,13 @@ class ScanService : IntentService("ScanService") {
         ouiManager = OuiManager(baseContext)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mainPendingIntent = PendingIntent.getActivity(baseContext, code++, Intent(baseContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            notificationManager.createNotificationChannel(NotificationChannel(
+                    NOTIFICATION_CHANNEL,
+                    "channelName",
+                    NotificationManager.IMPORTANCE_LOW
+            ))
     }
 
     override fun onDestroy() {
@@ -258,17 +264,23 @@ class ScanService : IntentService("ScanService") {
         isStartedForeground = foreground
 
         val co = applicationContext
-        val builder = Notification.Builder(co)
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Notification.Builder(co, NOTIFICATION_CHANNEL)
+		} else {
+			Notification.Builder(co)
+		}
+        builder.setContentText(getString(R.string.touch_to_look))
+                .setContentIntent(mainPendingIntent)
+                .setSmallIcon(R.drawable.ws)
                 .setContentTitle(getString(
                         if (foreground)
                             if (scanningIsNotRequired())
                                 R.string.scanning_battery_save
                             else
                                 R.string.scanning
-                        else R.string.scanning_was_paused)
-                ).setContentText(getString(R.string.touch_to_look))
-                .setContentIntent(mainPendingIntent)
-                .setSmallIcon(R.drawable.ws)
+                        else
+                            R.string.scanning_was_paused
+                ))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
@@ -297,8 +309,12 @@ class ScanService : IntentService("ScanService") {
         val co = applicationContext
         val id = point.bssid.hashCode()
 
-        val builder = Notification.Builder(co)
-                .setTicker(getString(R.string.clone_detected))
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Notification.Builder(co, NOTIFICATION_CHANNEL)
+		} else {
+			Notification.Builder(co)
+		}
+		builder.setTicker(getString(R.string.clone_detected))
                 .setContentTitle(getString(R.string.clone_detected))
                 .setContentText("${point.manufacturer} - ${point.bssid}")
                 .setContentIntent(mainPendingIntent)
@@ -330,8 +346,12 @@ class ScanService : IntentService("ScanService") {
         val co = applicationContext
         val id = point.bssid.hashCode() + 1
 
-        val builder = Notification.Builder(co)
-                .setTicker(getString(R.string.clone_detected))
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Notification.Builder(co, NOTIFICATION_CHANNEL)
+		} else {
+			Notification.Builder(co)
+		}
+		builder.setTicker(getString(R.string.clone_detected))
                 .setContentTitle(getString(R.string.wifi_was_disabled))
                 .setContentText("${point.manufacturer} - ${point.bssid}")
                 .setContentIntent(mainPendingIntent)
