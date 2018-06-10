@@ -255,8 +255,11 @@ class ScanService : IntentService("ScanService") {
                     trustedPoints.add(current)
             }
 
-            points.filter { it.isSimilar(current, smart) && !trustedPoints.contains(it) }
-                    .forEach { warning(it) }
+            points.filter {
+                it.level > Point.MIN_LEVEL
+                        && it.isSimilar(current, smart)
+                        && !trustedPoints.contains(it)
+            }.forEach { warning(it) }
         }
     }
 
