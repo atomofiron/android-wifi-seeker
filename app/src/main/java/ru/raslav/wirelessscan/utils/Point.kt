@@ -136,7 +136,7 @@ class Point private constructor(): Parcelable {
 
     fun isSimilar(point: Point, smart: Boolean): Boolean = this.essid == point.essid &&
             if (smart)
-                !this.bssid.startsWith(point.bssid.substring(0, 8))
+                point.bssid.length >= 8 && !this.bssid.startsWith(point.bssid.substring(0, 8))
             else
                 this.bssid != point.bssid
 
