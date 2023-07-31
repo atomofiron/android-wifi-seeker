@@ -2,7 +2,7 @@
 # By default, the flags in this file are appended to flags specified
 # in /home/atomofiron/Android/Sdk/tools/proguard/proguard-android.txt
 # You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
+# directive in build.gradle.kts.
 #
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
@@ -29,7 +29,7 @@
 -keep class ru.raslav.wirelessscan.ScanService
 -keep class ru.raslav.wirelessscan.utils.FileContentProvider
 -keepclasseswithmembers class ru.raslav.wirelessscan.utils.Point { *; }
--keepclasseswithmembers class ru.raslav.wirelessscan.utils.SnapshotManager.Snapshot { *; }
+-keepclasseswithmembers class ru.raslav.wirelessscan.utils.SnapshotManager$Snapshot { *; }
 
 # Keep SimpleXml
 -dontwarn com.bea.xml.stream.**
