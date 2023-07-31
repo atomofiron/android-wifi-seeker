@@ -6,9 +6,9 @@ import android.view.*
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
-import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.android.synthetic.main.layout_description.view.*
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
+import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 
 class SnapshotFragment : Fragment() {
     companion object {
@@ -24,7 +24,7 @@ class SnapshotFragment : Fragment() {
         }
     }
 
-    private var fragmentView: View? = null
+    private lateinit var binding: FragmentSnapshotBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,12 +36,6 @@ class SnapshotFragment : Fragment() {
         menu?.clear()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-
-        fragmentView = view
-    }
-
     override fun onStart() {
         super.onStart()
 
@@ -49,30 +43,27 @@ class SnapshotFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (fragmentView != null)
-            return fragmentView
+        binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
-        val view = inflater.inflate(R.layout.fragment_snapshot, container, false)
+        val adapter = PointsListAdapter(activity, binding.listView)
+        binding.listView.adapter = adapter
+        adapter.onPointClickListener = { point -> showDescription(binding.description, point) }
 
-        val adapter = PointsListAdapter(activity, view.list_view)
-        view.list_view.adapter = adapter
-        adapter.onPointClickListener = { point -> showDescription(view.layout_description, point) }
-
-        adapter.updateList(SnapshotManager(activity).get(arguments.getString(EXTRA_NAME)))
+        adapter.updateList(SnapshotManager(activity).get(arguments.getString(EXTRA_NAME)!!))
 
         return view
     }
 
-    private fun showDescription(description: View, point: Point?) {
+    private fun showDescription(description: LayoutDescriptionBinding, point: Point?) {
         if (point != null) {
-            description.visibility = View.VISIBLE
+            description.root.visibility = View.VISIBLE
 
-            description.tv_essid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
-            description.tv_bssid.text = getString(R.string.bssid_format, point.bssid)
-            description.tv_capab.text = getString(R.string.capab_format, point.capabilities)
-            description.tv_frequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
-            description.tv_manuf.text = getString(R.string.manuf_format, point.manufacturer)
+            description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
+            description.tvBssid.text = getString(R.string.bssid_format, point.bssid)
+            description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
+            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
         } else
-            description.visibility = View.GONE
+            description.root.visibility = View.GONE
     }
 }

@@ -5,20 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.TextView
-import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
-import kotlinx.android.synthetic.main.layout_item_snapshot.view.*
 import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.databinding.LayoutItemSnapshotBinding
 import java.io.File
 
-class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClickListener {
+class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
     private val list = ArrayList<String>()
     private val dbDir = File(co.applicationInfo.dataDir + "/files/")
-    private val onDoubleClickListener: (v: View) -> Unit = { v ->
-        File(dbDir.absolutePath, (v.parent as View).title.text.toString()).delete()
-        update()
-    }
 
     var onSnapshotShareListener: (name: String) -> Unit = {}
 
@@ -46,19 +40,22 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        var view: View? = convertView
-        val holder: ViewHolder
-
-        if (view == null) {
-            view = LayoutInflater.from(co).inflate(R.layout.layout_item_snapshot, parent, false)
-            holder = ViewHolder(view)
-            view.tag = holder
+        val binding = if (convertView == null) {
+            LayoutItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false).apply {
+                share.setOnClickListener {
+                    onSnapshotShareListener(title.text.toString())
+                }
+                delete.setOnClickListener(DoubleClickMaster {
+                    File(dbDir.absolutePath, title.text.toString()).delete()
+                    update()
+                })
+            }
         } else
-            holder = view.tag as ViewHolder
+            convertView.tag as LayoutItemSnapshotBinding
 
-        holder.title.text = list[position]
+        binding.title.text = list[position]
 
-        return view!!
+        return binding.root
     }
 
     override fun getItem(position: Int): String = list[position]
@@ -66,18 +63,4 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter(), View.OnClic
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getCount(): Int = list.size
-
-    inner class ViewHolder(view: View) {
-
-        val title: TextView = view.title
-
-        init {
-            view.share.setOnClickListener(this@SnapshotsListAdapter)
-            view.delete.setOnClickListener(DoubleClickMaster(onDoubleClickListener))
-        }
-    }
-
-    override fun onClick(v: View) {
-        onSnapshotShareListener((v.parent as View).title.text.toString())
-    }
 }

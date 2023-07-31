@@ -6,8 +6,6 @@ import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
 
 import ru.raslav.wirelessscan.utils.Point
-import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.android.synthetic.main.layout_buttons_pane.view.*
 import android.app.Fragment
 import android.content.*
 import android.content.Context.WIFI_SERVICE
@@ -24,10 +22,10 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.SnapshotManager
-import kotlinx.android.synthetic.main.layout_description.view.*
-import kotlinx.android.synthetic.main.layout_filters_pane.view.*
-import kotlinx.android.synthetic.main.layout_item.view.*
 import ru.raslav.wirelessscan.*
+import ru.raslav.wirelessscan.databinding.FragmentMainBinding
+import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
+import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import java.io.File
 
 class MainFragment : Fragment() {
@@ -43,8 +41,8 @@ class MainFragment : Fragment() {
 
     private lateinit var flash: Animation
     private var keepServiceStarted = false
-    /** if onDestroyView() was invoked, but not onDestroy() */
-    private var fragmentView: View? = null
+
+    private lateinit var binding: FragmentMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,17 +53,17 @@ class MainFragment : Fragment() {
         flash = AnimationUtils.loadAnimation(activity, R.anim.flash)
         flash.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {
-                view.flash.visibility = View.VISIBLE
+                binding.flash.visibility = View.VISIBLE
             }
             override fun onAnimationEnd(animation: Animation) {
-                view?.flash?.visibility = View.GONE
+                binding.flash.visibility = View.GONE
             }
             override fun onAnimationRepeat(animation: Animation) {}
         })
 
         scanConnection = ScanConnection(@SuppressLint("HandlerLeak")
         object : Handler() {
-            override fun handleMessage(msg: Message?) {
+            override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
                 this@MainFragment.handleMessage(msg)
             }
@@ -102,13 +100,8 @@ class MainFragment : Fragment() {
         super.onSaveInstanceState(outState)
         keepServiceStarted = true
 
-        outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, view?.button_resume?.isActivated ?: false)
+        outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.buttons.buttonResume.isActivated)
         outState.putParcelableArrayList(EXTRA_POINTS, pointsListAdapter.allPoints)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        fragmentView = view
     }
 
     override fun onStart() {
@@ -118,31 +111,21 @@ class MainFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (fragmentView != null) {
-            showDescriptionIfNecessary( // когда возвращаемся из настроек
-                    fragmentView!!.layout_description,
-                    if (sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) pointsListAdapter.focuse else null
-            )
 
-            fragmentView!!.flash.visibility = View.GONE
-
-            return fragmentView
-        }
-
-        val view = inflater.inflate(R.layout.fragment_main, container, false)
+        binding = FragmentMainBinding.inflate(inflater, container, false)
 
         if (WIDE_MODE)
-            view.layout_item.bssid.visibility = View.VISIBLE
+            binding.description.tvBssid.visibility = View.VISIBLE
 
-        pointsListAdapter = PointsListAdapter(activity, view.list_view)
-        view.list_view.adapter = pointsListAdapter
-        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(getView().layout_description, point) }
+        pointsListAdapter = PointsListAdapter(activity, binding.listView)
+        binding.listView.adapter = pointsListAdapter
+        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.description, point) }
 
-        initFilters(view.layout_filters)
-        initButtons(view.layout_buttons, view.label)
+        initFilters(binding.filters.root as ViewGroup)
+        initButtons(binding.buttons, binding.label)
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
-            startScanServiceIfWifiEnabled(view.button_resume)
+            startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
 
         if (savedInstanceState != null)
             pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS))
@@ -171,38 +154,38 @@ class MainFragment : Fragment() {
             filters.getChildAt(i).setOnClickListener(listener)
     }
 
-    private fun initButtons(buttons: View, label: TextView) {
-        buttons.button_filter.setOnClickListener { v ->
+    private fun initButtons(buttons: LayoutButtonsPaneBinding, label: TextView) {
+        buttons.buttonFilter.setOnClickListener { v ->
             v.isActivated = !v.isActivated
             updateCounters(pointsListAdapter.filter(v.isActivated))
-            view.layout_filters.visibility = if (v.isActivated) View.VISIBLE else View.GONE
+            buttons.buttonFilter.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
         var snapshotFileName: String? = null
-        buttons.button_save.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
+        buttons.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (pointsListAdapter.allPoints.size != 0) {
-                view.flash.startAnimation(flash)
+                binding.flash.startAnimation(flash)
 
                 snapshotFileName = SnapshotManager(activity).put(pointsListAdapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
-        buttons.button_resume.setOnClickListener { v: View ->
+        buttons.buttonResume.setOnClickListener { v: View ->
             if (v.isActivated)
                 stopScanService()
             else
                 startScanService()
         }
-        (buttons.spinner_delay as Spinner).setSelection(sp.getString(I.PREF_DEFAULT_DELAY, "1").toInt())
-        buttons.spinner_delay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        buttons.spinnerDelay.setSelection(sp.getString(I.PREF_DEFAULT_DELAY, "1")!!.toInt())
+        buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 sendScanDelay()
             }
         }
-        buttons.button_clear.setOnClickListener(DoubleClickMaster({
+        buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = pointsListAdapter.clear()
-        }).onClickListener { pointsListAdapter.resetFocus() })
-        buttons.button_list.setOnClickListener {
+        }.onClickListener { pointsListAdapter.resetFocus() })
+        buttons.buttonList.setOnClickListener {
             activity.startActivity(
                     Intent(activity, MainActivity::class.java)
                             .setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
@@ -234,7 +217,7 @@ class MainFragment : Fragment() {
 
     private fun sendScanDelay() {
         scanConnection.sendScanDelay(resources.getIntArray(R.array.delay_arr_int)
-                [view?.spinner_delay?.selectedItemPosition ?: return])
+                [binding.buttons.spinnerDelay.selectedItemPosition])
     }
 
     private fun handleMessage(msg: Message?) {
@@ -244,9 +227,9 @@ class MainFragment : Fragment() {
         when (msg?.what) {
             START_SCAN.ordinal -> pointsListAdapter.animScan(true)
             RESULTS.ordinal -> updateList(msg)
-            STARTED.ordinal -> view.button_resume.isActivated = true
+            STARTED.ordinal -> binding.buttons.buttonResume.isActivated = true
             STOPPED.ordinal -> {
-                view.button_resume.isActivated = false
+                binding.buttons.buttonResume.isActivated = false
                 pointsListAdapter.animScan(false)
             }
         }
@@ -254,14 +237,14 @@ class MainFragment : Fragment() {
 
     private fun updateList(msg: Message) {
         if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
-            view.button_resume.isActivated = msg.arg1.toBoolean()
+            binding.buttons.buttonResume.isActivated = msg.arg1.toBoolean()
 
             updateCounters(pointsListAdapter.updateList(msg.obj as ArrayList<Point>))
         }
     }
 
     private fun updateCounters(counters: String) {
-        view.label.text = counters
+        binding.label.text = counters
     }
 
     private fun renameSnapshot(lastName: String) {
@@ -274,7 +257,7 @@ class MainFragment : Fragment() {
                     .setView(editText)
                     .setCancelable(false)
                     .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.ok, { _, _ ->
+                    .setPositiveButton(R.string.ok) { _, _ ->
                         var text = editText.text.toString()
 
                         if (text.isEmpty())
@@ -284,23 +267,27 @@ class MainFragment : Fragment() {
                             text += I.SNAPSHOT_FORMAT
 
                         val success = file.renameTo(File(file.parent, text))
-                        Toast.makeText(activity, if (success) R.string.success else R.string.failure, Toast.LENGTH_SHORT).show()
-                    }).create().show()
+                        Toast.makeText(
+                            activity,
+                            if (success) R.string.success else R.string.failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }.create().show()
         } else
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showDescriptionIfNecessary(description: View, point: Point?) {
+    private fun showDescriptionIfNecessary(description: LayoutDescriptionBinding, point: Point?) {
         if (point != null && sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) {
-            description.visibility = View.VISIBLE
+            description.root.visibility = View.VISIBLE
 
-            description.tv_essid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
-            description.tv_bssid.text = getString(R.string.bssid_format, point.bssid)
-            description.tv_capab.text = getString(R.string.capab_format, point.capabilities)
-            description.tv_frequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
-            description.tv_manuf.text = getString(R.string.manuf_format, point.manufacturer)
+            description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
+            description.tvBssid.text = getString(R.string.bssid_format, point.bssid)
+            description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
+            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
         } else
-            description.visibility = View.GONE
+            description.root.visibility = View.GONE
     }
 
     private fun updateConnectionInfo() {

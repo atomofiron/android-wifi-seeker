@@ -6,6 +6,7 @@
     android:layout_height="match_parent">
 
     <include
+        android:id="@+id/description"
         layout="@layout/layout_description"
         android:visibility="gone"
         />

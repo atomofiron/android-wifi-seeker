@@ -269,11 +269,11 @@ class Point private constructor(): Parcelable {
                 val point = Point()
                 point.level = parcel.readInt()
                 point.frequency = parcel.readInt()
-                point.capabilities = parcel.readString()
-                point.essid = parcel.readString()
-                point.bssid = parcel.readString()
+                point.capabilities = parcel.readString()!!
+                point.essid = parcel.readString()!!
+                point.bssid = parcel.readString()!!
                 point.ch = parcel.readInt()
-                point.manufacturer = parcel.readString()
+                point.manufacturer = parcel.readString()!!
                 return point
             }
 

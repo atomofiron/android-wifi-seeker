@@ -8,13 +8,14 @@ import android.view.*
 import android.widget.Toast
 import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
 
-import kotlinx.android.synthetic.main.layout_list.view.*
 import ru.raslav.wirelessscan.BuildConfig
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.databinding.LayoutListBinding
 
 class SnapshotsListFragment : Fragment() {
-    private var fragmentView: View? = null
+
+    private lateinit var binding: LayoutListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +27,6 @@ class SnapshotsListFragment : Fragment() {
         menu?.clear()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-
-        fragmentView = view
-    }
-
     override fun onStart() {
         super.onStart()
 
@@ -39,15 +34,12 @@ class SnapshotsListFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (fragmentView != null)
-            return fragmentView
-
-        val view = inflater.inflate(R.layout.layout_list, container, false)
+        binding = LayoutListBinding.inflate(inflater, container, false)
 
         val adapter = SnapshotsListAdapter(activity)
         adapter.onSnapshotShareListener = { name -> share(name) }
-        view.list_view.adapter = adapter
-        view.list_view.setOnItemClickListener { _, _, position, _ ->
+        binding.listView.adapter = adapter
+        binding.listView.setOnItemClickListener { _, _, position, _ ->
             activity.startActivity(
                     Intent(activity, MainActivity::class.java)
                             .setAction(MainActivity.ACTION_OPEN_SNAPSHOT)

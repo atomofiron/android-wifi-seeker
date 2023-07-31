@@ -12,8 +12,8 @@ import android.widget.LinearLayout
 import android.widget.ListView
 import ru.raslav.wirelessscan.I
 import ru.raslav.wirelessscan.I.Companion.WIDE_MODE
-import kotlinx.android.synthetic.main.layout_item.view.*
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.utils.Point
 
 
@@ -47,33 +47,33 @@ class PointsListAdapter(private val co: Context, private val listView: ListView)
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        var convertView = convertView
-        val holder: ViewHolder
-        if (convertView == null) {
+        val binding: LayoutItemBinding = if (convertView == null) {
             //android.view.InflateException: Binary XML file line #64: addView(View, LayoutParams) is not supported in AdapterView
             //Caused by: java.lang.UnsupportedOperationException: addView(View, LayoutParams) is not supported in AdapterView
-            convertView = LayoutInflater.from(co).inflate(R.layout.layout_item, null)
-            holder = ViewHolder(convertView as LinearLayout)
-            convertView.tag = holder
+            val itemView = LayoutInflater.from(co).inflate(R.layout.layout_item, parent, false)
+            val binding = LayoutItemBinding.bind(itemView)
+            itemView.tag = binding
 
-            holder.pw.text = "\u25CF " // ●
-            holder.pw.gravity = Gravity.RIGHT
+            binding.pwr.text = "\u25CF " // ●
+            binding.pwr.gravity = Gravity.END
 
             if (WIDE_MODE)
-                holder.bssid.visibility = View.VISIBLE
+                binding.bssid.visibility = View.VISIBLE
+
+            binding
         } else
-            holder = convertView.tag as ViewHolder
+            convertView.tag as LayoutItemBinding
 
-        fillView(holder, points[position], position)
+        fillView(binding, points[position], position)
 
-        return convertView
+        return binding.root
     }
 
-    private fun fillView(holder: ViewHolder, point: Point, position: Int) {
+    private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
         drawItemRoot(holder.root, point, position)
 
         // point.level == -1 experiment
-        holder.pw.setTextColor(if (point.level == -1) -65281 else point.pwColor)
+        holder.pwr.setTextColor(if (point.level == -1) -65281 else point.pwColor)
 
         holder.ch.text = point.ch.toString()
         holder.ch.setTextColor(point.chColor)
@@ -183,19 +183,25 @@ class PointsListAdapter(private val co: Context, private val listView: ListView)
             for (i in 0 until count) {
                 val anim = AnimationUtils.loadAnimation(co, R.anim.show)
                 anim.startOffset = 500L / count * (count - 1 - i)
-                listView.getChildAt(i).pwr.startAnimation(anim)
+                val binding = LayoutItemBinding.bind(listView.getChildAt(i))
+                binding.pwr.startAnimation(anim)
             }
         }
     }
 
     fun animScan(start: Boolean) {
         val count = listView.childCount
-        if (count > 0)
-            for (i in 0 until count)
-                if (start)
-                    listView.getChildAt(i).pwr.startAnimation(AnimationUtils.loadAnimation(co, if (i % 2 == 0) R.anim.blink_0 else R.anim.blink_1))
-                else
-                    listView.getChildAt(i).pwr.animation = null
+        if (count > 0) {
+            for (i in 0 until count) {
+                val binding = LayoutItemBinding.bind(listView.getChildAt(i))
+                if (start) {
+                    val id = if (i % 2 == 0) R.anim.blink_0 else R.anim.blink_1
+                    binding.pwr.startAnimation(AnimationUtils.loadAnimation(co, id))
+                } else {
+                    binding.pwr.animation = null
+                }
+            }
+        }
     }
 
     override fun getItem(position: Int): Point = points[position]
@@ -203,15 +209,4 @@ class PointsListAdapter(private val co: Context, private val listView: ListView)
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getCount(): Int = points.size
-
-    class ViewHolder(layout: LinearLayout) {
-        val root = layout
-        val pw = layout.pwr
-        val ch = layout.ch
-        val enc = layout.enc
-        val chi = layout.chi
-        val wps = layout.wps
-        val essid = layout.essid
-        val bssid = layout.bssid
-    }
 }

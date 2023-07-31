@@ -68,7 +68,7 @@ class ScanService : IntentService("ScanService") {
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         commandMessenger = Messenger(@SuppressLint("HandlerLeak")
         object : Handler() {
-            override fun handleMessage(msg: Message?) {
+            override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
                 this@ScanService.handleMessage(msg)
             }
@@ -100,7 +100,7 @@ class ScanService : IntentService("ScanService") {
             else
                 super.onStartCommand(intent, flags, startId)
 
-    override fun onHandleIntent(intent: Intent) {
+    override fun onHandleIntent(intent: Intent?) {
         I.log("ScanService: onHandleIntent()")
         showNotification(true)
         sendStarted()
@@ -121,7 +121,7 @@ class ScanService : IntentService("ScanService") {
                 notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
             }
             ACTION_ALLOW -> {
-                trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT))
+                trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT)!!)
 
                 wifiManager.isWifiEnabled = true
                 notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
@@ -240,7 +240,7 @@ class ScanService : IntentService("ScanService") {
         val hidden = wifiManager.connectionInfo.hiddenSSID
         essid = essid.substring(1, essid.length - 1) // necessary
 
-        val extras = ArrayList<String>(sp.getString(I.PREF_EXTRAS, "").split("\n"))
+        val extras = ArrayList<String>(sp.getString(I.PREF_EXTRAS, "")!!.split("\n"))
         val current = points.find { it.compare(bssid, essid, hidden) }
         if (current != null && !extras.contains(current.essid)) {
             val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)

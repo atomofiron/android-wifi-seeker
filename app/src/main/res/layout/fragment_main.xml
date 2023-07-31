@@ -7,7 +7,11 @@
     android:orientation="@integer/similar_orientation"
     tools:context="ru.raslav.wirelessscan.MainActivity">
 
-    <include layout="@layout/layout_description" android:visibility="gone" />
+    <include
+        android:id="@+id/description"
+        layout="@layout/layout_description"
+        android:visibility="gone"
+        />
     <RelativeLayout
         style="@style/ListFrameStyle"
         android:layout_weight="1">
@@ -38,6 +42,12 @@
             android:visibility="gone"
             />
     </RelativeLayout>
-    <include layout="@layout/scrollview_filters" />
-    <include layout="@layout/layout_buttons_pane" />
+    <include
+        android:id="@+id/filters"
+        layout="@layout/scrollview_filters"
+        />
+    <include
+        android:id="@+id/buttons"
+        layout="@layout/layout_buttons_pane"
+        />
 </LinearLayout>

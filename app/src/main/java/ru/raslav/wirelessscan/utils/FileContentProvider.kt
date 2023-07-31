@@ -12,8 +12,13 @@ class FileContentProvider : ContentProvider() {
 
     @Throws(FileNotFoundException::class)
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
-        val file = File(context.filesDir, if (uri.path.contains("/"))
-            uri.path.substring(uri.path.lastIndexOf("/") + 1) else uri.path)
+        val context = context ?: return null
+        val path = uri.path ?: return null
+        val tail = when {
+            path.contains("/") -> path.substring(path.lastIndexOf("/") + 1)
+            else -> path
+        }
+        val file = File(context.filesDir, tail)
 
         if (!file.exists())
             throw FileNotFoundException(file.absolutePath)

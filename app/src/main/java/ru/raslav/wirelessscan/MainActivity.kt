@@ -63,7 +63,7 @@ class MainActivity : Activity() {
 
         when (intent?.action) {
             ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotsListFragment())
-            ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)))
+            ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)!!))
         }
     }
 
@@ -72,8 +72,8 @@ class MainActivity : Activity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.settings -> setFragment(PrefFragment())
             R.id.mail_to_dev -> mailToDeveloper()
         }
