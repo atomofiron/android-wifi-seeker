@@ -4,5 +4,5 @@ fun RepositoryHandler.commonRepositories() {
     mavenCentral()
 }
 
-rootProject.name = "Diary"
-include(":app")
+rootProject.name = "WirelessScan"
+include(":legacy")
