@@ -197,7 +197,7 @@ class ScanService : IntentService("ScanService") {
     private fun updatePoints() {
         val currentPoints = Point.parseScanResults(wifiManager.scanResults)
 
-        currentPoints.forEach { it.manufacturer = ouiManager.find(it.bssid) }
+        currentPoints.forEach { it.manufacturer = ouiManager.find(it.bssid).label }
 
         points.removeAll(currentPoints)
         points.forEach { it.level = Point.MIN_LEVEL }
