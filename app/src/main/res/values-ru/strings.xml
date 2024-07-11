@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">WiFi Seeker</string>
+    <string name="settings">Настройки</string>
+    <string name="email_dev">Написать разработчику</string>
+    <string name="ok">ОК</string>
+    <string name="snapshot_saved">Снимок сохранён</string>
+    <string name="no_activity">У вас нет приложения, способного выполнить данное действие</string>
+    <string name="cancel">Отмена</string>
+    <string name="rename_to">Переименовать</string>
+    <string name="success">Успех</string>
+    <string name="failure">Ошибка</string>
+
+    <!-- Fragment titles -->
+    <string name="title_snapshots">Снимки</string>
+    <string name="title_preferences">Настройки</string>
+
+    <!-- prefs -->
+    <string name="default_delay">Задержка по умолчанию</string>
+    <string name="show_description">Подробная информация о выбранной сети</string>
+    <string name="show_description_sum">Таблица над списком</string>
+    <string name="work_in_bg">Работать в фоне</string>
+    <string name="detect_attacks">Обнаружение атак</string>
+    <string name="detect_attacks_sum">Предупреждать о появлении точек доступа с одинаковыми именами</string>
+
+    <string name="attack_screen">Настройки обнаружения</string>
+    <string name="smart_detection">Умное обнаружение</string>
+    <string name="smart_detection_sum">Пропускать сети с похожими MAC адресами</string>
+    <string name="extras">Сети исключения (на каждой строке)</string>
+    <string name="guarding">Защита подключения</string>
+    <string name="recom">Рекомендуется включить работу в фоне</string>
+    <string name="auto_off_wifi">Автоотключение WiFi</string>
+    <string name="auto_off_wifi_sum">При подключении к подозрительной сети</string>
+    <string name="no_scan_in_bg">Энергосберегающий режим</string>
+    <string name="no_scan_in_bg_sum">Не сканировать сети в фоне</string>
+
+    <!-- Description -->
+    <string name="essid_format">SSID: %s</string>
+    <string name="bssid_format">BSSID: %s</string>
+    <string name="capab_format">Возможности: %s</string>
+    <string name="frequ_format">Частота: %1$d, канал: %2$d</string>
+    <string name="manuf_format">Производитель: %s</string>
+
+    <!-- Permissions -->
+    <string name="need_coarse_location">Для функционирования программы на Android 6 и выше необходимо разрешение на ПРИБЛИЗИТЕЛЬНОЕ местоположение</string>
+    <string name="get_perm_by_settings">Дайте разрешение на местоположение в настройках системы</string>
+    <string name="no_perm">Нет доступа</string>
+
+    <!-- Notification -->
+    <string name="scanning">Сканирование…</string>
+    <string name="scanning_battery_save">Сканирование… (экономия заряда)</string>
+    <string name="scanning_was_paused">Сканирование приостановлено</string>
+    <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
+    <string name="pause">Приостановить</string>
+    <string name="resume">Возобновить</string>
+    <string name="clone_detected">Была обнаружена копия вашей точки доступа</string>
+    <string name="wifi_was_disabled">WiFi был выключен</string>
+    <string name="allow_network">Разрешить эту сеть</string>
+    <string name="turn_wifi_on">Включить WiFi</string>
+
+    <!-- Other -->
+    <string name="send_email">Отправить письмо</string>
+    <string name="dear_dev">Дорогой разработчик, </string>
+    <string name="geolocation_need">Начиная с Android 6.0, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
+    <string name="got_it">Понятно</string>
+    <string name="error">Ошибка</string>
+</resources>

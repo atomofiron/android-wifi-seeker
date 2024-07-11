@@ -24,7 +24,12 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class app.atomofiron.wifiseeker.App
+-keep class ru.raslav.wirelessscan.App
+-keep class ru.raslav.wirelessscan.MainActivity
+-keep class ru.raslav.wirelessscan.ScanService
+-keep class ru.raslav.wirelessscan.utils.FileContentProvider
+-keepclasseswithmembers class ru.raslav.wirelessscan.utils.Point { *; }
+-keepclasseswithmembers class ru.raslav.wirelessscan.utils.SnapshotManager$Snapshot { *; }
 
 # Keep SimpleXml
 -dontwarn com.bea.xml.stream.**
