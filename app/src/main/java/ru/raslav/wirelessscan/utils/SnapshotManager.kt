@@ -10,14 +10,14 @@ import org.simpleframework.xml.Root
 import org.simpleframework.xml.core.Persister
 import kotlin.collections.ArrayList
 import org.simpleframework.xml.ElementList
-import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.Const
 import java.io.StringWriter
 
 class SnapshotManager(private val co: Context) {
 
     /** @return snapshot file name*/
     fun put(points: ArrayList<Point>): String? {
-        val name = "snapshot_${SimpleDateFormat("YY.MM.dd-HH.mm.ss").format(Date())}${I.SNAPSHOT_FORMAT}"
+        val name = "snapshot_${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(Date())}${Const.SNAPSHOT_FORMAT}"
         val file = File(co.filesDir, name)
 
         if (!co.filesDir.exists() && !co.filesDir.mkdirs() || !co.filesDir.canWrite()) {

@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         detectScreenConfigurations()
 
-        if (I.granted(this, Manifest.permission.ACCESS_FINE_LOCATION))
+        if (granted(Manifest.permission.ACCESS_FINE_LOCATION))
             showMainFragmentIfNecessary()
         else
             requestPermission()
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private fun detectScreenConfigurations() {
         val size = Point()
         windowManager.defaultDisplay.getSize(size)
-        I.WIDE_MODE = size.x > size.y * 1.5 &&
+        Const.WIDE_MODE = size.x > size.y * 1.5 &&
                 resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
             val current = fragments.findLast { it.isVisible }
             beginTransaction()
                 .addToBackStack(fragment.javaClass.name)
+                // todo test
                 .apply { hide(current ?: return@apply) }
                 .add(R.id.fragment_container, fragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -105,8 +106,8 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 7)
-        else if (!I.granted(this, Manifest.permission.ACCESS_WIFI_STATE)) {
-            I.shortToast(this, R.string.no_perm)
+        else if (!granted(Manifest.permission.ACCESS_WIFI_STATE)) {
+            shortToast(R.string.no_perm)
             finish()
         } else
             showMainFragmentIfNecessary()
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             grantResults[0] == PackageManager.PERMISSION_GRANTED -> showMainFragmentIfNecessary()
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> showPermissionDialog()
             else -> {
-                I.shortToast(this, R.string.get_perm_by_settings)
+                shortToast(R.string.get_perm_by_settings)
                 finish()
             }
         }

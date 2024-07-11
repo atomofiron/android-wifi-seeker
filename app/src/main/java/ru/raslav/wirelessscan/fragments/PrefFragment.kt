@@ -12,31 +12,34 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import androidx.preference.TwoStatePreference
-import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.longToast
+import ru.raslav.wirelessscan.sp
+import ru.raslav.wirelessscan.unsafeLazy
 
 class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
-    private lateinit var sp: SharedPreferences
+
+    private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 
     private lateinit var attackScreen: PreferenceScreen
     private lateinit var noScanInBg: TwoStatePreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // todo deprecation
         setHasOptionsMenu(true)
         addPreferencesFromResource(R.xml.preferences)
-
-        sp = I.sp(requireContext())
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setListeners(preferenceScreen)
 
-        val detectAttacks = findPreference<TwoStatePreference>(I.PREF_DETECT_ATTACKS)!!
-        val autoOff = findPreference<TwoStatePreference>(I.PREF_AUTO_OFF_WIFI)!!
-        attackScreen = findPreference(I.PREF_ATTACK_SCREEN)!!
+        val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
+        val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
+        attackScreen = findPreference(Const.PREF_ATTACK_SCREEN)!!
         attackScreen.isEnabled = detectAttacks.isChecked
-        noScanInBg = findPreference(I.PREF_NO_SCAN_IN_BG)!!
+        noScanInBg = findPreference(Const.PREF_NO_SCAN_IN_BG)!!
         noScanInBg.isEnabled = autoOff.isChecked
     }
 
@@ -76,8 +79,8 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
         updateSummary(preference, newValue)
         when (preference.key) {
-            I.PREF_DETECT_ATTACKS -> attackScreen.isEnabled = newValue as Boolean
-            I.PREF_AUTO_OFF_WIFI -> updateNoScanPreference(newValue as Boolean)
+            Const.PREF_DETECT_ATTACKS -> attackScreen.isEnabled = newValue as Boolean
+            Const.PREF_AUTO_OFF_WIFI -> updateNoScanPreference(newValue as Boolean)
         }
         return true
     }
@@ -85,10 +88,10 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
     private fun updateNoScanPreference(value: Boolean) {
         noScanInBg.isEnabled = value
 
-        if (!value)
-            noScanInBg.isChecked = false
-        else
-            if (!sp.getBoolean(I.PREF_WORK_IN_BG, false))
-                I.longToast(requireContext(), R.string.recom)
+        when (false) {
+            value -> noScanInBg.isChecked = false
+            sp.getBoolean(Const.PREF_WORK_IN_BG, false) -> requireContext().longToast(R.string.recom)
+            else -> Unit
+        }
     }
 }

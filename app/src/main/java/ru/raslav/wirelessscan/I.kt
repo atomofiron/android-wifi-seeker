@@ -1,12 +1,7 @@
 package ru.raslav.wirelessscan
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.widget.Toast
-import androidx.preference.PreferenceManager
-
-object I {
+object Const {
+    // todo remove from here
     var WIDE_MODE = false
     val SNAPSHOT_FORMAT = ".xml"
 
@@ -19,15 +14,4 @@ object I {
     val PREF_EXTRAS = "extras"
     val PREF_AUTO_OFF_WIFI = "auto_off_wifi"
     val PREF_NO_SCAN_IN_BG = "no_scan_in_bg"
-
-    fun sp(context: Context): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-    fun shortToast(context: Context, resId: Int) = Toast.makeText(context, resId, Toast.LENGTH_SHORT).show()
-
-    fun longToast(context: Context, resId: Int) = Toast.makeText(context, resId, Toast.LENGTH_LONG).show()
-
-    fun granted(context: Context, per: String) = context.checkCallingOrSelfPermission(per) == PackageManager.PERMISSION_GRANTED
 }
-
-fun Boolean.toInt(): Int = if (this) 1 else 0
-fun Int.toBoolean(): Boolean = this != 0

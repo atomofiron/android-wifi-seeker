@@ -2,7 +2,7 @@ package ru.raslav.wirelessscan.fragments
 
 import android.annotation.SuppressLint
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
-import ru.raslav.wirelessscan.I.WIDE_MODE
+import ru.raslav.wirelessscan.Const.WIDE_MODE
 
 import ru.raslav.wirelessscan.utils.Point
 import android.content.*
@@ -35,7 +35,7 @@ class MainFragment : Fragment() {
         private const val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
         private const val EXTRA_POINTS = "EXTRA_POINTS"
     }
-    private lateinit var sp: SharedPreferences
+    private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private lateinit var wifiManager: WifiManager
     private lateinit var scanConnection: ScanConnection
     private lateinit var pointsListAdapter: PointsListAdapter
@@ -50,7 +50,6 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
         // todo deprecation
         setHasOptionsMenu(true)
-        sp = I.sp(requireContext())
         wifiManager = requireContext().applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
         flash = AnimationUtils.loadAnimation(activity, R.anim.flash)
@@ -92,7 +91,7 @@ class MainFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (!keepServiceStarted && !sp.getBoolean(I.PREF_WORK_IN_BG, false))
+        if (!keepServiceStarted && !sp.getBoolean(Const.PREF_WORK_IN_BG, false))
             stopScanService()
 
         scanConnection.unbindService(requireContext())
@@ -177,7 +176,7 @@ class MainFragment : Fragment() {
             else
                 startScanService()
         }
-        buttons.spinnerDelay.setSelection(sp.getString(I.PREF_DEFAULT_DELAY, "1")!!.toInt())
+        buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, "1")!!.toInt())
         buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -265,8 +264,8 @@ class MainFragment : Fragment() {
                         if (text.isEmpty())
                             return@setPositiveButton
 
-                        if (!text.endsWith(I.SNAPSHOT_FORMAT))
-                            text += I.SNAPSHOT_FORMAT
+                        if (!text.endsWith(Const.SNAPSHOT_FORMAT))
+                            text += Const.SNAPSHOT_FORMAT
 
                         val success = file.renameTo(File(file.parent, text))
                         Toast.makeText(
@@ -280,7 +279,7 @@ class MainFragment : Fragment() {
     }
 
     private fun showDescriptionIfNecessary(description: LayoutDescriptionBinding, point: Point?) {
-        if (point != null && sp.getBoolean(I.PREF_SHOW_DESCRIPTION, false)) {
+        if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, false)) {
             description.root.visibility = View.VISIBLE
 
             description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())

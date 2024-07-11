@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
-import ru.raslav.wirelessscan.I
+import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.databinding.LayoutItemSnapshotBinding
 import java.io.File
 
@@ -22,7 +22,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
 
     fun clear() {
         dbDir.listFiles()
-                .filter { it.name.endsWith(I.SNAPSHOT_FORMAT) }
+                .filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
                 .forEach { it.delete() }
 
         update()
@@ -32,7 +32,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
         list.clear()
 
         dbDir.listFiles()
-                ?.filter { it.name.endsWith(I.SNAPSHOT_FORMAT) }
+                ?.filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
                 ?.forEach { list.add(it.name) }
                 ?: return
 

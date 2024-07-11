@@ -17,6 +17,7 @@ import androidx.core.app.ServiceCompat
 import ru.raslav.wirelessscan.utils.OuiManager
 import kotlin.collections.ArrayList
 
+@Suppress("DEPRECATION") // I don't care
 class ScanService : IntentService("ScanService") {
     companion object {
         private const val ACTION_PAUSE = "ACTION_PAUSE"
@@ -43,7 +44,7 @@ class ScanService : IntentService("ScanService") {
     private lateinit var receiver: BroadcastReceiver
     private lateinit var wifiManager: WifiManager
     private lateinit var commandMessenger: Messenger
-    private lateinit var sp: SharedPreferences
+    private val sp: SharedPreferences by unsafeLazy { sp() }
     private lateinit var ouiManager: OuiManager
     private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
@@ -76,7 +77,6 @@ class ScanService : IntentService("ScanService") {
             }
         })
 
-        sp = I.sp(baseContext)
         ouiManager = OuiManager(baseContext)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mainPendingIntent = PendingIntent.getActivity(
@@ -160,7 +160,7 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun scanningIsNotRequired(): Boolean =
-            sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && sp.getBoolean(I.PREF_NO_SCAN_IN_BG, false) && boundCount <= 1
+            sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) && sp.getBoolean(Const.PREF_NO_SCAN_IN_BG, false) && boundCount <= 1
 
     /** @return process */
     private fun waitForWifi(): Boolean {
@@ -240,7 +240,7 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun detectAttacksIfNeeded() {
-        if (!sp.getBoolean(I.PREF_DETECT_ATTACKS, false))
+        if (!sp.getBoolean(Const.PREF_DETECT_ATTACKS, false))
             return
 
         val bssid = wifiManager.connectionInfo.bssid ?: ""
@@ -248,12 +248,13 @@ class ScanService : IntentService("ScanService") {
         val hidden = wifiManager.connectionInfo.hiddenSSID
         essid = essid.substring(1, essid.length - 1) // necessary
 
-        val extras = ArrayList<String>(sp.getString(I.PREF_EXTRAS, "")!!.split("\n"))
+        // todo replace ArrayList with MutableList
+        val extras = ArrayList<String>(sp.getString(Const.PREF_EXTRAS, "")!!.split("\n"))
         val current = points.find { it.compare(bssid, essid, hidden) }
         if (current != null && !extras.contains(current.essid)) {
-            val smart = sp.getBoolean(I.PREF_SMART_DETECTION, false)
+            val smart = sp.getBoolean(Const.PREF_SMART_DETECTION, false)
 
-            if (sp.getBoolean(I.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)
+            if (sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)
                     && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 
                 if (trustedPoints.find { it.isSimilar(current, smart) } != null) {

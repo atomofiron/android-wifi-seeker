@@ -10,7 +10,7 @@ import android.view.animation.AnimationUtils
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.ListView
-import ru.raslav.wirelessscan.I.WIDE_MODE
+import ru.raslav.wirelessscan.Const.WIDE_MODE
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.report
