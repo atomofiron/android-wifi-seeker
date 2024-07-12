@@ -12,6 +12,9 @@ import android.content.*
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.graphics.drawable.Icon
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.JELLY_BEAN
+import android.os.Build.VERSION_CODES.M
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import ru.raslav.wirelessscan.utils.OuiManager
@@ -86,7 +89,7 @@ class ScanService : IntentService("ScanService") {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        if (SDK_INT >= Build.VERSION_CODES.O)
             notificationManager.createNotificationChannel(NotificationChannel(
                     NOTIFICATION_CHANNEL,
                     "channelName",
@@ -255,7 +258,8 @@ class ScanService : IntentService("ScanService") {
             val smart = sp.getBoolean(Const.PREF_SMART_DETECTION, false)
 
             if (sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)
-                    && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    && SDK_INT >= JELLY_BEAN
+            ) {
 
                 if (trustedPoints.find { it.isSimilar(current, smart) } != null) {
                     wifiManager.isWifiEnabled = false
@@ -276,11 +280,7 @@ class ScanService : IntentService("ScanService") {
         isStartedForeground = foreground
 
         val co = applicationContext
-        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			Notification.Builder(co, NOTIFICATION_CHANNEL)
-		} else {
-			Notification.Builder(co)
-		}
+        val builder = NotificationCompat.Builder(co, NOTIFICATION_CHANNEL)
         builder.setContentText(getString(R.string.touch_to_look))
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws)
@@ -294,10 +294,9 @@ class ScanService : IntentService("ScanService") {
                             R.string.scanning_was_paused
                 ))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
+        if (SDK_INT >= M) builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
-        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+        val notification = if (SDK_INT >= JELLY_BEAN)
             builder.addAction(
                     if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
                     getString(if (foreground) R.string.pause else R.string.resume),
@@ -328,28 +327,24 @@ class ScanService : IntentService("ScanService") {
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws_yellow)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
+        if (SDK_INT >= M) builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
-        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            builder.addAction(
-                    R.drawable.ic_check,
-                    getString(R.string.allow_network),
-                    PendingIntent.getService(co, code++,
-                            Intent(co, ScanService::class.java)
-                                    .setAction(ACTION_ALLOW)
-                                    .putExtra(EXTRA_ID, id)
-                                    .putExtra(EXTRA_POINT, point),
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-            ).build()
-        } else
-            builder.notification
+        val notification = builder.addAction(
+            R.drawable.ic_check,
+            getString(R.string.allow_network),
+            PendingIntent.getService(co, code++,
+                Intent(co, ScanService::class.java)
+                    .setAction(ACTION_ALLOW)
+                    .putExtra(EXTRA_ID, id)
+                    .putExtra(EXTRA_POINT, point),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        ).build()
 
         notificationManager.notify(id, notification)
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @TargetApi(JELLY_BEAN)
     private fun request(point: Point) {
         val co = applicationContext
         val id = point.bssid.hashCode() + 1
@@ -361,7 +356,7 @@ class ScanService : IntentService("ScanService") {
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws_red)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        if (SDK_INT >= M)
             builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
         val notification = builder

@@ -8,7 +8,8 @@ import android.os.Bundle
 import android.content.res.Configuration
 import android.graphics.Point
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -40,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMainFragmentIfNecessary() {
-        report("fragmentManager ${fragmentManager.findFragmentById(R.id.fragment_container)}")
         if (supportFragmentManager.fragments.isEmpty())
             supportFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, MainFragment())
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        if (SDK_INT >= M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 7)
         else if (!granted(Manifest.permission.ACCESS_WIFI_STATE)) {
             shortToast(R.string.no_perm)
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
             showMainFragmentIfNecessary()
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
+    @TargetApi(M)
     private fun showPermissionDialog() =
         AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                     requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 7)
                 }.create().show()
 
-    @TargetApi(Build.VERSION_CODES.M)
+    @TargetApi(M)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when {

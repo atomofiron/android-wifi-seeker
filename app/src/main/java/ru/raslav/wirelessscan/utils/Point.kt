@@ -4,7 +4,8 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.O
 import android.os.Parcel
 import android.os.Parcelable
 import org.simpleframework.xml.Element
@@ -201,10 +202,10 @@ class Point private constructor(): Parcelable {
 			/* не знаю в чём причина, но, начиная с Android 8,
 			   функция WifiManager.calculateSignalLevel(int, int)
 			   возвращает неадекватные значения */
-            val pwr = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-				MAX_INDICATOR_LEVEL * (Math.min(level, -50) + 100) / 50
-			else
-				WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
+            val pwr = when {
+                SDK_INT >= O -> MAX_INDICATOR_LEVEL * (Math.min(level, -50) + 100) / 50
+                else -> WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
+            }
 
             var red = if (pwr <= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(MAX_INDICATOR_LEVEL - pwr)
             var green = if (pwr >= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(pwr)
