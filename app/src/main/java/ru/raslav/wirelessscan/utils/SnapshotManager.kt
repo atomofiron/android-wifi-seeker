@@ -8,7 +8,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import org.simpleframework.xml.Root
 import org.simpleframework.xml.core.Persister
-import kotlin.collections.ArrayList
 import org.simpleframework.xml.ElementList
 import ru.raslav.wirelessscan.Const
 import java.io.StringWriter
@@ -16,7 +15,7 @@ import java.io.StringWriter
 class SnapshotManager(private val co: Context) {
 
     /** @return snapshot file name*/
-    fun put(points: ArrayList<Point>): String? {
+    fun put(points: List<Point>): String? {
         val name = "snapshot_${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(Date())}${Const.SNAPSHOT_FORMAT}"
         val file = File(co.filesDir, name)
 
@@ -41,7 +40,7 @@ class SnapshotManager(private val co: Context) {
         return name
     }
 
-    fun get(name: String): ArrayList<Point>? {
+    fun get(name: String): List<Point>? {
         val file = File(co.filesDir, name)
         return try {
             Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false).points
@@ -55,6 +54,6 @@ class SnapshotManager(private val co: Context) {
     @Root(name = "snapshot")
     private class Snapshot(
         @field:ElementList(inline = true, name = "points")
-        var points: ArrayList<Point>? = null
+        var points: List<Point>? = null,
     )
 }

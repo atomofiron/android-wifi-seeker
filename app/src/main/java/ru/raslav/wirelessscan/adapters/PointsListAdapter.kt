@@ -28,8 +28,8 @@ class PointsListAdapter(
     }
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
-    val allPoints = ArrayList<Point>()
-    private val points = ArrayList<Point>()
+    val allPoints = mutableListOf<Point>()
+    private val points = mutableListOf<Point>()
     var focuse: Point? = null
         private set
     private var transparent = 0
@@ -121,11 +121,11 @@ class PointsListAdapter(
     /** @return counters like '15/22' or '5/22   15/22' */
     private fun getCounters(): String {
         var count = allPoints.size
-        allPoints.forEach { it -> if (it.level == Point.MIN_LEVEL) count-- }
+        allPoints.forEach { if (it.level == Point.MIN_LEVEL) count-- }
         return "${if (filtering) "${points.size}/${allPoints.size}" else ""}   $count/${allPoints.size}"
     }
 
-    fun updateList(list: ArrayList<Point>?) : String {
+    fun updateList(list: List<Point>?) : String {
         allPoints.clear()
         points.clear()
 
@@ -151,14 +151,14 @@ class PointsListAdapter(
     }
 
     private fun applyFilter() {
-        val prevPoints = ArrayList(points)
+        val prevPoints = points.toMutableList()
         points.clear()
         points.addAll(allPoints)
 
         if (filtering) {
             var n = 0
             loop@ while (n < points.size) {
-                for (i in 0 until filter.size)
+                for (i in filter.indices)
                     if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != points[n].essid.isEmpty() ||
                             filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != points[n].capabilities.contains(filterValues[i])) {
                         points.removeAt(n)

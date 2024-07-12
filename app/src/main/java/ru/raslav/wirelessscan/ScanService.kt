@@ -18,7 +18,6 @@ import android.os.Build.VERSION_CODES.M
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import ru.raslav.wirelessscan.utils.OuiManager
-import kotlin.collections.ArrayList
 
 @Suppress("DEPRECATION") // I don't care
 class ScanService : IntentService("ScanService") {
@@ -51,8 +50,8 @@ class ScanService : IntentService("ScanService") {
     private lateinit var ouiManager: OuiManager
     private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
-    private val points = ArrayList<Point>()
-    private var trustedPoints: ArrayList<Point> = ArrayList()
+    private val points = mutableListOf<Point>()
+    private val trustedPoints = mutableListOf<Point>()
     private var isStartedForeground = false
     private var lastBoundCount = 0
     private var delay = 10
@@ -198,7 +197,7 @@ class ScanService : IntentService("ScanService") {
 
     @SuppressLint("MissingPermission") // ask permission before, on button click
     private fun updatePoints() {
-        val currentPoints = Point.parseScanResults(wifiManager.scanResults)
+        val currentPoints = wifiManager.scanResults.map { Point(it) }
 
         currentPoints.forEach { it.manufacturer = ouiManager.find(it.bssid).label }
 
@@ -251,23 +250,20 @@ class ScanService : IntentService("ScanService") {
         val hidden = wifiManager.connectionInfo.hiddenSSID
         essid = essid.substring(1, essid.length - 1) // necessary
 
-        // todo replace ArrayList with MutableList
-        val extras = ArrayList<String>(sp.getString(Const.PREF_EXTRAS, "")!!.split("\n"))
+        val extras = sp.getString(Const.PREF_EXTRAS, "")!!.split("\n")
         val current = points.find { it.compare(bssid, essid, hidden) }
         if (current != null && !extras.contains(current.essid)) {
             val smart = sp.getBoolean(Const.PREF_SMART_DETECTION, false)
 
-            if (sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) && !trustedPoints.contains(current)
-                    && SDK_INT >= JELLY_BEAN
-            ) {
-
-                if (trustedPoints.find { it.isSimilar(current, smart) } != null) {
+            when {
+                !sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) -> Unit
+                trustedPoints.contains(current) -> Unit
+                !trustedPoints.any { it.isSimilar(current, smart) } -> trustedPoints.add(current)
+                else -> {
                     wifiManager.isWifiEnabled = false
                     request(current)
-                } else
-                    trustedPoints.add(current)
+                }
             }
-
             points.filter {
                 it.level > Point.MIN_LEVEL
                         && it.isSimilar(current, smart)

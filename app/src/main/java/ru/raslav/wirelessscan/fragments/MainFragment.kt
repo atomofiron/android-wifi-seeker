@@ -103,7 +103,7 @@ class MainFragment : Fragment() {
         keepServiceStarted = true
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.buttons.buttonResume.isActivated)
-        outState.putParcelableArrayList(EXTRA_POINTS, pointsListAdapter.allPoints)
+        outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(pointsListAdapter.allPoints))
     }
 
     override fun onStart() {
@@ -130,7 +130,7 @@ class MainFragment : Fragment() {
             startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
 
         if (savedInstanceState != null)
-            pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS))
+            pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
 
         return binding.root
     }

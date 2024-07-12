@@ -11,7 +11,7 @@ import ru.raslav.wirelessscan.databinding.LayoutItemSnapshotBinding
 import java.io.File
 
 class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
-    private val list = ArrayList<String>()
+    private val list = mutableListOf<String>()
     private val dbDir = File(co.applicationInfo.dataDir + "/files/")
 
     var onSnapshotShareListener: (name: String) -> Unit = {}
@@ -20,6 +20,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
         update()
     }
 
+    // todo why unused?
     fun clear() {
         dbDir.listFiles()
                 .filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }

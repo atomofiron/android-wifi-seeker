@@ -143,17 +143,6 @@ class Point private constructor(): Parcelable {
 
     fun getNotEmptyESSID(): String = if (essid.isEmpty()) bssid else essid
 
-/*    override fun describeContents(): Int {
-        return 0
-    }
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(level)
-        dest.writeInt(frequency)
-        dest.writeString(capabilities)
-        dest.writeString(essid)
-        dest.writeString(bssid)
-    }*/
-
     companion object {
 		private val MAX_INDICATOR_LEVEL = 512
         val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
@@ -255,13 +244,6 @@ class Point private constructor(): Parcelable {
                 }
             }
             return ans
-        }
-
-        fun parseScanResults(list: List<ScanResult>) : ArrayList<Point> {
-            val points = ArrayList<Point>()
-            list.forEach { it -> points.add(Point(it)) }
-
-            return points
         }
 
         @JvmField
