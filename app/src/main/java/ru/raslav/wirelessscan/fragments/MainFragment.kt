@@ -21,10 +21,12 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.*
+import ru.raslav.wirelessscan.connection.Connection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
@@ -36,13 +38,12 @@ class MainFragment : Fragment() {
         private const val EXTRA_POINTS = "EXTRA_POINTS"
     }
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
-    private lateinit var wifiManager: WifiManager
-    private lateinit var scanConnection: ScanConnection
-    private lateinit var pointsListAdapter: PointsListAdapter
-    private lateinit var connectionReceiver: BroadcastReceiver
+    private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(WIFI_SERVICE) as WifiManager }
+    private val scanConnection = ScanConnection(MessageHandler())
+    private val pointsListAdapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
+    private val connectionReceiver = ConnectionReceiver()
 
-    private lateinit var flash: Animation
-    private var keepServiceStarted = false
+    private val flash: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
     private lateinit var binding: FragmentMainBinding
 
@@ -50,26 +51,9 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
         // todo deprecation
         setHasOptionsMenu(true)
-        wifiManager = requireContext().applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
-        flash = AnimationUtils.loadAnimation(activity, R.anim.flash)
-        flash.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {
-                binding.flash.visibility = View.VISIBLE
-            }
-            override fun onAnimationEnd(animation: Animation) {
-                binding.flash.visibility = View.GONE
-            }
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
+        flash.setAnimationListener(FlashAnimationListener())
 
-        scanConnection = ScanConnection(@SuppressLint("HandlerLeak")
-        object : Handler() {
-            override fun handleMessage(msg: Message) {
-                super.handleMessage(msg)
-                this@MainFragment.handleMessage(msg)
-            }
-        })
         val appIsStarted = savedInstanceState == null
         scanConnection.onServiceConnectedListener = {
             if (appIsStarted)
@@ -79,9 +63,6 @@ class MainFragment : Fragment() {
         }
         scanConnection.bindService(requireContext())
 
-        connectionReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) = updateConnectionInfo()
-        }
         val filter = IntentFilter()
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
@@ -91,7 +72,7 @@ class MainFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (!keepServiceStarted && !sp.getBoolean(Const.PREF_WORK_IN_BG, false))
+        if (isRemoving && !sp.getBoolean(Const.PREF_WORK_IN_BG, false))
             stopScanService()
 
         scanConnection.unbindService(requireContext())
@@ -100,7 +81,6 @@ class MainFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        keepServiceStarted = true
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.buttons.buttonResume.isActivated)
         outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(pointsListAdapter.allPoints))
@@ -119,7 +99,6 @@ class MainFragment : Fragment() {
         if (WIDE_MODE)
             binding.description.tvBssid.visibility = View.VISIBLE
 
-        pointsListAdapter = PointsListAdapter(requireContext(), binding.listView)
         binding.listView.adapter = pointsListAdapter
         pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.description, point) }
 
@@ -222,7 +201,7 @@ class MainFragment : Fragment() {
     }
 
     private fun handleMessage(msg: Message?) {
-        report("R: what: ${msg?.what}")
+        report("message: ${msg?.run { Connection.Event.entries[what] }}")
         if (view == null) return
 
         when (msg?.what) {
@@ -296,5 +275,27 @@ class MainFragment : Fragment() {
             pointsListAdapter.connectionInfo = wifiManager.connectionInfo
 
         requireActivity().title = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+    }
+
+    private inner class FlashAnimationListener : Animation.AnimationListener {
+        override fun onAnimationStart(animation: Animation) {
+            binding.flash.isVisible = true
+        }
+        override fun onAnimationEnd(animation: Animation) {
+            binding.flash.isVisible = false
+        }
+        override fun onAnimationRepeat(animation: Animation) {}
+    }
+
+    @SuppressLint("HandlerLeak")
+    private inner class MessageHandler : Handler() {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            this@MainFragment.handleMessage(msg)
+        }
+    }
+
+    private inner class ConnectionReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = updateConnectionInfo()
     }
 }
