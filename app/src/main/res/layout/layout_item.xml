@@ -8,9 +8,9 @@
     android:background="@color/colorFrame">
 
     <TextView
-        android:layout_width="4dp"
+        android:layout_width="28dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="0"
         android:id="@+id/pwr"
         android:text="PW"
         android:layout_marginLeft="2dp"
@@ -56,12 +56,10 @@
         android:maxLines="1"
         />
     <TextView
-        android:layout_width="0dp"
+        android:layout_width="128sp"
         android:layout_height="wrap_content"
-        android:layout_weight="6"
         android:id="@+id/bssid"
         android:text="BSSID"
         android:maxLines="1"
-        android:visibility="gone"
-        /> <!-- todo visibility integer -->
+        />
 </LinearLayout>

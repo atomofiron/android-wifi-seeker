@@ -5,8 +5,6 @@ import android.annotation.TargetApi
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.content.res.Configuration
-import android.graphics.Point
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
@@ -32,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        detectScreenConfigurations()
 
         if (granted(Manifest.permission.ACCESS_FINE_LOCATION))
             showMainFragmentIfNecessary()
@@ -45,13 +42,6 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, MainFragment())
                     .commit()
-    }
-
-    private fun detectScreenConfigurations() {
-        val size = Point()
-        windowManager.defaultDisplay.getSize(size)
-        Const.WIDE_MODE = size.x > size.y * 1.5 &&
-                resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     private fun setFragment(fragment: Fragment) {

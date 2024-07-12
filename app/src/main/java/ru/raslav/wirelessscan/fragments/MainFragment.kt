@@ -2,11 +2,11 @@ package ru.raslav.wirelessscan.fragments
 
 import android.annotation.SuppressLint
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
-import ru.raslav.wirelessscan.Const.WIDE_MODE
 
 import ru.raslav.wirelessscan.utils.Point
 import android.content.*
 import android.content.Context.WIFI_SERVICE
+import android.content.res.Configuration
 import android.net.wifi.WifiManager
 import android.os.*
 import android.os.Build.VERSION.SDK_INT
@@ -89,12 +89,9 @@ class MainFragment : Fragment() {
         updateConnectionInfo()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = FragmentMainBinding.inflate(inflater, container, false)
-
-        if (WIDE_MODE)
-            binding.layoutDescription.tvBssid.visibility = View.VISIBLE
 
         binding.listView.adapter = pointsListAdapter
         pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
@@ -109,6 +106,20 @@ class MainFragment : Fragment() {
             pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        resources.configuration.applyLayout()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        newConfig.applyLayout()
+    }
+
+    private fun Configuration.applyLayout() {
+        binding.layoutItem.bssid.isVisible = isWide()
     }
 
     private fun initFilters(filters: ViewGroup) {

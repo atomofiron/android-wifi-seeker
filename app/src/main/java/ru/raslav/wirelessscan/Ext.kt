@@ -3,6 +3,7 @@ package ru.raslav.wirelessscan
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 
@@ -20,3 +21,5 @@ fun <T> unsafeLazy(provider: () -> T) = lazy(LazyThreadSafetyMode.NONE, provider
 fun Boolean.toInt(): Int = if (this) 1 else 0
 
 fun Int.toBoolean(): Boolean = this != 0
+
+fun Configuration.isWide() = screenWidthDp > 640

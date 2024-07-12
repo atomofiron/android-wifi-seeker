@@ -10,9 +10,10 @@ import android.view.animation.AnimationUtils
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.ListView
-import ru.raslav.wirelessscan.Const.WIDE_MODE
+import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
+import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
 
@@ -59,10 +60,7 @@ class PointsListAdapter(
 
             binding.pwr.text = "\u25CF " // ●
             binding.pwr.gravity = Gravity.END
-
-            if (WIDE_MODE)
-                binding.bssid.visibility = View.VISIBLE
-
+            binding.bssid.isVisible = itemView.resources.configuration.isWide()
             binding
         } else
             convertView.tag as LayoutItemBinding
