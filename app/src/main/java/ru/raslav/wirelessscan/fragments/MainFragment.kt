@@ -16,7 +16,7 @@ import android.text.format.Formatter
 import android.view.*
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.connection.ScanConnection
-import ru.raslav.wirelessscan.connection.Connection.Event.*
+import ru.raslav.wirelessscan.connection.Connection.Event
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
@@ -26,7 +26,6 @@ import androidx.fragment.app.Fragment
 import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.*
-import ru.raslav.wirelessscan.connection.Connection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
@@ -39,7 +38,7 @@ class MainFragment : Fragment() {
     }
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(WIFI_SERVICE) as WifiManager }
-    private val scanConnection = ScanConnection(MessageHandler())
+    private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
     private val pointsListAdapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
     private val connectionReceiver = ConnectionReceiver()
 
@@ -54,13 +53,6 @@ class MainFragment : Fragment() {
 
         flash.setAnimationListener(FlashAnimationListener())
 
-        val appIsStarted = savedInstanceState == null
-        scanConnection.onServiceConnectedListener = {
-            if (appIsStarted)
-                scanConnection.sendGetRequest()
-
-            sendScanDelay()
-        }
         scanConnection.bindService(requireContext())
 
         val filter = IntentFilter()
@@ -68,6 +60,11 @@ class MainFragment : Fragment() {
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         requireContext().registerReceiver(connectionReceiver, filter)
+    }
+
+    private fun onServiceConnected() {
+        scanConnection.sendGetRequest()
+        sendScanDelay()
     }
 
     override fun onDestroy() {
@@ -97,10 +94,10 @@ class MainFragment : Fragment() {
         binding = FragmentMainBinding.inflate(inflater, container, false)
 
         if (WIDE_MODE)
-            binding.description.tvBssid.visibility = View.VISIBLE
+            binding.layoutDescription.tvBssid.visibility = View.VISIBLE
 
         binding.listView.adapter = pointsListAdapter
-        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.description, point) }
+        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
 
         initFilters(binding.filters.root as ViewGroup)
         initButtons(binding.buttons, binding.label)
@@ -155,12 +152,10 @@ class MainFragment : Fragment() {
             else
                 startScanService()
         }
-        buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, "1")!!.toInt())
+        buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, 1.toString())!!.toInt())
         buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                sendScanDelay()
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) = sendScanDelay()
         }
         buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
@@ -196,20 +191,22 @@ class MainFragment : Fragment() {
     private fun stopScanService() = scanConnection.stopScanService()
 
     private fun sendScanDelay() {
-        scanConnection.sendScanDelay(resources.getIntArray(R.array.delay_arr_int)
-                [binding.buttons.spinnerDelay.selectedItemPosition])
+        val selected = binding.buttons.spinnerDelay.selectedItemPosition
+        val delay = resources.getIntArray(R.array.delay_arr_int)[selected]
+        scanConnection.sendScanDelay(delay)
     }
 
-    private fun handleMessage(msg: Message?) {
-        report("message: ${msg?.run { Connection.Event.entries[what] }}")
+    private fun FragmentMainBinding.updateState(mesaage: Message) {
+        report("event: ${mesaage.run { Event.entries[what] }}")
         if (view == null) return
 
-        when (msg?.what) {
-            START_SCAN.ordinal -> pointsListAdapter.animScan(true)
-            RESULTS.ordinal -> updateList(msg)
-            STARTED.ordinal -> binding.buttons.buttonResume.isActivated = true
-            STOPPED.ordinal -> {
-                binding.buttons.buttonResume.isActivated = false
+        progress.isVisible = mesaage.what == Event.START_SCAN.ordinal
+        when (mesaage.what) {
+            Event.START_SCAN.ordinal -> pointsListAdapter.animScan(true)
+            Event.RESULTS.ordinal -> updateList(mesaage)
+            Event.STARTED.ordinal -> buttons.buttonResume.isActivated = true
+            Event.STOPPED.ordinal -> {
+                buttons.buttonResume.isActivated = false
                 pointsListAdapter.animScan(false)
             }
         }
@@ -271,8 +268,7 @@ class MainFragment : Fragment() {
     }
 
     private fun updateConnectionInfo() {
-        if (view != null)
-            pointsListAdapter.connectionInfo = wifiManager.connectionInfo
+        pointsListAdapter.connectionInfo = wifiManager.connectionInfo
 
         requireActivity().title = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
     }
@@ -289,10 +285,7 @@ class MainFragment : Fragment() {
 
     @SuppressLint("HandlerLeak")
     private inner class MessageHandler : Handler() {
-        override fun handleMessage(msg: Message) {
-            super.handleMessage(msg)
-            this@MainFragment.handleMessage(msg)
-        }
+        override fun handleMessage(msg: Message) = binding.updateState(msg)
     }
 
     private inner class ConnectionReceiver : BroadcastReceiver() {

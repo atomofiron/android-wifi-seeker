@@ -7,20 +7,30 @@
     android:orientation="@integer/similar_orientation"
     tools:context="ru.raslav.wirelessscan.MainActivity">
 
-    <include
-        android:id="@+id/description"
-        layout="@layout/layout_description"
-        android:visibility="gone"
-        />
     <RelativeLayout
         style="@style/ListFrameStyle"
         android:layout_weight="1">
 
-        <include layout="@layout/layout_item" />
+        <include
+            android:id="@+id/layout_description"
+            layout="@layout/layout_description"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+
+        <include
+            android:id="@+id/layout_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layout_description"
+            layout="@layout/layout_item"
+            />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/label"
+            android:layout_below="@+id/layout_description"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:text="0/0"
@@ -33,6 +43,17 @@
             android:overScrollMode="never"
             android:divider="@null"
             android:layout_below="@+id/layout_item"
+            />
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:indeterminate="true"
+            android:layout_marginBottom="-1.5dp"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             />
         <View
             android:layout_width="match_parent"

@@ -2,7 +2,10 @@ package ru.raslav.wirelessscan.connection
 
 import android.os.Handler
 
-class ScanConnection(handler: Handler) : Connection() {
+class ScanConnection(
+    handler: Handler,
+    onServiceConnectedListener: () -> Unit,
+) : Connection(onServiceConnectedListener) {
 
     init {
         setDuplex(handler)

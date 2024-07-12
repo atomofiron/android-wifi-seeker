@@ -14,7 +14,7 @@
         android:id="@+id/button_filter"
         android:src="@drawable/ic_filter_state"
         android:layout_weight="1"
-        style="?android:borderlessButtonStyle"
+        android:background="?selectableItemBackgroundBorderless"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -22,7 +22,7 @@
         android:id="@+id/button_save"
         android:src="@drawable/ic_save_state"
         android:layout_weight="1"
-        style="?android:borderlessButtonStyle"
+        android:background="?selectableItemBackgroundBorderless"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -30,16 +30,16 @@
         android:id="@+id/button_resume"
         android:src="@drawable/ic_state"
         android:layout_weight="1"
-        style="?android:borderlessButtonStyle"
+        android:background="?selectableItemBackgroundBorderless"
         />
     <Spinner
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
         android:id="@+id/spinner_delay"
         android:layout_weight="1"
-        android:background="@null"
         android:entries="@array/delay_arr"
         android:gravity="center"
+        android:background="?selectableItemBackgroundBorderless"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -47,7 +47,7 @@
         android:id="@+id/button_clear"
         android:src="@drawable/ic_clear_state"
         android:layout_weight="1"
-        style="?android:borderlessButtonStyle"
+        android:background="?selectableItemBackgroundBorderless"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -55,6 +55,6 @@
         android:id="@+id/button_list"
         android:src="@drawable/ic_list"
         android:layout_weight="1"
-        style="?android:borderlessButtonStyle"
+        android:background="?selectableItemBackgroundBorderless"
         />
 </LinearLayout>

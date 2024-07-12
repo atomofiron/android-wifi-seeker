@@ -112,11 +112,12 @@ class ScanService : IntentService("ScanService") {
     override fun onHandleIntent(intent: Intent?) {
         report("ScanService: onHandleIntent()")
         showNotification(true)
-        sendStarted()
 
+        // wait for the connection to the service to be established
+        Thread.sleep(100)
+        sendStarted()
         process = true
-        while (process)
-            scan()
+        while (process) scan()
     }
 
     override fun onBind(intent: Intent?): IBinder = commandMessenger.binder
@@ -141,7 +142,7 @@ class ScanService : IntentService("ScanService") {
     }
 
     private fun scan() {
-        report("scan()")
+        report("scan...")
 
         if (!waitForWifi())
             return
@@ -214,11 +215,11 @@ class ScanService : IntentService("ScanService") {
         return message
     }
 
-    private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal))
+    private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal)).let { report("sendStartScan") }
 
-    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal))
+    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal)).let { report("sendStarted") }
 
-    private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal))
+    private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal)).let { report("sendStopped") }
 
     private fun sendResults() {
         val message = newMessage(RESULTS.ordinal)

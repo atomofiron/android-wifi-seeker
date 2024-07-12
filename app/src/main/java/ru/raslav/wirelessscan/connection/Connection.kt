@@ -11,7 +11,9 @@ import android.os.Messenger
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.report
 
-open class Connection(var onServiceConnectedListener: () -> Unit = {}) : ServiceConnection {
+open class Connection(
+    private val onServiceConnectedListener: () -> Unit = {},
+) : ServiceConnection {
     enum class Event { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED, STARTED }
 
     private var commandMessenger: Messenger? = null
