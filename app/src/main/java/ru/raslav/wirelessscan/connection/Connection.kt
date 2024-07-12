@@ -12,7 +12,7 @@ import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.report
 
 open class Connection(var onServiceConnectedListener: () -> Unit = {}) : ServiceConnection {
-    enum class WHAT { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED, STARTED }
+    enum class Event { GET, CLEAR, STOP, START_SCAN, DELAY, RESULTS, STOPPED, STARTED }
 
     private var commandMessenger: Messenger? = null
     private var replyMessenger: Messenger? = null

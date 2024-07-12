@@ -16,7 +16,7 @@ import android.text.format.Formatter
 import android.view.*
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.connection.ScanConnection
-import ru.raslav.wirelessscan.connection.Connection.WHAT.*
+import ru.raslav.wirelessscan.connection.Connection.Event.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*

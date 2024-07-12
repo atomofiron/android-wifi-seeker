@@ -8,15 +8,15 @@ class ScanConnection(handler: Handler) : Connection() {
         setDuplex(handler)
     }
 
-    fun sendGetRequest() = send(newMessage(WHAT.GET.ordinal))
+    fun sendGetRequest() = send(newMessage(Event.GET.ordinal))
 
     fun sendScanDelay(sec: Int) {
-        val message = newMessage(WHAT.DELAY.ordinal)
+        val message = newMessage(Event.DELAY.ordinal)
         message.arg1 = sec
         send(message)
     }
 
-    fun clearPointsList() = send(newMessage(WHAT.CLEAR.ordinal))
+    fun clearPointsList() = send(newMessage(Event.CLEAR.ordinal))
 
-    fun stopScanService() = send(newMessage(WHAT.STOP.ordinal))
+    fun stopScanService() = send(newMessage(Event.STOP.ordinal))
 }
