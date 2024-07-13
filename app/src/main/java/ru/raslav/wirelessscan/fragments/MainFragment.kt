@@ -300,7 +300,7 @@ class MainFragment : Fragment(), Titled {
     }
 
     private fun showDescriptionIfNecessary(description: LayoutDescriptionBinding, point: Point?) {
-        if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, false)) {
+        if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, true)) {
             description.root.visibility = View.VISIBLE
 
             description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())

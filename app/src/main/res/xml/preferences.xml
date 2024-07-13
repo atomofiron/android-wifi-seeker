@@ -16,7 +16,7 @@
         android:icon="@drawable/ic_notes"
         android:summary="@string/show_description_sum"
         android:key="show_description"
-        android:defaultValue="false"
+        android:defaultValue="true"
         />
     <SwitchPreference
         android:title="@string/work_in_bg"
