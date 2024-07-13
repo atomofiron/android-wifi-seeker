@@ -57,4 +57,10 @@
                 />
         </PreferenceCategory>
     </PreferenceScreen>
+    <PreferenceScreen
+        android:key="mail_to_dev"
+        android:id="@+id/mail_to_dev"
+        android:title="@string/email_dev"
+        android:icon="@drawable/ic_email"
+        />
 </PreferenceScreen>
