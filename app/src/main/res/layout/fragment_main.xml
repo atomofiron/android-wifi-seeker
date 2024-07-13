@@ -31,11 +31,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/label"
+            android:id="@+id/counter"
             android:layout_below="@+id/layout_description"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:text="0/0"
+            android:paddingEnd="4dp"
             android:textColor="@color/color_label"
             />
         <ListView

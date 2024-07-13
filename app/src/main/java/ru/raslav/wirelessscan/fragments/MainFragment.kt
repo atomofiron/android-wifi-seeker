@@ -31,6 +31,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.ViewInsetsDelegate
 import lib.atomofiron.insets.insetsMix
+import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
@@ -117,18 +118,19 @@ class MainFragment : Fragment() {
         binding = FragmentMainBinding.inflate(inflater, container, false)
 
         val description = binding.layoutDescription.root.insetsMix { }
+        val counter = binding.counter.insetsMix { }
         val header = binding.layoutItem.root.insetsMix { }
         val list = binding.listView.insetsMix { }
         val buttons = binding.buttons.root.insetsMix { }
         val filters = binding.filters.root.insetsMix { }
-        val delegate = LayoutDelegate(resources) { binding.onLayoutChanged(description, header, list, filters, buttons, it) }
+        val delegate = LayoutDelegate(resources) { binding.onLayoutChanged(description, counter, header, list, filters, buttons, it) }
         binding.root.addOnLayoutChangeListener(delegate)
 
         binding.listView.adapter = adapter
         adapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
 
         initFilters(binding.filters.root as ViewGroup)
-        initButtons(binding.buttons, binding.label)
+        initButtons(binding.buttons, binding.counter)
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
             startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
@@ -263,7 +265,7 @@ class MainFragment : Fragment() {
     }
 
     private fun updateCounters(counters: String) {
-        binding.label.text = counters
+        binding.counter.text = counters
     }
 
     private fun renameSnapshot(lastName: String) {
@@ -335,6 +337,7 @@ class MainFragment : Fragment() {
     }
 
     private fun FragmentMainBinding.onLayoutChanged(
+        counter: ViewInsetsDelegate,
         descriptionInsets: ViewInsetsDelegate,
         headerInsets: ViewInsetsDelegate,
         listInsets: ViewInsetsDelegate,
@@ -352,7 +355,9 @@ class MainFragment : Fragment() {
             root.addView(filters.root)
             root.addView(buttons.root)
         }
-        val vertical = orientation.vertical
+        counter.changeInsets {
+            if (orientation != Orientation.End) padding(end)
+        }
         descriptionInsets.changeInsets {
             when (orientation) {
                 Orientation.Start -> padding(end)
@@ -384,6 +389,7 @@ class MainFragment : Fragment() {
                 Orientation.End -> padding(bottom, end)
             }
         }
+        val vertical = orientation.vertical
         root.orientation = if (vertical) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
         container.updateLayoutParams {
             this.width = if (vertical) LayoutParams.MATCH_PARENT else 0
