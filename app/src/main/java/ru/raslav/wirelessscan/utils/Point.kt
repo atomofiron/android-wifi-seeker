@@ -1,6 +1,6 @@
 package ru.raslav.wirelessscan.utils
 
-import android.content.res.Resources
+import android.content.Context
 import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
@@ -8,6 +8,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.core.content.ContextCompat
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 import ru.raslav.wirelessscan.R
@@ -46,6 +47,7 @@ class Point private constructor(): Parcelable {
         set(value) { field = value; essidColor = if (value.isEmpty()) yellow else grey }
     @field:Element(name = "bssid")
     var bssid = ""
+    var hex = ""
 
     @field:Element(name = "channel")
     var ch = 0
@@ -57,7 +59,6 @@ class Point private constructor(): Parcelable {
         private set
     @field:Element(name = "manufacturer")
     var manufacturer = ""
-    @field:Element(name = "manufacturerDesc")
     var manufacturerDesc = ""
 
     var pwColor = 0
@@ -171,23 +172,23 @@ class Point private constructor(): Parcelable {
         private var yellow = 0
         var green_light = 0; private set
 
-        fun initColors(resources: Resources) {
-            transparent = resources.getColor(R.color.transparent)
-            black_lite = resources.getColor(R.color.black_lite)
-            red_lite = resources.getColor(R.color.red_lite)
-            red_middle = resources.getColor(R.color.red_middle)
-            grey = resources.getColor(R.color.grey)
-            blue_light = resources.getColor(R.color.blue_light)
-            green = resources.getColor(R.color.green)
-            yellow_middle = resources.getColor(R.color.yellow_middle)
-            sky_light = resources.getColor(R.color.sky_light)
-            red_light = resources.getColor(R.color.red_light)
-            sky = resources.getColor(R.color.sky)
-            sky_white = resources.getColor(R.color.sky_white)
-            green_high = resources.getColor(R.color.green_high)
-            red_high = resources.getColor(R.color.red_high)
-            yellow = resources.getColor(R.color.yellow)
-            green_light = resources.getColor(R.color.green_light)
+        fun initColors(co: Context) {
+            transparent = ContextCompat.getColor(co, R.color.transparent)
+            black_lite = ContextCompat.getColor(co, R.color.black_lite)
+            red_lite = ContextCompat.getColor(co, R.color.red_lite)
+            red_middle = ContextCompat.getColor(co, R.color.red_middle)
+            grey = ContextCompat.getColor(co, R.color.grey)
+            blue_light = ContextCompat.getColor(co, R.color.blue_light)
+            green = ContextCompat.getColor(co, R.color.green)
+            yellow_middle = ContextCompat.getColor(co, R.color.yellow_middle)
+            sky_light = ContextCompat.getColor(co, R.color.sky_light)
+            red_light = ContextCompat.getColor(co, R.color.red_light)
+            sky = ContextCompat.getColor(co, R.color.sky)
+            sky_white = ContextCompat.getColor(co, R.color.sky_white)
+            green_high = ContextCompat.getColor(co, R.color.green_high)
+            red_high = ContextCompat.getColor(co, R.color.red_high)
+            yellow = ContextCompat.getColor(co, R.color.yellow)
+            green_light = ContextCompat.getColor(co, R.color.green_light)
         }
 
         private fun getPowerColor(level: Int): Int {

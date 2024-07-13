@@ -47,6 +47,7 @@ class OuiManager(private val context: Context) {
         val cursor = rawQuery("select * from $TABLE where $COLUMN_MAC=?;", arrayOf(digits))
         val manufacturer = cursor.takeIf { it.moveToFirst() }?.run {
             Manufacturer(
+                digits,
                 label = getString(cursor.getColumnIndex(COLUMN_LABEL)),
                 description = getString(cursor.getColumnIndex(COLUMN_DESC)),
             )

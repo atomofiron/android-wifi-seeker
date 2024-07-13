@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.ListView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
@@ -31,8 +32,7 @@ class PointsListAdapter(
     private val filter: IntArray = IntArray(filterValues.size)
     val allPoints = mutableListOf<Point>()
     private val points = mutableListOf<Point>()
-    var focuse: Point? = null
-        private set
+    private var focused: Point? = null
     private var transparent = 0
     private var filtering = false
     var connectionInfo: WifiInfo? = null
@@ -41,11 +41,11 @@ class PointsListAdapter(
     var onPointClickListener: (point: Point?) -> Unit = {}
 
     init {
-        Point.initColors(co.resources)
-        transparent = co.resources.getColor(R.color.transparent)
+        Point.initColors(co)
+        transparent = ContextCompat.getColor(co, R.color.transparent)
         listView.setOnItemClickListener { _, _, position, _ ->
-            focuse = points[position]
-            onPointClickListener(focuse)
+            focused = points[position]
+            onPointClickListener(focused)
             notifyDataSetChanged()
         }
     }
@@ -97,7 +97,14 @@ class PointsListAdapter(
     }
 
     private fun drawItemRoot(layout: LinearLayout, point: Point, position: Int) {
-        val associating = focuse?.bssid?.startsWith(point.bssid.substring(0, 8)) ?: false
+        val focused = focused
+        val associating =  when {
+            focused == null -> false
+            focused.hex.isEmpty() != point.hex.isEmpty() -> false
+            focused.hex == point.hex -> true
+            focused.hex.isNotEmpty() && point.hex.isNotEmpty() -> false
+            else -> focused.bssid.startsWith(point.bssid.substring(0, 8))
+        }
         if (associating)
             layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
         else
@@ -112,7 +119,7 @@ class PointsListAdapter(
     }
 
     fun resetFocus() {
-        focuse = null
+        focused = null
         onPointClickListener(null)
     }
 

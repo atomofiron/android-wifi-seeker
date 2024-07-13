@@ -200,6 +200,7 @@ class ScanService : IntentService("ScanService") {
         val currentPoints = wifiManager.scanResults.map { Point(it) }
 
         currentPoints.forEach {
+            it.hex = ouiManager.find(it.bssid).digits
             it.manufacturer = ouiManager.find(it.bssid).label
             it.manufacturerDesc = ouiManager.find(it.bssid).description
         }
