@@ -29,11 +29,10 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
         super.onCreate(savedInstanceState)
         // todo deprecation
         setHasOptionsMenu(true)
-        addPreferencesFromResource(R.xml.preferences)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setListeners(preferenceScreen)
+        addPreferencesFromResource(R.xml.preferences)
 
         val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
         val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
@@ -41,6 +40,7 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
         attackScreen.isEnabled = detectAttacks.isChecked
         noScanInBg = findPreference(Const.PREF_NO_SCAN_IN_BG)!!
         noScanInBg.isEnabled = autoOff.isChecked
+        setListeners(preferenceScreen)
     }
 
     override fun onStart() {
