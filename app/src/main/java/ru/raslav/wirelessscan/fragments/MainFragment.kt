@@ -31,7 +31,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.ViewInsetsDelegate
 import lib.atomofiron.insets.insetsMix
-import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
