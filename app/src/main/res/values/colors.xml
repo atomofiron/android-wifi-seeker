@@ -20,6 +20,7 @@
     <color name="red_lite">#11ff0000</color>
     <color name="red_middle">#ff880000</color>
     <color name="grey">#ffcccccc</color>
+    <color name="normal">#ccffffff</color>
     <color name="blue_light">#ff8888ff</color>
     <color name="green">#ff00ff00</color>
     <color name="yellow_middle">#ffaaaa00</color>
@@ -29,6 +30,7 @@
     <color name="sky_white">#ffaaffff</color>
     <color name="green_high">#ff00dd00</color>
     <color name="red_high">#ffdd0000</color>
+    <color name="clear">#ccff0000</color>
     <color name="yellow">#ffcccc00</color>
     <color name="yellow_high">#ffdddd00</color>
     <color name="green_light">#ffaaffaa</color>
