@@ -47,11 +47,11 @@
 
     <!-- Notification -->
     <string name="scanning">Scanning…</string>
-    <string name="scanning_battery_save">Scanning… (battery save)</string>
+    <string name="scanning_battery_save">Lazy scanning…</string>
     <string name="scanning_was_paused">Scanning was paused</string>
     <string name="touch_to_look">Touch to look</string>
     <string name="pause">Pause</string>
-    <string name="resume">Resume</string>
+    <string name="resume">Continue</string>
     <string name="clone_detected">The clone of your AP was found</string>
     <string name="wifi_was_disabled">WiFi was disabled</string>
     <string name="allow_network">Allow that network</string>
