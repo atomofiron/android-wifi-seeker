@@ -242,7 +242,7 @@ class MainFragment : Fragment() {
     }
 
     private fun FragmentMainBinding.updateState(mesaage: Message) {
-        report("event: ${mesaage.run { Event.entries[what] }}")
+        report("-> ${mesaage.run { Event.entries[what] }}")
         if (view == null) return
 
         progress.isVisible = mesaage.what == Event.START_SCAN.ordinal
@@ -308,6 +308,7 @@ class MainFragment : Fragment() {
             description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
             description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
             description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
+            description.tvManufDesc.text = point.manufacturerDesc
         } else
             description.root.visibility = View.GONE
     }

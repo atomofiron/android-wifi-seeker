@@ -5,8 +5,6 @@ import android.annotation.TargetApi
 import android.app.*
 import android.net.wifi.WifiManager
 import android.os.*
-import ru.raslav.wirelessscan.utils.Point
-import ru.raslav.wirelessscan.connection.Connection.Event.*
 import android.app.PendingIntent
 import android.content.*
 import android.content.pm.ServiceInfo
@@ -17,7 +15,9 @@ import android.os.Build.VERSION_CODES.JELLY_BEAN
 import android.os.Build.VERSION_CODES.M
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.utils.OuiManager
+import ru.raslav.wirelessscan.utils.Point
 
 @Suppress("DEPRECATION") // I don't care
 class ScanService : IntentService("ScanService") {
@@ -74,7 +74,6 @@ class ScanService : IntentService("ScanService") {
         commandMessenger = Messenger(@SuppressLint("HandlerLeak")
         object : Handler() {
             override fun handleMessage(msg: Message) {
-                super.handleMessage(msg)
                 this@ScanService.handleMessage(msg)
             }
         })
@@ -218,30 +217,28 @@ class ScanService : IntentService("ScanService") {
         return message
     }
 
-    private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal))
+    private fun sendStartScan() = resultMessenger?.send(newMessage(Event.START_SCAN.ordinal))
 
-    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal))
+    private fun sendStarted() = resultMessenger?.send(newMessage(Event.STARTED.ordinal))
 
-    private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal))
+    private fun sendStopped() = resultMessenger?.send(newMessage(Event.STOPPED.ordinal))
 
     private fun sendResults() {
-        val message = newMessage(RESULTS.ordinal)
+        val message = newMessage(Event.RESULTS.ordinal)
         message.arg1 = process.toInt()
         message.obj = points
         resultMessenger?.send(message)
     }
 
-    fun handleMessage(msg: Message?) {
-        report("CH: what: ${msg?.what}")
-        if (msg != null) {
-            resultMessenger = msg.replyTo ?: resultMessenger
+    fun handleMessage(message: Message) {
+        report("<- ${message.run { Event.entries[what] }}")
+        resultMessenger = message.replyTo ?: resultMessenger
 
-            when (msg.what) {
-                GET.ordinal -> sendResults()
-                CLEAR.ordinal-> points.clear()
-                STOP.ordinal -> stop()
-                DELAY.ordinal -> delay = msg.arg1
-            }
+        when (message.what) {
+            Event.GET.ordinal -> sendResults()
+            Event.CLEAR.ordinal-> points.clear()
+            Event.STOP.ordinal -> stop()
+            Event.DELAY.ordinal -> delay = message.arg1
         }
     }
 
