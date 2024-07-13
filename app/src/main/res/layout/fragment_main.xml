@@ -47,6 +47,7 @@
             android:divider="@null"
             android:layout_below="@+id/layout_item"
             android:clipToPadding="false"
+            android:scrollbarThumbVertical="@drawable/scroll_vertical"
             />
         <ProgressBar
             android:id="@+id/progress"

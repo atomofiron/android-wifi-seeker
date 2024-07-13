@@ -21,6 +21,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/filter_btn</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
     <style name="Description">
         <item name="android:layout_width">match_parent</item>

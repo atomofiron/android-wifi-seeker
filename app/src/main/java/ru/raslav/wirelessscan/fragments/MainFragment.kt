@@ -39,7 +39,6 @@ import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
-import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
@@ -65,7 +64,7 @@ class MainFragment : Fragment() {
     private val adapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
     private val connectionReceiver = ConnectionReceiver()
 
-    private val flash: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
+    private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
     private lateinit var binding: FragmentMainBinding
 
@@ -74,7 +73,7 @@ class MainFragment : Fragment() {
         // todo deprecation
         setHasOptionsMenu(true)
 
-        flash.setAnimationListener(FlashAnimationListener())
+        flashAnim.setAnimationListener(FlashAnimationListener())
 
         scanConnection.bindService(requireContext())
 
@@ -129,8 +128,8 @@ class MainFragment : Fragment() {
         binding.listView.adapter = adapter
         adapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
 
-        initFilters(binding.filters.root)
-        initButtons(binding.buttons, binding.counter)
+        initFilters(binding.filters.layoutFilters.root)
+        binding.initButtons(binding.counter)
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
             startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
@@ -176,16 +175,16 @@ class MainFragment : Fragment() {
             filters.getChildAt(i).setOnClickListener(listener)
     }
 
-    private fun initButtons(buttons: LayoutButtonsPaneBinding, label: TextView) {
+    private fun FragmentMainBinding.initButtons(label: TextView) {
         buttons.buttonFilter.setOnClickListener { v ->
             v.isActivated = !v.isActivated
             updateCounters(adapter.filter(v.isActivated))
-            buttons.buttonFilter.visibility = if (v.isActivated) View.VISIBLE else View.GONE
+            filters.root.isVisible = v.isActivated
         }
         var snapshotFileName: String? = null
         buttons.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (adapter.allPoints.size != 0) {
-                binding.flash.startAnimation(flash)
+                binding.flash.startAnimation(flashAnim)
 
                 snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
             }
@@ -355,6 +354,14 @@ class MainFragment : Fragment() {
             root.addView(container)
             root.addView(filters.root)
             root.addView(buttons.root)
+        }
+        filters.run {
+            val parent = layoutFilters.root.parent as ViewGroup
+            parent.removeView(layoutFilters.root)
+            when (orientation) {
+                Orientation.Bottom -> horizontalScrollView.addView(layoutFilters.root)
+                else -> scrollView.addView(layoutFilters.root)
+            }
         }
         counter.changeInsets {
             if (orientation != Orientation.End) padding(end)

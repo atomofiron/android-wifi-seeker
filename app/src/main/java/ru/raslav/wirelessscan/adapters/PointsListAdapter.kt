@@ -123,11 +123,11 @@ class PointsListAdapter(
         onPointClickListener(null)
     }
 
-    /** @return counters like '15/22' or '5/22   15/22' */
+    /** @return counters like '15 / 22' or '5 / 15 / 22' */
     private fun getCounters(): String {
         var count = allPoints.size
         allPoints.forEach { if (it.level == Point.MIN_LEVEL) count-- }
-        return "${if (filtering) "${points.size}/${allPoints.size}" else ""}   $count/${allPoints.size}"
+        return "${if (filtering) "${points.size} / " else ""}$count / ${allPoints.size}"
     }
 
     fun updateList(list: List<Point>?) : String {

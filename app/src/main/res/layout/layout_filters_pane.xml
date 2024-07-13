@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/layout_filters"
     android:orientation="horizontal"
-    android:visibility="gone">
+    >
     <Button
         style="@style/FilterButtonStyle"
         android:id="@+id/filter_wpa"
