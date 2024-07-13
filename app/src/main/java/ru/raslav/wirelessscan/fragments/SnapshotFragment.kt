@@ -10,7 +10,7 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 
-class SnapshotFragment : Fragment() {
+class SnapshotFragment : Fragment(), Titled {
     companion object {
         private val EXTRA_NAME = "EXTRA_NAME"
 
@@ -23,6 +23,8 @@ class SnapshotFragment : Fragment() {
             return fragment
         }
     }
+
+    override val title: String get() = requireArguments().getString(EXTRA_NAME).toString()
 
     private lateinit var binding: FragmentSnapshotBinding
 

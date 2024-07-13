@@ -53,7 +53,7 @@ import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), Titled {
     companion object {
         private const val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
         private const val EXTRA_POINTS = "EXTRA_POINTS"
@@ -67,6 +67,8 @@ class MainFragment : Fragment() {
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
     private lateinit var binding: FragmentMainBinding
+
+    override val title: String get() = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress) // todo deprecation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -313,8 +315,11 @@ class MainFragment : Fragment() {
 
     private fun updateConnectionInfo() {
         adapter.connectionInfo = wifiManager.connectionInfo
-
-        requireActivity().title = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+        // trigger the back stack listeners
+        parentFragmentManager.beginTransaction()
+            .addToBackStack(null)
+            .commit()
+        parentFragmentManager.popBackStack()
     }
 
     private inner class FlashAnimationListener : Animation.AnimationListener {

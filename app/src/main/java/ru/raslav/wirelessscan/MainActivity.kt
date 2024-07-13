@@ -22,6 +22,7 @@ import ru.raslav.wirelessscan.fragments.MainFragment
 import ru.raslav.wirelessscan.fragments.PrefFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
 import ru.raslav.wirelessscan.fragments.SnapshotsListFragment
+import ru.raslav.wirelessscan.fragments.Titled
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -39,6 +40,16 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.insetsPadding(start = true, top = true, end = true)
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val current = supportFragmentManager.fragments.findLast { it.isVisible }
+            current ?: return@addOnBackStackChangedListener
+            current as Titled
+            title = current.title
+                ?: resources.takeIf { current.titleId > 0 }
+                    ?.getString(current.titleId)
+                ?: ""
+        }
 
         if (granted(Manifest.permission.ACCESS_FINE_LOCATION))
             showMainFragmentIfNecessary()
@@ -58,7 +69,6 @@ class MainActivity : AppCompatActivity() {
             val current = fragments.findLast { it.isVisible }
             beginTransaction()
                 .addToBackStack(fragment.javaClass.name)
-                // todo test
                 .apply { hide(current ?: return@apply) }
                 .add(R.id.fragment_container, fragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

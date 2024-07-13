@@ -13,7 +13,7 @@ import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutListBinding
 
-class SnapshotsListFragment : Fragment() {
+class SnapshotsListFragment : Fragment(), Titled by Titled(R.string.title_snapshots) {
 
     private lateinit var binding: LayoutListBinding
 
@@ -26,12 +26,6 @@ class SnapshotsListFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        requireActivity().setTitle(R.string.title_snapshots)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

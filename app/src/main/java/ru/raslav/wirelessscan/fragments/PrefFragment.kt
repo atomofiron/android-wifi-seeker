@@ -25,7 +25,7 @@ import ru.raslav.wirelessscan.longToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
 
-class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
+class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 
@@ -59,12 +59,6 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
         savedInstanceState: Bundle?,
     ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
         insetsPadding(start = true, end = true, bottom = true)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        requireActivity().setTitle(R.string.title_preferences)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
