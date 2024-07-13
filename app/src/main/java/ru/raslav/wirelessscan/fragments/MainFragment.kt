@@ -62,7 +62,7 @@ class MainFragment : Fragment() {
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
-    private val pointsListAdapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
+    private val adapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
     private val connectionReceiver = ConnectionReceiver()
 
     private val flash: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
@@ -103,7 +103,7 @@ class MainFragment : Fragment() {
         super.onSaveInstanceState(outState)
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.buttons.buttonResume.isActivated)
-        outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(pointsListAdapter.allPoints))
+        outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(adapter.allPoints))
     }
 
     override fun onStart() {
@@ -124,8 +124,8 @@ class MainFragment : Fragment() {
         val delegate = LayoutDelegate(resources) { binding.onLayoutChanged(description, header, list, filters, buttons, it) }
         binding.root.addOnLayoutChangeListener(delegate)
 
-        binding.listView.adapter = pointsListAdapter
-        pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
+        binding.listView.adapter = adapter
+        adapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
 
         initFilters(binding.filters.root as ViewGroup)
         initButtons(binding.buttons, binding.label)
@@ -134,7 +134,7 @@ class MainFragment : Fragment() {
             startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
 
         if (savedInstanceState != null)
-            pointsListAdapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
+            adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
 
         return binding.root
     }
@@ -168,7 +168,7 @@ class MainFragment : Fragment() {
                     state = PointsListAdapter.FILTER_INCLUDE
                 }
             }
-            updateCounters(pointsListAdapter.updateFilter(filters.indexOfChild(v), state))
+            updateCounters(adapter.updateFilter(filters.indexOfChild(v), state))
         }
         for (i in 0 until filters.childCount)
             filters.getChildAt(i).setOnClickListener(listener)
@@ -177,15 +177,15 @@ class MainFragment : Fragment() {
     private fun initButtons(buttons: LayoutButtonsPaneBinding, label: TextView) {
         buttons.buttonFilter.setOnClickListener { v ->
             v.isActivated = !v.isActivated
-            updateCounters(pointsListAdapter.filter(v.isActivated))
+            updateCounters(adapter.filter(v.isActivated))
             buttons.buttonFilter.visibility = if (v.isActivated) View.VISIBLE else View.GONE
         }
         var snapshotFileName: String? = null
         buttons.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
-            if (pointsListAdapter.allPoints.size != 0) {
+            if (adapter.allPoints.size != 0) {
                 binding.flash.startAnimation(flash)
 
-                snapshotFileName = SnapshotManager(requireContext()).put(pointsListAdapter.allPoints)
+                snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
         buttons.buttonResume.setOnClickListener { v: View ->
@@ -201,8 +201,8 @@ class MainFragment : Fragment() {
         }
         buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
-            label.text = pointsListAdapter.clear()
-        }.onClickListener { pointsListAdapter.resetFocus() })
+            label.text = adapter.clear()
+        }.onClickListener { adapter.resetFocus() })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
             requireContext().startActivity(intent)
@@ -244,12 +244,12 @@ class MainFragment : Fragment() {
 
         progress.isVisible = mesaage.what == Event.START_SCAN.ordinal
         when (mesaage.what) {
-            Event.START_SCAN.ordinal -> pointsListAdapter.animScan(true)
+            Event.START_SCAN.ordinal -> adapter.animScan(true)
             Event.RESULTS.ordinal -> updateList(mesaage)
             Event.STARTED.ordinal -> buttons.buttonResume.isActivated = true
             Event.STOPPED.ordinal -> {
                 buttons.buttonResume.isActivated = false
-                pointsListAdapter.animScan(false)
+                adapter.animScan(false)
             }
         }
     }
@@ -258,7 +258,7 @@ class MainFragment : Fragment() {
         if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
             binding.buttons.buttonResume.isActivated = msg.arg1.toBoolean()
 
-            updateCounters(pointsListAdapter.updateList(msg.obj as ArrayList<Point>)) // todo wtf
+            updateCounters(adapter.updateList(msg.obj as ArrayList<Point>)) // todo wtf
         }
     }
 
@@ -310,7 +310,7 @@ class MainFragment : Fragment() {
     }
 
     private fun updateConnectionInfo() {
-        pointsListAdapter.connectionInfo = wifiManager.connectionInfo
+        adapter.connectionInfo = wifiManager.connectionInfo
 
         requireActivity().title = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
     }
@@ -405,5 +405,6 @@ class MainFragment : Fragment() {
             this.width = lpWidth
             this.height = lpHeight
         }
+        adapter.notifyDataSetChanged()
     }
 }

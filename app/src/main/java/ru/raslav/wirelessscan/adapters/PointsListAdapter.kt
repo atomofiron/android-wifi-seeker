@@ -60,7 +60,6 @@ class PointsListAdapter(
 
             binding.pwr.text = "\u25CF " // ●
             binding.pwr.gravity = Gravity.END
-            binding.bssid.isVisible = itemView.resources.configuration.isWide()
             binding
         } else
             convertView.tag as LayoutItemBinding
@@ -94,6 +93,7 @@ class PointsListAdapter(
 
         holder.bssid.text = point.bssid
         holder.bssid.setTextColor(if (connected) Point.green_light else point.bssidColor)
+        holder.bssid.isVisible = holder.root.resources.configuration.isWide()
     }
 
     private fun drawItemRoot(layout: LinearLayout, point: Point, position: Int) {
