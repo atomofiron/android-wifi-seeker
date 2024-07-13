@@ -27,4 +27,8 @@
         style="@style/Description"
         android:id="@+id/tv_manuf"
         />
+    <TextView
+        style="@style/Description"
+        android:id="@+id/tv_manuf_desc"
+        />
 </LinearLayout>

@@ -22,6 +22,7 @@ class Point private constructor(): Parcelable {
         dest.writeString(bssid)
         dest.writeInt(ch)
         dest.writeString(manufacturer)
+        dest.writeString(manufacturerDesc)
     }
 
     override fun describeContents(): Int = 0
@@ -56,6 +57,8 @@ class Point private constructor(): Parcelable {
         private set
     @field:Element(name = "manufacturer")
     var manufacturer = ""
+    @field:Element(name = "manufacturerDesc")
+    var manufacturerDesc = ""
 
     var pwColor = 0
         private set
@@ -257,6 +260,7 @@ class Point private constructor(): Parcelable {
                 point.bssid = parcel.readString()!!
                 point.ch = parcel.readInt()
                 point.manufacturer = parcel.readString()!!
+                point.manufacturerDesc = parcel.readString()!!
                 return point
             }
 
