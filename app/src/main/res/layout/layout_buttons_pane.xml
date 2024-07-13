@@ -19,10 +19,11 @@
     <ImageButton
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
-        android:id="@+id/button_save"
-        android:src="@drawable/ic_save_state"
+        android:id="@+id/button_clear"
+        android:src="@drawable/ic_trash"
         android:layout_weight="1"
         android:background="?selectableItemBackgroundBorderless"
+        app:tint="@color/clear_btn"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -44,11 +45,10 @@
     <ImageButton
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
-        android:id="@+id/button_clear"
-        android:src="@drawable/ic_trash"
+        android:id="@+id/button_save"
+        android:src="@drawable/ic_save_state"
         android:layout_weight="1"
         android:background="?selectableItemBackgroundBorderless"
-        app:tint="@color/clear_btn"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
