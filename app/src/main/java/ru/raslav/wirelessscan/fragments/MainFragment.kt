@@ -49,7 +49,7 @@ import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.FileNameInputText
-import ru.raslav.wirelessscan.utils.LayoutDelegate
+import ru.raslav.wirelessscan.utils.LayoutDelegate.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
@@ -123,13 +123,14 @@ class MainFragment : Fragment() {
         val list = binding.listView.insetsMix { }
         val buttons = binding.buttons.root.insetsMix { }
         val filters = binding.filters.root.insetsMix { }
-        val delegate = LayoutDelegate(resources) { binding.onLayoutChanged(description, counter, header, list, filters, buttons, it) }
-        binding.root.addOnLayoutChangeListener(delegate)
+        binding.root.layoutChanges {
+            binding.onLayoutChanged(description, counter, header, list, filters, buttons, it)
+        }
 
         binding.listView.adapter = adapter
         adapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
 
-        initFilters(binding.filters.root as ViewGroup)
+        initFilters(binding.filters.root)
         initButtons(binding.buttons, binding.counter)
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)

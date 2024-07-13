@@ -1,19 +1,23 @@
 package ru.raslav.wirelessscan.utils
 
 import android.content.Context
-import android.content.res.Resources
 import android.util.LayoutDirection
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import ru.raslav.wirelessscan.R
 
-class LayoutDelegate(
-    resources: Resources,
+class LayoutDelegate private constructor(
+    private val range: IntRange,
     private val listener: (Orientation) -> Unit,
 ) : View.OnLayoutChangeListener {
+    companion object {
+        fun View.layoutChanges(listener: (Orientation) -> Unit) {
+            val range = resources.run { getDimensionPixelSize(R.dimen.compact_width)..getDimensionPixelSize(R.dimen.medium_width) }
+            addOnLayoutChangeListener(LayoutDelegate(range, listener))
+        }
+    }
 
-    private val range = resources.run { getDimensionPixelSize(R.dimen.compact_width)..getDimensionPixelSize(R.dimen.medium_width) }
     private var orientation: Orientation? = null
 
     override fun onLayoutChange(layout: View, left: Int, top: Int, right: Int, bottom: Int, ol: Int, ot: Int, or: Int, ob: Int) {
