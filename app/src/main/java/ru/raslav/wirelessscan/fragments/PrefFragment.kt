@@ -41,10 +41,9 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
 
-        findPreference<Preference>(Const.PREF_MAIL)!!.run {
-            widgetLayoutResource = R.layout.widget_outside
-            setOnPreferenceClickListener { mailToDeveloper(); true }
-        }
+        findPreference<Preference>(Const.PREF_MAIL)!!.setOnPreferenceClickListener { mailToDeveloper(); true }
+        findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.setOnPreferenceClickListener { openOuiSource(); true }
+        findPreference<Preference>(Const.PREF_SOURCE_CODE)!!.setOnPreferenceClickListener { openSourceCode(); true }
         val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
         val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
         attackScreen = findPreference(Const.PREF_ATTACK_SCREEN)!!
@@ -115,12 +114,25 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
     }
 
     private fun mailToDeveloper() {
-        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "atomofiron@gmail.com", null))
+        Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "atomofiron@gmail.com", null))
             .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
             .putExtra(Intent.EXTRA_TEXT, getString(R.string.dear_dev))
+            .showChooser(R.string.send_email)
+    }
 
-        if (intent.resolveActivity(requireContext().packageManager) != null) {
-            val chooser = Intent.createChooser(intent, getString(R.string.send_email))
+    private fun openOuiSource() {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://www.wireshark.org/tools/oui-lookup"))
+            .showChooser(R.string.open_an_url)
+    }
+
+    private fun openSourceCode() {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/atomofiron/android-wifi-seeker"))
+            .showChooser(R.string.open_an_url)
+    }
+
+    private fun Intent.showChooser(title: Int) {
+        if (resolveActivity(requireContext().packageManager) != null) {
+            val chooser = Intent.createChooser(this, getString(title))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(chooser)
         } else

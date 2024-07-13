@@ -2,6 +2,8 @@
     <string name="app_name">WiFi Seeker</string>
     <string name="settings">Настройки</string>
     <string name="email_dev">Написать разработчику</string>
+    <string name="oui_source">Источник OUI базы</string>
+    <string name="source_code">Исходный код</string>
     <string name="ok">ОК</string>
     <string name="snapshot_saved">Снимок сохранён</string>
     <string name="no_activity">У вас нет приложения, способного выполнить данное действие</string>
@@ -32,6 +34,7 @@
     <string name="auto_off_wifi_sum">При подключении к подозрительной сети</string>
     <string name="no_scan_in_bg">Энергосберегающий режим</string>
     <string name="no_scan_in_bg_sum">Не сканировать сети в фоне</string>
+    <string name="other">Прочее</string>
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>
@@ -59,6 +62,7 @@
 
     <!-- Other -->
     <string name="send_email">Отправить письмо</string>
+    <string name="open_an_url">Открыть ссылку</string>
     <string name="dear_dev">Дорогой разработчик, </string>
     <string name="geolocation_need">Начиная с Android 6.0, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
     <string name="got_it">Понятно</string>

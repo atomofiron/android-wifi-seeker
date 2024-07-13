@@ -3,12 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/settings"
     >
-    <PreferenceScreen
-        android:key="mail_to_dev"
-        android:id="@+id/mail_to_dev"
-        android:title="@string/email_dev"
-        android:icon="@drawable/ic_email"
-        />
     <ListPreference
         android:title="@string/default_delay"
         android:icon="@drawable/ic_timer"
@@ -66,5 +60,32 @@
                 android:defaultValue="false"
                 />
         </PreferenceCategory>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/other"
+        android:key="other"
+        >
+        <PreferenceScreen
+            android:key="oui_source"
+            android:id="@+id/oui_source"
+            android:title="@string/oui_source"
+            android:icon="@drawable/ic_shark"
+            android:widgetLayout="@layout/widget_outside"
+            />
+        <PreferenceScreen
+            android:key="mail_to_dev"
+            android:id="@+id/mail_to_dev"
+            android:title="@string/email_dev"
+            android:icon="@drawable/ic_email"
+            android:widgetLayout="@layout/widget_outside"
+            />
+        <PreferenceScreen
+            android:key="source_code"
+            android:id="@+id/source_code"
+            android:title="@string/source_code"
+            android:icon="@drawable/ic_github"
+            android:widgetLayout="@layout/widget_outside"
+            />
     </PreferenceCategory>
 </PreferenceScreen>

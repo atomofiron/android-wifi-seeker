@@ -2,6 +2,8 @@
     <string name="app_name">WiFi Seeker</string>
     <string name="settings">Settings</string>
     <string name="email_dev">Mail to developer</string>
+    <string name="oui_source">OUI base source</string>
+    <string name="source_code">Source code</string>
     <string name="ok">OK</string>
     <string name="snapshot_saved">Snapshot was saved</string>
     <string name="no_activity">You have no application able to perform this action</string>
@@ -32,6 +34,7 @@
     <string name="auto_off_wifi_sum">When you connect to suspicious networks</string>
     <string name="no_scan_in_bg">Energy saving mode</string>
     <string name="no_scan_in_bg_sum">Do not scan in background</string>
+    <string name="other">Other</string>
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>
@@ -59,6 +62,7 @@
 
     <!-- Other -->
     <string name="send_email">Send an email</string>
+    <string name="open_an_url">Open an URL</string>
     <string name="dear_dev">Dear developer, </string>
     <string name="geolocation_need">Starting from Android 5.0 to get a list of WiFi networks you must enable geolocation</string>
     <string name="got_it">Got it</string>
