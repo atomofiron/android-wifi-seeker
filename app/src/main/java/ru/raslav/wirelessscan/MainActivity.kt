@@ -42,13 +42,7 @@ class MainActivity : AppCompatActivity() {
         toolbar.insetsPadding(start = true, top = true, end = true)
 
         supportFragmentManager.addOnBackStackChangedListener {
-            val current = supportFragmentManager.fragments.findLast { it.isVisible }
-            current ?: return@addOnBackStackChangedListener
-            current as Titled
-            title = current.title
-                ?: resources.takeIf { current.titleId > 0 }
-                    ?.getString(current.titleId)
-                ?: ""
+            updateTitle()
         }
 
         if (granted(Manifest.permission.ACCESS_FINE_LOCATION))
@@ -95,6 +89,21 @@ class MainActivity : AppCompatActivity() {
             R.id.settings -> setFragment(PrefFragment())
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateTitle()
+    }
+
+    private fun updateTitle() {
+        val current = supportFragmentManager.fragments.findLast { it.isVisible }
+        current ?: return
+        current as Titled
+        title = current.title
+            ?: resources.takeIf { current.titleId > 0 }
+                ?.getString(current.titleId)
+                    ?: ""
     }
 
     private fun requestPermission() {

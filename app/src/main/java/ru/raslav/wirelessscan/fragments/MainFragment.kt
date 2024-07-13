@@ -315,11 +315,13 @@ class MainFragment : Fragment(), Titled {
 
     private fun updateConnectionInfo() {
         adapter.connectionInfo = wifiManager.connectionInfo
-        // trigger the back stack listeners
-        parentFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .commit()
-        parentFragmentManager.popBackStack()
+        if (isResumed) {
+            // trigger the back stack listeners
+            parentFragmentManager.beginTransaction()
+                .addToBackStack(null)
+                .commit()
+            parentFragmentManager.popBackStack()
+        }
     }
 
     private inner class FlashAnimationListener : Animation.AnimationListener {
