@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:fitsSystemWindows">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -12,24 +12,15 @@
         <item name="android:windowSplashScreenBehavior" tools:targetApi="33">icon_preferred</item>
 
         <!--  name="android:statusBarColor">@color/colorBlack -->
-        <item name="android:actionBarStyle">@style/ActionBarStyle</item>
         <item name="android:windowBackground">@color/colorDarkGray</item>
         <!--  name="android:buttonsPaneBarColor">@color/colorBlack -->
         <!--  name="android:navigationBarColor">@color/colorBlack  -->
     </style>
-    <style name="ActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/colorBlack</item>
-    </style>
-    <style name="ButtonBorderlessStyle" parent="Widget.AppCompat.Button.Borderless" />
-    <style name="FilterButtonStyle" parent="@style/ButtonBorderlessStyle">
+    <style name="FilterButtonStyle" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:layout_width">72sp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/filter_btn</item>
         <item name="android:textSize">14sp</item>
-    </style>
-    <style name="ListFrameStyle" parent="Widget.AppCompat.ListView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">0dp</item>
     </style>
     <style name="Description">
         <item name="android:layout_width">match_parent</item>

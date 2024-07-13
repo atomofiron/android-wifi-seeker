@@ -1,34 +1,57 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.annotation.SuppressLint
-import ru.raslav.wirelessscan.adapters.PointsListAdapter
-
-import ru.raslav.wirelessscan.utils.Point
-import android.content.*
-import android.content.Context.WIFI_SERVICE
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.wifi.WifiManager
-import android.os.*
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
+import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.provider.Settings
 import android.text.format.Formatter
-import android.view.*
-import ru.raslav.wirelessscan.utils.DoubleClickMaster
-import ru.raslav.wirelessscan.connection.ScanConnection
-import ru.raslav.wirelessscan.connection.Connection.Event
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import ru.raslav.wirelessscan.utils.FileNameInputText
-import ru.raslav.wirelessscan.utils.SnapshotManager
-import ru.raslav.wirelessscan.*
+import lib.atomofiron.insets.ViewInsetsDelegate
+import lib.atomofiron.insets.insetsMix
+import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.MainActivity
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.ScanService
+import ru.raslav.wirelessscan.adapters.PointsListAdapter
+import ru.raslav.wirelessscan.connection.Connection.Event
+import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
+import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.report
+import ru.raslav.wirelessscan.sp
+import ru.raslav.wirelessscan.toBoolean
+import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.utils.FileNameInputText
+import ru.raslav.wirelessscan.utils.LayoutDelegate
+import ru.raslav.wirelessscan.utils.Orientation
+import ru.raslav.wirelessscan.utils.Point
+import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
 
 class MainFragment : Fragment() {
@@ -37,7 +60,7 @@ class MainFragment : Fragment() {
         private const val EXTRA_POINTS = "EXTRA_POINTS"
     }
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
-    private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(WIFI_SERVICE) as WifiManager }
+    private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
     private val pointsListAdapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
     private val connectionReceiver = ConnectionReceiver()
@@ -92,6 +115,14 @@ class MainFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = FragmentMainBinding.inflate(inflater, container, false)
+
+        val description = binding.layoutDescription.root.insetsMix { }
+        val header = binding.layoutItem.root.insetsMix { }
+        val list = binding.listView.insetsMix { }
+        val buttons = binding.buttons.root.insetsMix { }
+        val filters = binding.filters.root.insetsMix { }
+        val delegate = LayoutDelegate(resources) { binding.onLayoutChanged(description, header, list, filters, buttons, it) }
+        binding.root.addOnLayoutChangeListener(delegate)
 
         binding.listView.adapter = pointsListAdapter
         pointsListAdapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
@@ -166,7 +197,7 @@ class MainFragment : Fragment() {
         buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, 1.toString())!!.toInt())
         buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) = sendScanDelay()
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = sendScanDelay()
         }
         buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
@@ -301,5 +332,78 @@ class MainFragment : Fragment() {
 
     private inner class ConnectionReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) = updateConnectionInfo()
+    }
+
+    private fun FragmentMainBinding.onLayoutChanged(
+        descriptionInsets: ViewInsetsDelegate,
+        headerInsets: ViewInsetsDelegate,
+        listInsets: ViewInsetsDelegate,
+        filtersInsets: ViewInsetsDelegate,
+        buttonsInsets: ViewInsetsDelegate,
+        orientation: Orientation,
+    ) {
+        root.removeAllViews()
+        if (orientation == Orientation.Start) {
+            root.addView(buttons.root)
+            root.addView(filters.root)
+            root.addView(container)
+        } else {
+            root.addView(container)
+            root.addView(filters.root)
+            root.addView(buttons.root)
+        }
+        val vertical = orientation.vertical
+        descriptionInsets.changeInsets {
+            when (orientation) {
+                Orientation.Start -> padding(end)
+                Orientation.Bottom -> padding(start, end)
+                Orientation.End -> padding(start)
+            }
+        }
+        headerInsets.changeInsets {
+            when (orientation) {
+                Orientation.Start -> padding(end)
+                Orientation.Bottom -> padding(start, end)
+                Orientation.End -> padding(start)
+            }
+        }
+        listInsets.changeInsets {
+            when (orientation) {
+                Orientation.Start -> padding(end, bottom)
+                Orientation.Bottom -> padding(start, end)
+                Orientation.End -> padding(start, bottom)
+            }
+        }
+        filtersInsets.changeInsets {
+            if (orientation == Orientation.Bottom) padding(start, end) else padding(bottom)
+        }
+        buttonsInsets.changeInsets {
+            when (orientation) {
+                Orientation.Start -> padding(start, bottom)
+                Orientation.Bottom -> padding(start, bottom, end)
+                Orientation.End -> padding(bottom, end)
+            }
+        }
+        root.orientation = if (vertical) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+        container.updateLayoutParams {
+            this.width = if (vertical) LayoutParams.MATCH_PARENT else 0
+            this.height = if (vertical) 0 else LayoutParams.MATCH_PARENT
+        }
+        buttons.root.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+        val lpWidth = if (vertical) LayoutParams.MATCH_PARENT else LayoutParams.WRAP_CONTENT
+        val lpHeight = if (vertical) LayoutParams.WRAP_CONTENT else LayoutParams.MATCH_PARENT
+        buttons.root.updateLayoutParams {
+            this.width = lpWidth
+            this.height = lpHeight
+        }
+        filters.root.updateLayoutParams {
+            this.width = lpWidth
+            this.height = lpHeight
+        }
+        filters.layoutFilters.root.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+        filters.layoutFilters.root.updateLayoutParams {
+            this.width = lpWidth
+            this.height = lpHeight
+        }
     }
 }

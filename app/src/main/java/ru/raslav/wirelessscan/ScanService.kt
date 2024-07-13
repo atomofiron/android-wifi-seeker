@@ -215,11 +215,11 @@ class ScanService : IntentService("ScanService") {
         return message
     }
 
-    private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal)).let { report("sendStartScan") }
+    private fun sendStartScan() = resultMessenger?.send(newMessage(START_SCAN.ordinal))
 
-    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal)).let { report("sendStarted") }
+    private fun sendStarted() = resultMessenger?.send(newMessage(STARTED.ordinal))
 
-    private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal)).let { report("sendStopped") }
+    private fun sendStopped() = resultMessenger?.send(newMessage(STOPPED.ordinal))
 
     private fun sendResults() {
         val message = newMessage(RESULTS.ordinal)

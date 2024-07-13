@@ -13,8 +13,13 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import lib.atomofiron.insets.InsetsProviderImpl
+import lib.atomofiron.insets.insetsPadding
+import lib.atomofiron.insets.setContentView
 import ru.raslav.wirelessscan.fragments.MainFragment
 import ru.raslav.wirelessscan.fragments.PrefFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
@@ -29,7 +34,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        setContentView(R.layout.activity_main, InsetsProviderImpl())
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        toolbar.insetsPadding(start = true, top = true, end = true)
 
         if (granted(Manifest.permission.ACCESS_FINE_LOCATION))
             showMainFragmentIfNecessary()
