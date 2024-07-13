@@ -1,9 +1,14 @@
 package ru.raslav.wirelessscan.fragments
 
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -12,6 +17,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import androidx.preference.TwoStatePreference
+import androidx.recyclerview.widget.RecyclerView
+import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.longToast
@@ -22,7 +29,7 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
 
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 
-    private lateinit var attackScreen: PreferenceScreen
+    private lateinit var attackScreen: PreferenceCategory
     private lateinit var noScanInBg: TwoStatePreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +41,10 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
 
+        findPreference<Preference>(Const.PREF_MAIL)!!.run {
+            widgetLayoutResource = R.layout.widget_outside
+            setOnPreferenceClickListener { mailToDeveloper(); true }
+        }
         val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
         val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
         attackScreen = findPreference(Const.PREF_ATTACK_SCREEN)!!
@@ -41,6 +52,14 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
         noScanInBg = findPreference(Const.PREF_NO_SCAN_IN_BG)!!
         noScanInBg.isEnabled = autoOff.isChecked
         setListeners(preferenceScreen)
+    }
+
+    override fun onCreateRecyclerView(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        savedInstanceState: Bundle?,
+    ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
+        insetsPadding(start = true, end = true, bottom = true)
     }
 
     override fun onStart() {
@@ -93,5 +112,18 @@ class PrefFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeLi
             sp.getBoolean(Const.PREF_WORK_IN_BG, false) -> requireContext().longToast(R.string.recom)
             else -> Unit
         }
+    }
+
+    private fun mailToDeveloper() {
+        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "atomofiron@gmail.com", null))
+            .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+            .putExtra(Intent.EXTRA_TEXT, getString(R.string.dear_dev))
+
+        if (intent.resolveActivity(requireContext().packageManager) != null) {
+            val chooser = Intent.createChooser(intent, getString(R.string.send_email))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(chooser)
+        } else
+            Toast.makeText(requireContext(), R.string.no_activity, Toast.LENGTH_SHORT).show()
     }
 }

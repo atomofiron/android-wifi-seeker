@@ -16,9 +16,9 @@
 
     <!-- prefs -->
     <string name="default_delay">Default delay</string>
-    <string name="show_description">Show extended network\'s details</string>
+    <string name="show_description">Show pont\'s details</string>
     <string name="show_description_sum">Table above the list</string>
-    <string name="work_in_bg">Work in the background</string>
+    <string name="work_in_bg">Scan in the background</string>
     <string name="detect_attacks">Attack detection</string>
     <string name="detect_attacks_sum">To warn about the appearance of access points with the same name</string>
 
@@ -27,11 +27,11 @@
     <string name="smart_detection_sum">To pass network with a similar MAC addresses</string>
     <string name="extras">Network exceptions (on each line)</string>
     <string name="guarding">Protect connection</string>
-    <string name="recom">It is recommended to enable the Work in the background</string>
+    <string name="recom">It is recommended to enable the Scan in the background</string>
     <string name="auto_off_wifi">Auto turning off WiFi</string>
     <string name="auto_off_wifi_sum">When you connect to suspicious networks</string>
     <string name="no_scan_in_bg">Energy saving mode</string>
-    <string name="no_scan_in_bg_sum">Do not scan networks in background</string>
+    <string name="no_scan_in_bg_sum">Do not scan in background</string>
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>

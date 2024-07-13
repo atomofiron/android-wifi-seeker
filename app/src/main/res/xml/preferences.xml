@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/settings">
-
+    android:title="@string/settings"
+    >
+    <PreferenceScreen
+        android:key="mail_to_dev"
+        android:id="@+id/mail_to_dev"
+        android:title="@string/email_dev"
+        android:icon="@drawable/ic_email"
+        />
     <ListPreference
         android:title="@string/default_delay"
+        android:icon="@drawable/ic_timer"
         android:key="default_delay"
         android:entryValues="@array/delay_arr_val"
         android:entries="@array/delay_arr"
@@ -12,22 +19,25 @@
         />
     <CheckBoxPreference
         android:title="@string/show_description"
+        android:icon="@drawable/ic_notes"
         android:summary="@string/show_description_sum"
         android:key="show_description"
         android:defaultValue="false"
         />
     <SwitchPreference
         android:title="@string/work_in_bg"
+        android:icon="@drawable/ic_radar"
         android:key="work_in_bg"
         android:defaultValue="false"
         />
     <SwitchPreference
         android:title="@string/detect_attacks"
+        android:icon="@drawable/ic_shield"
         android:summary="@string/detect_attacks_sum"
         android:key="detect_attacks"
         android:defaultValue="false"
         />
-    <PreferenceScreen
+    <PreferenceCategory
         android:title="@string/attack_screen"
         android:key="attack_screen">
         <CheckBoxPreference
@@ -56,11 +66,5 @@
                 android:defaultValue="false"
                 />
         </PreferenceCategory>
-    </PreferenceScreen>
-    <PreferenceScreen
-        android:key="mail_to_dev"
-        android:id="@+id/mail_to_dev"
-        android:title="@string/email_dev"
-        android:icon="@drawable/ic_email"
-        />
+    </PreferenceCategory>
 </PreferenceScreen>
