@@ -44,7 +44,8 @@
     <string name="manuf_format">Manufacturer: %s</string>
 
     <!-- Permissions -->
-    <string name="need_coarse_location">For the program to process on Android 6 and above must have permission to the location</string>
+    <string name="need_location_permission">To function Android 6 and later,\npermission to access the location is required</string>
+    <string name="grant">Grant</string>
     <string name="get_perm_by_settings">Allow permission for the location in system settings</string>
     <string name="no_perm">Permission denied</string>
 

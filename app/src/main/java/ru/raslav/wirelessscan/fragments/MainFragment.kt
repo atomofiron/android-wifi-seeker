@@ -1,5 +1,10 @@
 package ru.raslav.wirelessscan.fragments
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
 import android.annotation.SuppressLint
 import android.app.BackgroundServiceStartNotAllowedException
 import android.content.BroadcastReceiver
@@ -9,8 +14,6 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.wifi.WifiManager
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
 import android.os.Build.VERSION_CODES.S
 import android.os.Bundle
 import android.os.Handler
@@ -41,9 +44,12 @@ import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
+import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
+import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
+import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.unsafeLazy
@@ -145,14 +151,21 @@ class MainFragment : Fragment(), Titled {
             adapter.resetFocus()
             showDescription(binding.layoutDescription, null)
         }
-
-        if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
-            tryStartScanServiceIfWifiEnabled(binding.buttons.buttonResume)
+        binding.permissionDisclaimer.isVisible = !locationGranted()
 
         if (savedInstanceState != null)
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        when {
+            savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) == false -> Unit
+            locationGranted() -> binding.buttons.tryStartScanServiceIfWifiEnabled()
+            else -> requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE).also { report("onViewCreated requestPermissions") }
+        }
     }
 
     override fun onDestroyView() {
@@ -200,11 +213,11 @@ class MainFragment : Fragment(), Titled {
                 snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
-        buttons.buttonResume.setOnClickListener { v: View ->
-            if (v.isActivated)
+        buttons.buttonResume.setOnClickListener { view ->
+            if (view.isActivated)
                 stopScanService()
             else
-                startScanService()
+                checkPermissionAndStartScan()
         }
         buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, 1.toString())!!.toInt())
         buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -224,10 +237,39 @@ class MainFragment : Fragment(), Titled {
         }
     }
 
-    private fun tryStartScanServiceIfWifiEnabled(buttonResume: View) {
-        buttonResume.isActivated = wifiManager.isWifiEnabled
+    private fun locationGranted() = SDK_INT < M || requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
+
+    private fun checkPermissionAndStartScan() {
+        if (!locationGranted())
+            requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE)
+        else if (!requireContext().granted(Manifest.permission.ACCESS_WIFI_STATE))
+            requireContext().shortToast(R.string.no_perm)
+        else
+            startScanService()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            binding.permissionDisclaimer.isVisible = false
+            tryStartScanService()
+        } else if (!shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION)) {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.setData(Uri.fromParts("package", requireContext().packageName, null))
+            startActivity(intent)
+            requireContext().shortToast(R.string.get_perm_by_settings)
+        }
+    }
+
+    private fun LayoutButtonsPaneBinding.tryStartScanServiceIfWifiEnabled() {
+        if (wifiManager.isWifiEnabled) {
+            buttonResume.isActivated = true
+            tryStartScanService()
+        }
+    }
+
+    private fun tryStartScanService() {
         when {
-            !buttonResume.isActivated -> Unit
             SDK_INT < S -> startScanService()
             else -> try {
                 startScanService()

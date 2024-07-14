@@ -44,7 +44,8 @@
     <string name="manuf_format">Производитель: %s</string>
 
     <!-- Permissions -->
-    <string name="need_coarse_location">Для функционирования программы на Android 6 и выше необходимо разрешение на местоположение</string>
+    <string name="need_location_permission">Для функционирования на Android 6 и выше\nнеобходимо разрешение на доступ к местоположению</string>
+    <string name="grant">Разрешить</string>
     <string name="get_perm_by_settings">Дайте разрешение на местоположение в настройках системы</string>
     <string name="no_perm">Нет доступа</string>
 
