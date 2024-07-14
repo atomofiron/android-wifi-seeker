@@ -70,6 +70,7 @@
             android:key="oui_source"
             android:id="@+id/oui_source"
             android:title="@string/oui_source"
+            android:summary="@string/oui_lookup_tool"
             android:icon="@drawable/ic_shark"
             android:widgetLayout="@layout/widget_outside"
             />
