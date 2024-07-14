@@ -19,6 +19,8 @@ import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SideDrawable
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 enum class AnimType {
@@ -28,7 +30,10 @@ enum class AnimType {
 private class Holder(
     var index: Int = -1,
     val binding: LayoutItemBinding,
-)
+) {
+    override fun equals(other: Any?): Boolean = other is Holder && other.binding === binding
+    override fun hashCode(): Int = binding.hashCode()
+}
 
 class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     ValueAnimator.AnimatorUpdateListener {
@@ -44,7 +49,7 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     private var focused: Point? = null
     private var filtering = false
     private lateinit var focusedDrawable: SideDrawable
-    private val views = hashMapOf<Int, LayoutItemBinding>()
+    private val holders = mutableListOf<Holder>()
     var connectionInfo: WifiInfo? = null
         set(value) { field = value; notifyDataSetChanged() }
 
@@ -213,12 +218,12 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
 
     override fun onViewAttachedToWindow(view: View) {
         val holder = view.tag as Holder
-        views[holder.index] = holder.binding
+        holders.add(holder)
+        holder.binding.pwr.alpha = Const.ALPHA_FULL
     }
 
     override fun onViewDetachedFromWindow(view: View) {
-        val holder = view.tag as Holder
-        views.remove(holder.index)
+        holders.remove(view.tag as Holder)
     }
 
     fun animScanStart() {
@@ -242,8 +247,8 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
         if (animType == AnimType.ScanStart) {
             animator.cancel()
             animType = AnimType.None
-            for (binding in views.values) {
-                binding.pwr.alpha = Const.ALPHA_FULL
+            for (holder in holders) {
+                holder.binding.pwr.alpha = Const.ALPHA_FULL
             }
         }
     }
@@ -253,20 +258,24 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     fun resetAnim() = animator.removeUpdateListener(this)
 
     override fun onAnimationUpdate(animation: ValueAnimator) {
-        if (views.isEmpty()) {
+        if (holders.isEmpty()) {
             return
         }
         val value = animation.animatedValue as Float
         if (animType == AnimType.ScanStart) {
-            for (entry in views.entries) {
-                entry.value.pwr.alpha = if (entry.key % 2 == 0) value else (Const.ALPHA_FULL - value)
+            for (holder in holders) {
+                holder.binding.pwr.alpha = if (holder.index % 2 == 0) value else (Const.ALPHA_FULL - value)
             }
         } else if (animType == AnimType.ScanEnd) {
-            val min = views.keys.min()
-            val max = views.keys.max()
+            var min = Int.MAX_VALUE
+            var max = Int.MIN_VALUE
+            for (holder in holders) {
+                min = min(min, holder.index)
+                max = max(max, holder.index)
+            }
             val threshold = (min + (max - min) * (Const.ALPHA_FULL - value)).roundToInt()
-            for (entry in views.entries) {
-                entry.value.pwr.alpha = if (entry.key >= threshold) Const.ALPHA_FULL else Const.ALPHA_ZERO
+            for (holder in holders) {
+                holder.binding.pwr.alpha = if (holder.index >= threshold) Const.ALPHA_FULL else Const.ALPHA_ZERO
             }
             if (value == Const.ALPHA_FULL) {
                 animType = AnimType.None
