@@ -63,7 +63,7 @@ class MainFragment : Fragment(), Titled {
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
-    private val adapter by unsafeLazy { PointListAdapter(requireContext(), binding.listView) }
+    private val adapter = PointListAdapter()
     private val connectionReceiver = ConnectionReceiver()
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
@@ -86,6 +86,8 @@ class MainFragment : Fragment(), Titled {
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         requireContext().registerReceiver(connectionReceiver, filter)
+
+        Point.initColors(requireContext())
     }
 
     private fun onServiceConnected() {
@@ -128,9 +130,13 @@ class MainFragment : Fragment(), Titled {
         binding.root.layoutChanges {
             binding.onLayoutChanged(description, counter, header, list, filters, buttons, it)
         }
-
+        binding.listView.setOnItemClickListener { _, _, position, _ ->
+            val point = adapter[position]
+            showDescriptionIfNecessary(binding.layoutDescription, point)
+            adapter.setFocused(point)
+        }
         binding.listView.adapter = adapter
-        adapter.onPointClickListener = { point -> showDescriptionIfNecessary(binding.layoutDescription, point) }
+        adapter.initAnim()
 
         initFilters(binding.filters.layoutFilters.root)
         binding.initButtons(binding.counter)
@@ -143,6 +149,11 @@ class MainFragment : Fragment(), Titled {
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        adapter.resetAnim()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -199,7 +210,10 @@ class MainFragment : Fragment(), Titled {
         buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
-        }.onClickListener { adapter.resetFocus() })
+        }.onClickListener {
+            adapter.resetFocus()
+            showDescriptionIfNecessary(binding.layoutDescription, null)
+        })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
             requireContext().startActivity(intent)
@@ -248,12 +262,12 @@ class MainFragment : Fragment(), Titled {
 
         progress.isVisible = mesaage.what == Event.START_SCAN.ordinal
         when (mesaage.what) {
-            Event.START_SCAN.ordinal -> adapter.animScan(true)
+            Event.START_SCAN.ordinal -> adapter.animScanStart()
             Event.RESULTS.ordinal -> updateList(mesaage)
             Event.STARTED.ordinal -> buttons.buttonResume.isActivated = true
             Event.STOPPED.ordinal -> {
                 buttons.buttonResume.isActivated = false
-                adapter.animScan(false)
+                adapter.animScanCancel()
             }
         }
     }
@@ -263,6 +277,7 @@ class MainFragment : Fragment(), Titled {
             binding.buttons.buttonResume.isActivated = msg.arg1.toBoolean()
 
             updateCounters(adapter.updateList(msg.obj as ArrayList<Point>)) // todo wtf
+            adapter.animScanEnd()
         }
     }
 
@@ -307,7 +322,7 @@ class MainFragment : Fragment(), Titled {
             description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
             description.tvBssid.text = getString(R.string.bssid_format, point.bssid)
             description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
-            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
             description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
             description.tvManufDesc.text = point.manufacturerDesc
         } else

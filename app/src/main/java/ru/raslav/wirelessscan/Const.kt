@@ -15,4 +15,7 @@ object Const {
     const val PREF_EXTRAS = "extras"
     const val PREF_AUTO_OFF_WIFI = "auto_off_wifi"
     const val PREF_NO_SCAN_IN_BG = "no_scan_in_bg"
+
+    const val ALPHA_ZERO = 0f
+    const val ALPHA_FULL = 1f
 }

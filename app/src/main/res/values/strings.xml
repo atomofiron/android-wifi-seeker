@@ -40,7 +40,7 @@
     <string name="essid_format">SSID: %s</string>
     <string name="bssid_format">BSSID: %s</string>
     <string name="capab_format">Capabilities: %s</string>
-    <string name="frequ_format">Frequency: %1$d, chanel: %2$d</string>
+    <string name="frequ_format">Frequency: %1$d, chanel: %2$d, pwr: %3$d</string>
     <string name="manuf_format">Manufacturer: %s</string>
 
     <!-- Permissions -->

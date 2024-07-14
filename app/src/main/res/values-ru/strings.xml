@@ -40,7 +40,7 @@
     <string name="essid_format">SSID: %s</string>
     <string name="bssid_format">BSSID: %s</string>
     <string name="capab_format">Возможности: %s</string>
-    <string name="frequ_format">Частота: %1$d, канал: %2$d</string>
+    <string name="frequ_format">Частота: %1$d, канал: %2$d, мощь: %3$d</string>
     <string name="manuf_format">Производитель: %s</string>
 
     <!-- Permissions -->

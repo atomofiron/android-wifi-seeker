@@ -1,28 +1,33 @@
 package ru.raslav.wirelessscan.adapters
 
-import android.content.Context
+import android.animation.ValueAnimator
 import android.net.wifi.WifiInfo
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
-import android.widget.ListView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
+import kotlin.math.roundToInt
 
+enum class AnimType {
+    None, ScanStart, ScanEnd
+}
 
-class PointListAdapter(
-    private val co: Context,
-    private val listView: ListView,
-) : BaseAdapter() {
+private class Holder(
+    var index: Int = -1,
+    val binding: LayoutItemBinding,
+)
+
+class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
+    ValueAnimator.AnimatorUpdateListener {
     companion object {
         const val FILTER_DEFAULT = 0
         const val FILTER_INCLUDE = 1
@@ -33,40 +38,36 @@ class PointListAdapter(
     val allPoints = mutableListOf<Point>()
     private val points = mutableListOf<Point>()
     private var focused: Point? = null
-    private var transparent = 0
     private var filtering = false
+    private val views = hashMapOf<Int, LayoutItemBinding>()
     var connectionInfo: WifiInfo? = null
         set(value) { field = value; notifyDataSetChanged() }
 
-    var onPointClickListener: (point: Point?) -> Unit = {}
+    private var animType = AnimType.None
+    private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
 
-    init {
-        Point.initColors(co)
-        transparent = ContextCompat.getColor(co, R.color.transparent)
-        listView.setOnItemClickListener { _, _, position, _ ->
-            focused = points[position]
-            onPointClickListener(focused)
-            notifyDataSetChanged()
-        }
-    }
+    operator fun get(index: Int): Point = points[index]
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val binding: LayoutItemBinding = if (convertView == null) {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val holder: Holder = if (convertView == null) {
             //android.view.InflateException: Binary XML file line #64: addView(View, LayoutParams) is not supported in AdapterView
             //Caused by: java.lang.UnsupportedOperationException: addView(View, LayoutParams) is not supported in AdapterView
-            val itemView = LayoutInflater.from(co).inflate(R.layout.layout_item, parent, false)
+            val itemView = LayoutInflater.from(parent.context).inflate(R.layout.layout_item, parent, false)
+            itemView.addOnAttachStateChangeListener(this)
             val binding = LayoutItemBinding.bind(itemView)
-            itemView.tag = binding
+            val holder = Holder(binding = binding)
+            itemView.tag = holder
 
             binding.pwr.text = "\u25CF " // ●
             binding.pwr.gravity = Gravity.END
-            binding
+            holder
         } else
-            convertView.tag as LayoutItemBinding
+            convertView.tag as Holder
 
-        fillView(binding, points[position], position)
+        holder.index = position
+        fillView(holder.binding, points[position], position)
 
-        return binding.root
+        return holder.binding.root
     }
 
     private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
@@ -120,9 +121,14 @@ class PointListAdapter(
             report("WOW: point.level == -1")
     }
 
+    fun setFocused(point: Point) {
+        focused = point
+        notifyDataSetChanged()
+    }
+
     fun resetFocus() {
         focused = null
-        onPointClickListener(null)
+        notifyDataSetChanged()
     }
 
     /** @return counters like '15 / 22' or '5 / 15 / 22' */
@@ -141,7 +147,6 @@ class PointListAdapter(
 
         applyFilter()
         notifyDataSetChanged()
-        anim()
         return getCounters()
     }
 
@@ -187,36 +192,72 @@ class PointListAdapter(
         return getCounters()
     }
 
-    private fun anim() {
-        val count = listView.childCount
-        if (count > 0) {
-            for (i in 0 until count) {
-                val anim = AnimationUtils.loadAnimation(co, R.anim.show)
-                anim.startOffset = 500L / count * (count - 1 - i)
-                val binding = LayoutItemBinding.bind(listView.getChildAt(i))
-                binding.pwr.startAnimation(anim)
-            }
-        }
-    }
-
-    fun animScan(start: Boolean) {
-        val count = listView.childCount
-        if (count > 0) {
-            for (i in 0 until count) {
-                val binding = LayoutItemBinding.bind(listView.getChildAt(i))
-                if (start) {
-                    val id = if (i % 2 == 0) R.anim.blink_0 else R.anim.blink_1
-                    binding.pwr.startAnimation(AnimationUtils.loadAnimation(co, id))
-                } else {
-                    binding.pwr.animation = null
-                }
-            }
-        }
-    }
-
     override fun getItem(position: Int): Point = points[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getCount(): Int = points.size
+
+    override fun onViewAttachedToWindow(view: View) {
+        val holder = view.tag as Holder
+        views[holder.index] = holder.binding
+    }
+
+    override fun onViewDetachedFromWindow(view: View) {
+        val holder = view.tag as Holder
+        views.remove(holder.index)
+    }
+
+    fun animScanStart() {
+        animType = AnimType.ScanStart
+        animator.cancel()
+        animator.duration = 100
+        animator.repeatMode = ValueAnimator.REVERSE
+        animator.repeatCount = ValueAnimator.INFINITE
+        animator.start()
+    }
+
+    fun animScanEnd() {
+        animType = AnimType.ScanEnd
+        animator.cancel()
+        animator.duration = 500
+        animator.repeatCount = 0
+        animator.start()
+    }
+
+    fun animScanCancel() {
+        if (animType == AnimType.ScanStart) {
+            animator.cancel()
+            animType = AnimType.None
+            for (binding in views.values) {
+                binding.pwr.alpha = Const.ALPHA_FULL
+            }
+        }
+    }
+
+    fun initAnim() = animator.addUpdateListener(this)
+
+    fun resetAnim() = animator.removeUpdateListener(this)
+
+    override fun onAnimationUpdate(animation: ValueAnimator) {
+        if (views.isEmpty()) {
+            return
+        }
+        val value = animation.animatedValue as Float
+        if (animType == AnimType.ScanStart) {
+            for (entry in views.entries) {
+                entry.value.pwr.alpha = if (entry.key % 2 == 0) value else (Const.ALPHA_FULL - value)
+            }
+        } else if (animType == AnimType.ScanEnd) {
+            val min = views.keys.min()
+            val max = views.keys.max()
+            val threshold = (min + (max - min) * (Const.ALPHA_FULL - value)).roundToInt()
+            for (entry in views.entries) {
+                entry.value.pwr.alpha = if (entry.key >= threshold) Const.ALPHA_FULL else Const.ALPHA_ZERO
+            }
+            if (value == Const.ALPHA_FULL) {
+                animType = AnimType.None
+            }
+        }
+    }
 }

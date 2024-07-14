@@ -30,6 +30,7 @@ class SnapshotFragment : Fragment(), Titled {
 
     override val title: String get() = requireArguments().getString(EXTRA_NAME).toString()
 
+    private val adapter = PointListAdapter()
     private lateinit var binding: FragmentSnapshotBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,10 +53,12 @@ class SnapshotFragment : Fragment(), Titled {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
-        val adapter = PointListAdapter(requireContext(), binding.listView)
         binding.listView.adapter = adapter
-        adapter.onPointClickListener = { point -> showDescription(binding.description, point) }
-
+        binding.listView.setOnItemClickListener { _, _, position, _ ->
+            val point = adapter[position]
+            showDescription(binding.description, point)
+            adapter.setFocused(point)
+        }
         adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 
         binding.description.root.insetsPadding(start = true, end = true)
@@ -78,7 +81,7 @@ class SnapshotFragment : Fragment(), Titled {
             description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
             description.tvBssid.text = getString(R.string.bssid_format, point.bssid)
             description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
-            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
+            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
             description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
             description.tvManufDesc.text =  point.manufacturerDesc
         } else
