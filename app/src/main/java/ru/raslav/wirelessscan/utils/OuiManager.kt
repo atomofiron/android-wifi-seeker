@@ -19,22 +19,28 @@ private const val COLUMN_MAC = "MAC"
 private const val COLUMN_LABEL = "label"
 private const val COLUMN_DESC = "description"
 
-class OuiManager(private val context: Context) {
+class OuiManager private constructor(context: Context) {
+    companion object {
+        private lateinit var instance: OuiManager
+
+        fun init(context: Context) {
+            instance = OuiManager(context)
+        }
+
+        fun find(bssid: String): Manufacturer = instance.find(bssid)
+    }
     private val db: SQLiteDatabase
     private val tmpDbPath = context.filesDir.absolutePath + "/tmp.db"
     private val dbPath = context.filesDir.absolutePath + "/$DB_NAME"
     private val txtPath = context.filesDir.absolutePath + "/oui.txt"
 
     init {
-        verifyFile()
+        context.verifyFile()
         db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY)
         //Thread(::parseTxt).start()
     }
 
-    fun close() = db.close()
-
-    fun find(bssid: String): Manufacturer {
-        val db = db ?: return Manufacturer.NoBase
+    private fun find(bssid: String): Manufacturer {
         val mac = bssid.replace(":", "").uppercase()
         DIGITS.map { mac.take(it) }.forEach { digits ->
             db.find(digits)?.let { return it }
@@ -56,15 +62,15 @@ class OuiManager(private val context: Context) {
         return manufacturer
     }
 
-    private fun verifyFile() {
+    private fun Context.verifyFile() {
         val file = File(dbPath)
         if (!file.exists() || file.length() != OUI_SIZE) {
             copyOui()
         }
     }
 
-    private fun copyOui() {
-        val stream = context.assets.open(DB_NAME)
+    private fun Context.copyOui() {
+        val stream = assets.open(DB_NAME)
         val dst = FileOutputStream(dbPath)
         stream.copyTo(dst)
         dst.close()

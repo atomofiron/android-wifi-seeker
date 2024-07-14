@@ -19,7 +19,7 @@ import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
 
 
-class PointsListAdapter(
+class PointListAdapter(
     private val co: Context,
     private val listView: ListView,
 ) : BaseAdapter() {
@@ -89,10 +89,14 @@ class PointsListAdapter(
 
         val connected = connectionInfo?.bssid == point.bssid
         holder.essid.text = if (point.essid.isEmpty()) point.bssid else point.essid
-        holder.essid.setTextColor(if (connected) Point.green_light else point.essidColor)
+        holder.essid.setTextColor(when {
+            connected -> Point.green_light
+            point.essid.isEmpty() -> Point.yellow
+            else -> Point.grey
+        })
 
         holder.bssid.text = point.bssid
-        holder.bssid.setTextColor(if (connected) Point.green_light else point.bssidColor)
+        holder.bssid.setTextColor(if (connected) Point.green_light else Point.grey)
         holder.bssid.isVisible = holder.root.resources.configuration.isWide()
     }
 
@@ -100,10 +104,8 @@ class PointsListAdapter(
         val focused = focused
         val associating =  when {
             focused == null -> false
-            focused.hex.isEmpty() != point.hex.isEmpty() -> false
-            focused.hex == point.hex -> true
-            focused.hex.isNotEmpty() && point.hex.isNotEmpty() -> false
-            else -> focused.bssid.startsWith(point.bssid.substring(0, 8))
+            focused.hex.isEmpty() && point.hex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
+            else -> focused.hex == point.hex
         }
         if (associating)
             layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)

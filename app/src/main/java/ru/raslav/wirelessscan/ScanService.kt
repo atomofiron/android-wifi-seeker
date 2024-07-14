@@ -47,7 +47,6 @@ class ScanService : IntentService("ScanService") {
     private lateinit var wifiManager: WifiManager
     private lateinit var commandMessenger: Messenger
     private val sp: SharedPreferences by unsafeLazy { sp() }
-    private lateinit var ouiManager: OuiManager
     private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
@@ -78,7 +77,6 @@ class ScanService : IntentService("ScanService") {
             }
         })
 
-        ouiManager = OuiManager(baseContext)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mainPendingIntent = PendingIntent.getActivity(
             baseContext,
@@ -99,7 +97,6 @@ class ScanService : IntentService("ScanService") {
         super.onDestroy()
         report("ScanService: onDestroy()")
         unregisterReceiver(receiver)
-        ouiManager.close()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
@@ -200,9 +197,10 @@ class ScanService : IntentService("ScanService") {
         val currentPoints = wifiManager.scanResults.map { Point(it) }
 
         currentPoints.forEach {
-            it.hex = ouiManager.find(it.bssid).digits
-            it.manufacturer = ouiManager.find(it.bssid).label
-            it.manufacturerDesc = ouiManager.find(it.bssid).description
+            val manuf = OuiManager.find(it.bssid)
+            it.hex = manuf.digits
+            it.manufacturer = manuf.label
+            it.manufacturerDesc = manuf.description
         }
 
         points.removeAll(currentPoints)

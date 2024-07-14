@@ -6,7 +6,7 @@ import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
-import ru.raslav.wirelessscan.adapters.PointsListAdapter
+import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.R
@@ -52,7 +52,7 @@ class SnapshotFragment : Fragment(), Titled {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
-        val adapter = PointsListAdapter(requireContext(), binding.listView)
+        val adapter = PointListAdapter(requireContext(), binding.listView)
         binding.listView.adapter = adapter
         adapter.onPointClickListener = { point -> showDescription(binding.description, point) }
 

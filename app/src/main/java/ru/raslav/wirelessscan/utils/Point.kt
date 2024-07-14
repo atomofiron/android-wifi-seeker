@@ -41,10 +41,8 @@ class Point private constructor(): Parcelable {
     @set:Element(name = "capabilities")
     var capabilities = ""
         set(value) { field = value; parseCapabilities(value) }
-    @get:Element(name = "essid")
-    @set:Element(name = "essid")
+    @field:Element(name = "essid", required = false) // empty values couldn't be required (WTF)
     var essid = ""
-        set(value) { field = value; essidColor = if (value.isEmpty()) yellow else grey }
     @field:Element(name = "bssid")
     var bssid = ""
     var hex = ""
@@ -57,8 +55,9 @@ class Point private constructor(): Parcelable {
         private set
     lateinit var wps: String
         private set
-    @field:Element(name = "manufacturer")
+    @field:Element(name = "manufacturer", required = false)
     var manufacturer = ""
+    @field:Element(name = "manufacturerDesc", required = false)
     var manufacturerDesc = ""
 
     var pwColor = 0
@@ -71,9 +70,6 @@ class Point private constructor(): Parcelable {
         private set
     var wpsColor = 0
         private set
-    var essidColor = 0
-        private set
-    val bssidColor = grey
 
     constructor(sr: ScanResult) : this() {
         level = sr.level
@@ -159,7 +155,7 @@ class Point private constructor(): Parcelable {
             private set
 
         private var red_middle = 0
-        private var grey = 0
+        var grey = 0
         private var blue_light = 0
         private var green = 0
         private var yellow_middle = 0
@@ -169,7 +165,7 @@ class Point private constructor(): Parcelable {
         private var sky_white = 0
         private var green_high = 0
         private var red_high = 0
-        private var yellow = 0
+        var yellow = 0
         var green_light = 0; private set
 
         fun initColors(co: Context) {

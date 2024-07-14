@@ -10,6 +10,7 @@ import org.simpleframework.xml.Root
 import org.simpleframework.xml.core.Persister
 import org.simpleframework.xml.ElementList
 import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.report
 import java.io.StringWriter
 
 class SnapshotManager(private val co: Context) {
@@ -32,6 +33,7 @@ class SnapshotManager(private val co: Context) {
             stream.flush()
             stream.close()
         } catch (e: Exception) {
+            report(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
             return null
         }
@@ -43,8 +45,17 @@ class SnapshotManager(private val co: Context) {
     fun get(name: String): List<Point>? {
         val file = File(co.filesDir, name)
         return try {
-            Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false).points
+            Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false)
+                .points?.apply {
+                    for (point in this) {
+                        val manuf = OuiManager.find(point.bssid)
+                        point.hex = manuf.digits
+                        point.manufacturer = manuf.label
+                        point.manufacturerDesc = manuf.description
+                    }
+                }
         } catch (e: Exception) {
+            report(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
 
             null

@@ -35,7 +35,7 @@ import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
-import ru.raslav.wirelessscan.adapters.PointsListAdapter
+import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
@@ -61,7 +61,7 @@ class MainFragment : Fragment(), Titled {
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
-    private val adapter by unsafeLazy { PointsListAdapter(requireContext(), binding.listView) }
+    private val adapter by unsafeLazy { PointListAdapter(requireContext(), binding.listView) }
     private val connectionReceiver = ConnectionReceiver()
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
@@ -150,17 +150,17 @@ class MainFragment : Fragment(), Titled {
 
     private fun initFilters(filters: ViewGroup) {
         val listener = View.OnClickListener { v ->
-            var state = PointsListAdapter.FILTER_DEFAULT
+            var state = PointListAdapter.FILTER_DEFAULT
             when {
                 v.isSelected -> v.isSelected = false
                 v.isActivated -> {
                     v.isActivated = false
                     v.isSelected = true
-                    state = PointsListAdapter.FILTER_EXCLUDE
+                    state = PointListAdapter.FILTER_EXCLUDE
                 }
                 else -> {
                     v.isActivated = true
-                    state = PointsListAdapter.FILTER_INCLUDE
+                    state = PointListAdapter.FILTER_INCLUDE
                 }
             }
             updateCounters(adapter.updateFilter(filters.indexOfChild(v), state))
