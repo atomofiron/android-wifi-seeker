@@ -21,7 +21,7 @@ import lib.atomofiron.insets.setContentView
 import ru.raslav.wirelessscan.fragments.MainFragment
 import ru.raslav.wirelessscan.fragments.PrefFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
-import ru.raslav.wirelessscan.fragments.SnapshotsListFragment
+import ru.raslav.wirelessscan.fragments.SnapshotListFragment
 import ru.raslav.wirelessscan.fragments.Titled
 
 class MainActivity : AppCompatActivity() {
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
 
         when (intent?.action) {
-            ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotsListFragment())
+            ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotListFragment())
             ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)!!))
         }
     }

@@ -15,7 +15,7 @@
         android:singleLine="true"
         android:ellipsize="middle"
         android:textSize="@dimen/item_title"
-        android:layout_margin="@dimen/item_title_margin"
+        android:layout_marginStart="16dp"
         />
     <ImageButton
         android:layout_width="wrap_content"
@@ -24,8 +24,7 @@
         android:src="@drawable/ic_share"
         android:padding="@dimen/image_button_padding"
         android:layout_weight="0"
-        android:background="?android:selectableItemBackground"
-        android:focusable="false"
+        android:background="@drawable/ripple_40"
         />
     <ImageButton
         android:layout_width="wrap_content"
@@ -34,7 +33,6 @@
         android:src="@drawable/ic_delete_state"
         android:padding="@dimen/image_button_padding"
         android:layout_weight="0"
-        android:background="?android:selectableItemBackground"
-        android:focusable="false"
+        android:background="@drawable/ripple_40"
         />
 </LinearLayout>

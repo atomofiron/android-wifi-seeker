@@ -13,7 +13,7 @@ import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutListBinding
 
-class SnapshotsListFragment : Fragment(), Titled by Titled(R.string.title_snapshots) {
+class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapshots) {
 
     private lateinit var binding: LayoutListBinding
 
@@ -41,8 +41,7 @@ class SnapshotsListFragment : Fragment(), Titled by Titled(R.string.title_snapsh
                             .putExtra(MainActivity.EXTRA_SNAPSHOT_NAME, adapter.getItem(position))
             )
         }
-
-        return view
+        return binding.root
     }
 
     private fun share(name: String) {
