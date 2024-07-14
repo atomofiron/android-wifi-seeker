@@ -1,14 +1,18 @@
 package ru.raslav.wirelessscan.fragments
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.adapters.PointsListAdapter
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
+import ru.raslav.wirelessscan.isWide
 
 class SnapshotFragment : Fragment(), Titled {
     companion object {
@@ -54,7 +58,17 @@ class SnapshotFragment : Fragment(), Titled {
 
         adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 
-        return view
+        binding.description.root.insetsPadding(start = true, end = true)
+        binding.layoutItem.root.insetsPadding(start = true, end = true)
+        binding.listView.insetsPadding(start = true, end = true, bottom = true)
+        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
+
+        return binding.root
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
     }
 
     private fun showDescription(description: LayoutDescriptionBinding, point: Point?) {
@@ -66,6 +80,7 @@ class SnapshotFragment : Fragment(), Titled {
             description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
             description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch)
             description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
+            description.tvManufDesc.text =  point.manufacturerDesc
         } else
             description.root.visibility = View.GONE
     }

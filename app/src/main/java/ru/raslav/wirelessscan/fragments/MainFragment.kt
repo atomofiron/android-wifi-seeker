@@ -132,6 +132,7 @@ class MainFragment : Fragment(), Titled {
 
         initFilters(binding.filters.layoutFilters.root)
         binding.initButtons(binding.counter)
+        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
             startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
@@ -142,18 +143,9 @@ class MainFragment : Fragment(), Titled {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        resources.configuration.applyLayout()
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        newConfig.applyLayout()
-    }
-
-    private fun Configuration.applyLayout() {
-        binding.layoutItem.bssid.isVisible = isWide()
+        binding.layoutItem.bssid.isVisible = newConfig.isWide()
     }
 
     private fun initFilters(filters: ViewGroup) {

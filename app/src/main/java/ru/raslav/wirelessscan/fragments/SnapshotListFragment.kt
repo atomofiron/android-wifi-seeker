@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
 
 import ru.raslav.wirelessscan.BuildConfig
@@ -41,6 +42,7 @@ class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapsho
                             .putExtra(MainActivity.EXTRA_SNAPSHOT_NAME, adapter.getItem(position))
             )
         }
+        binding.listView.insetsPadding(start = true, end = true, bottom = true)
         return binding.root
     }
 

@@ -50,6 +50,7 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
                     File(dbDir.absolutePath, title.text.toString()).delete()
                     update()
                 })
+                root.tag = this
             }
         } else
             convertView.tag as LayoutItemSnapshotBinding

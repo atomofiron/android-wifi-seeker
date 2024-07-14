@@ -10,12 +10,16 @@
         layout="@layout/layout_description"
         android:visibility="gone"
         />
-    <include layout="@layout/layout_item" />
+    <include
+        android:id="@+id/layout_item"
+        layout="@layout/layout_item"
+        />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/list_view"
         android:divider="@null"
+        android:clipToPadding="false"
         />
 </LinearLayout>
