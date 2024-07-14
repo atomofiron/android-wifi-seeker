@@ -63,7 +63,7 @@ class MainFragment : Fragment(), Titled {
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
-    private val adapter = PointListAdapter()
+    private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private val connectionReceiver = ConnectionReceiver()
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
@@ -120,6 +120,7 @@ class MainFragment : Fragment(), Titled {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = FragmentMainBinding.inflate(inflater, container, false)
+        adapter.initAnim()
 
         val description = binding.layoutDescription.root.insetsMix { }
         val counter = binding.counter.insetsMix { }
@@ -136,7 +137,6 @@ class MainFragment : Fragment(), Titled {
             adapter.setFocused(point)
         }
         binding.listView.adapter = adapter
-        adapter.initAnim()
 
         initFilters(binding.filters.layoutFilters.root)
         binding.initButtons(binding.counter)

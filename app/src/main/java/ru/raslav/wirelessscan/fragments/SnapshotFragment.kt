@@ -13,6 +13,7 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.unsafeLazy
 
 class SnapshotFragment : Fragment(), Titled {
     companion object {
@@ -30,7 +31,7 @@ class SnapshotFragment : Fragment(), Titled {
 
     override val title: String get() = requireArguments().getString(EXTRA_NAME).toString()
 
-    private val adapter = PointListAdapter()
+    private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

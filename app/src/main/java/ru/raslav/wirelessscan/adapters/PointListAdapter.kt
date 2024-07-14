@@ -1,9 +1,11 @@
 package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
+import android.content.Context
 import android.net.wifi.WifiInfo
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -35,7 +37,7 @@ private class Holder(
     override fun hashCode(): Int = binding.hashCode()
 }
 
-class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
+class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChangeListener,
     ValueAnimator.AnimatorUpdateListener {
     companion object {
         const val FILTER_DEFAULT = 0
@@ -48,11 +50,15 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     private val points = mutableListOf<Point>()
     private var focused: Point? = null
     private var filtering = false
-    private lateinit var focusedDrawable: SideDrawable
+    private val focusedDrawable = SideDrawable(
+        ContextCompat.getColor(context, R.color.grey),
+        context.resources.getDimension(R.dimen.one),
+    )
     private val holders = mutableListOf<Holder>()
     var connectionInfo: WifiInfo? = null
         set(value) { field = value; notifyDataSetChanged() }
 
+    private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     private var animType = AnimType.None
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
 
@@ -67,13 +73,6 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
             val binding = LayoutItemBinding.bind(itemView)
             val holder = Holder(binding = binding)
             itemView.tag = holder
-
-            if (!::focusedDrawable.isInitialized) {
-                focusedDrawable = SideDrawable(
-                    ContextCompat.getColor(parent.context, R.color.grey),
-                    parent.resources.getDimension(R.dimen.one),
-                )
-            }
 
             binding.pwr.text = "\u25CF " // ●
             binding.pwr.gravity = Gravity.END
@@ -227,18 +226,20 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     }
 
     fun animScanStart() {
+        if (animScale <= 0f) return
         animType = AnimType.ScanStart
         animator.cancel()
-        animator.duration = 100
+        animator.duration = (100 / animScale).roundToInt().toLong()
         animator.repeatMode = ValueAnimator.REVERSE
         animator.repeatCount = ValueAnimator.INFINITE
         animator.start()
     }
 
     fun animScanEnd() {
+        if (animScale <= 0f) return
         animType = AnimType.ScanEnd
         animator.cancel()
-        animator.duration = 500
+        animator.duration = (500 / animScale).roundToInt().toLong()
         animator.repeatCount = 0
         animator.start()
     }
