@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
+import android.os.Build.VERSION_CODES.TIRAMISU as T
 import android.annotation.SuppressLint
 import android.app.BackgroundServiceStartNotAllowedException
 import android.content.BroadcastReceiver
@@ -121,6 +122,7 @@ class MainFragment : Fragment(), Titled {
         super.onStart()
 
         updateConnectionInfo()
+        view?.let { binding.permissionDisclaimer.isVisible = !locationGranted() }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -152,6 +154,7 @@ class MainFragment : Fragment(), Titled {
             showDescription(binding.layoutDescription, null)
         }
         binding.permissionDisclaimer.isVisible = !locationGranted()
+        binding.btnGrant.setOnClickListener { openPermissionSettings() }
 
         if (savedInstanceState != null)
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
@@ -239,6 +242,8 @@ class MainFragment : Fragment(), Titled {
 
     private fun locationGranted() = SDK_INT < M || requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
 
+    private fun notificationsGranted() = SDK_INT < T || requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
     private fun checkPermissionAndStartScan() {
         if (!locationGranted())
             requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE)
@@ -250,19 +255,29 @@ class MainFragment : Fragment(), Titled {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+        if (requestCode == Const.NOTIFICATIONS_REQUEST_CODE) {
+            // do nothing
+        } else if (requestCode == Const.LOCATION_REQUEST_CODE && granted) {
             binding.permissionDisclaimer.isVisible = false
             tryStartScanService()
         } else if (!shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION)) {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.setData(Uri.fromParts("package", requireContext().packageName, null))
-            startActivity(intent)
-            requireContext().shortToast(R.string.get_perm_by_settings)
+            openPermissionSettings()
         }
+    }
+
+    private fun openPermissionSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        intent.setData(Uri.fromParts("package", requireContext().packageName, null))
+        startActivity(intent)
+        requireContext().shortToast(R.string.get_perm_by_settings)
     }
 
     private fun LayoutButtonsPaneBinding.tryStartScanServiceIfWifiEnabled() {
         if (wifiManager.isWifiEnabled) {
+            if (!notificationsGranted()) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), Const.NOTIFICATIONS_REQUEST_CODE)
+            }
             buttonResume.isActivated = true
             tryStartScanService()
         }
