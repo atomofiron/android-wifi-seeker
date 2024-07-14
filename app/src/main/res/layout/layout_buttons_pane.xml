@@ -14,7 +14,7 @@
         android:id="@+id/button_filter"
         android:src="@drawable/ic_filter_state"
         android:layout_weight="1"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="@drawable/ripple_40"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -22,7 +22,7 @@
         android:id="@+id/button_clear"
         android:src="@drawable/ic_trash"
         android:layout_weight="1"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="@drawable/ripple_40"
         app:tint="@color/clear_btn"
         />
     <ImageButton
@@ -31,7 +31,7 @@
         android:id="@+id/button_resume"
         android:src="@drawable/ic_state"
         android:layout_weight="1"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="@drawable/ripple_40"
         />
     <Spinner
         android:layout_width="@dimen/button_size"
@@ -48,7 +48,7 @@
         android:id="@+id/button_save"
         android:src="@drawable/ic_save_state"
         android:layout_weight="1"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="@drawable/ripple_40"
         />
     <ImageButton
         android:layout_width="@dimen/button_size"
@@ -56,6 +56,6 @@
         android:id="@+id/button_list"
         android:src="@drawable/ic_list"
         android:layout_weight="1"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="@drawable/ripple_40"
         />
 </LinearLayout>
