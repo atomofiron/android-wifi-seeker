@@ -54,17 +54,18 @@ class SnapshotFragment : Fragment(), Titled {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
         binding.listView.adapter = adapter
+        adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
+
+        binding.description.root.insetsPadding(start = true, end = true, bottom = true)
+        binding.layoutItem.root.insetsPadding(start = true, end = true)
+        val listInsets = binding.listView.insetsPadding(start = true, end = true, bottom = true)
+        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             val point = adapter[position]
             showDescription(binding.description, point)
             adapter.setFocused(point)
+            listInsets.changeInsets { padding(start, end) }
         }
-        adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
-
-        binding.description.root.insetsPadding(start = true, end = true)
-        binding.layoutItem.root.insetsPadding(start = true, end = true)
-        binding.listView.insetsPadding(start = true, end = true, bottom = true)
-        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
 
         return binding.root
     }

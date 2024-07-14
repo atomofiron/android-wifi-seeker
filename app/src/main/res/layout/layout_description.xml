@@ -5,8 +5,9 @@
     android:layout_height="wrap_content"
     android:id="@+id/layout_description"
     android:orientation="vertical"
+    android:paddingStart="8dp"
     android:background="@color/colorFrame"
-    style="?android:selectableItemBackground">
+    >
     <TextView
         style="@style/Description"
         android:id="@+id/tv_essid"

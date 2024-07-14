@@ -14,17 +14,10 @@
         android:layout_weight="1">
 
         <include
-            android:id="@+id/layout_description"
-            layout="@layout/layout_description"
-            android:visibility="gone"
-            tools:visibility="visible"
-            />
-
-        <include
             android:id="@+id/layout_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/layout_description"
+            android:layout_alignParentTop="true"
             layout="@layout/layout_item"
             />
 
@@ -32,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/counter"
-            android:layout_below="@+id/layout_description"
+            android:layout_below="@+id/layout_item"
             android:layout_alignTop="@+id/layout_item"
             android:layout_alignParentEnd="true"
             android:text="0/0"
@@ -48,6 +41,16 @@
             android:layout_below="@+id/layout_item"
             android:clipToPadding="false"
             android:scrollbarThumbVertical="@drawable/scroll_vertical"
+            android:layout_above="@+id/layout_description"
+            />
+        <include
+            android:id="@+id/layout_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_description"
+            android:visibility="gone"
+            android:layout_alignParentBottom="true"
+            tools:visibility="visible"
             />
         <ProgressBar
             android:id="@+id/progress"

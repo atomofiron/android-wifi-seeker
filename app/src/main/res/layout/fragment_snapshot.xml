@@ -6,20 +6,21 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/description"
-        layout="@layout/layout_description"
-        android:visibility="gone"
-        />
-    <include
         android:id="@+id/layout_item"
         layout="@layout/layout_item"
         />
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/list_view"
         android:divider="@null"
         android:clipToPadding="false"
+        />
+    <include
+        android:id="@+id/description"
+        layout="@layout/layout_description"
+        android:visibility="gone"
         />
 </LinearLayout>

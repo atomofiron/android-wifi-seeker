@@ -128,7 +128,7 @@ class MainFragment : Fragment(), Titled {
         val buttons = binding.buttons.root.insetsMix { }
         val filters = binding.filters.root.insetsMix { }
         binding.root.layoutChanges {
-            binding.onLayoutChanged(description, counter, header, list, filters, buttons, it)
+            binding.onLayoutChanged(counter, description, header, list, filters, buttons, it)
         }
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             val point = adapter[position]
@@ -405,9 +405,9 @@ class MainFragment : Fragment(), Titled {
         }
         listInsets.changeInsets {
             when (orientation) {
-                Orientation.Start -> padding(end, bottom)
+                Orientation.Start -> padding(end)
                 Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start, bottom)
+                Orientation.End -> padding(start)
             }
         }
         filtersInsets.changeInsets {
