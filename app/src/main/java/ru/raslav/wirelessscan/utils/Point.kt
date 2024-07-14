@@ -60,6 +60,7 @@ class Point private constructor(): Parcelable {
     @field:Element(name = "manufacturerDesc", required = false)
     var manufacturerDesc = ""
 
+    // todo move this into adapter/holder
     var pwColor = 0
         private set
     var chColor = 0
@@ -147,6 +148,7 @@ class Point private constructor(): Parcelable {
 		private val MAX_INDICATOR_LEVEL = 512
         val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
 
+        // todo move this into adapter/holder
         var transparent = 0
             private set
         var black_lite = 0
@@ -155,7 +157,7 @@ class Point private constructor(): Parcelable {
             private set
 
         private var red_middle = 0
-        var grey = 0
+        var grey = 0; private set
         private var blue_light = 0
         private var green = 0
         private var yellow_middle = 0
@@ -165,7 +167,7 @@ class Point private constructor(): Parcelable {
         private var sky_white = 0
         private var green_high = 0
         private var red_high = 0
-        var yellow = 0
+        var yellow = 0; private set
         var green_light = 0; private set
 
         fun initColors(co: Context) {
