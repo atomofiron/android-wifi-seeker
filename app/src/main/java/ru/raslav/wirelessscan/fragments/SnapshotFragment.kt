@@ -66,6 +66,11 @@ class SnapshotFragment : Fragment(), Titled {
             adapter.setFocused(point)
             listInsets.changeInsets { padding(start, end) }
         }
+        binding.description.cross.setOnClickListener {
+            adapter.resetFocus()
+            showDescription(binding.description, null)
+            listInsets.changeInsets { padding(start, end, bottom) }
+        }
 
         return binding.root
     }

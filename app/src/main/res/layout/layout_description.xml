@@ -1,35 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/layout_description"
-    android:orientation="vertical"
-    android:paddingStart="8dp"
     android:background="@color/colorFrame"
+    android:paddingStart="8dp"
     >
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_essid"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_essid"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_bssid"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_capab"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_frequ"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_manuf"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_manuf_desc"
+            />
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/cross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:src="@drawable/ic_circle_cross"
+        android:padding="8dp"
+        android:alpha="0.5"
+        android:background="@drawable/ripple_40"
         />
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_bssid"
-        />
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_capab"
-        />
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_frequ"
-        />
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_manuf"
-        />
-    <TextView
-        style="@style/Description"
-        android:id="@+id/tv_manuf_desc"
-        />
-</LinearLayout>
+</FrameLayout>

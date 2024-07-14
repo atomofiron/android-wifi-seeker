@@ -132,7 +132,7 @@ class MainFragment : Fragment(), Titled {
         }
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             val point = adapter[position]
-            showDescriptionIfNecessary(binding.layoutDescription, point)
+            showDescription(binding.layoutDescription, point)
             adapter.setFocused(point)
         }
         binding.listView.adapter = adapter
@@ -141,6 +141,10 @@ class MainFragment : Fragment(), Titled {
         initFilters(binding.filters.layoutFilters.root)
         binding.initButtons(binding.counter)
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
+        binding.layoutDescription.cross.setOnClickListener {
+            adapter.resetFocus()
+            showDescription(binding.layoutDescription, null)
+        }
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
             tryStartScanServiceIfWifiEnabled(binding.buttons.buttonResume)
@@ -212,7 +216,7 @@ class MainFragment : Fragment(), Titled {
             label.text = adapter.clear()
         }.onClickListener {
             adapter.resetFocus()
-            showDescriptionIfNecessary(binding.layoutDescription, null)
+            showDescription(binding.layoutDescription, null)
         })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
@@ -315,7 +319,7 @@ class MainFragment : Fragment(), Titled {
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showDescriptionIfNecessary(description: LayoutDescriptionBinding, point: Point?) {
+    private fun showDescription(description: LayoutDescriptionBinding, point: Point?) {
         if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, true)) {
             description.root.visibility = View.VISIBLE
 
