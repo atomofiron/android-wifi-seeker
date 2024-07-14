@@ -2,12 +2,15 @@ package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
 import android.net.wifi.WifiInfo
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
@@ -15,6 +18,7 @@ import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
+import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.roundToInt
 
 enum class AnimType {
@@ -39,6 +43,7 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
     private val points = mutableListOf<Point>()
     private var focused: Point? = null
     private var filtering = false
+    private lateinit var focusedDrawable: SideDrawable
     private val views = hashMapOf<Int, LayoutItemBinding>()
     var connectionInfo: WifiInfo? = null
         set(value) { field = value; notifyDataSetChanged() }
@@ -57,6 +62,13 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
             val binding = LayoutItemBinding.bind(itemView)
             val holder = Holder(binding = binding)
             itemView.tag = holder
+
+            if (!::focusedDrawable.isInitialized) {
+                focusedDrawable = SideDrawable(
+                    ContextCompat.getColor(parent.context, R.color.grey),
+                    parent.resources.getDimension(R.dimen.one),
+                )
+            }
 
             binding.pwr.text = "\u25CF " // ●
             binding.pwr.gravity = Gravity.END
@@ -108,6 +120,7 @@ class PointListAdapter : BaseAdapter(), View.OnAttachStateChangeListener,
             focused.hex.isEmpty() && point.hex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
             else -> focused.hex == point.hex
         }
+        if (SDK_INT >= M) layout.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
         if (associating)
             layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
         else

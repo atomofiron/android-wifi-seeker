@@ -6,4 +6,5 @@
     <dimen name="compact_width">320dp</dimen>
     <dimen name="medium_width">480dp</dimen>
     <dimen name="extended_width">640dp</dimen>
+    <dimen name="one">1dp</dimen>
 </resources>
