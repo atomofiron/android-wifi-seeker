@@ -28,6 +28,14 @@
         android:theme="@style/AppTheme"
         android:name=".App"
         >
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="3.0"
+            />
+        <meta-data
+            android:name="com.sec.android.support.multiwindow"
+            android:value="true"
+            />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleInstance"
