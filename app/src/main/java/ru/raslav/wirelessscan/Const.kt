@@ -1,5 +1,9 @@
 package ru.raslav.wirelessscan
 
+import android.Manifest
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
+
 object Const {
     const val SNAPSHOT_FORMAT = ".xml"
 
@@ -18,4 +22,10 @@ object Const {
 
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f
+
+    const val LOCATION_REQUEST_CODE = 7
+    val LOCATION_PERMISSION = when {
+        SDK_INT >= Q -> Manifest.permission.ACCESS_FINE_LOCATION
+        else -> Manifest.permission.ACCESS_COARSE_LOCATION
+    }
 }

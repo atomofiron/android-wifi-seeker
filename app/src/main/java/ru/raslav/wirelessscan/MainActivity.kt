@@ -4,9 +4,11 @@ import android.Manifest
 import android.annotation.TargetApi
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Bundle
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
+import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
@@ -23,6 +25,7 @@ import ru.raslav.wirelessscan.fragments.PrefFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
 import ru.raslav.wirelessscan.fragments.SnapshotListFragment
 import ru.raslav.wirelessscan.fragments.Titled
+
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -107,8 +110,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        if (SDK_INT >= M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 7)
+        if (SDK_INT >= M && checkSelfPermission(Const.LOCATION_PERMISSION) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE)
         else if (!granted(Manifest.permission.ACCESS_WIFI_STATE)) {
             shortToast(R.string.no_perm)
             finish()
@@ -122,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                 .setCancelable(false)
                 .setMessage(R.string.need_coarse_location)
                 .setPositiveButton(R.string.ok) { _, _ ->
-                    requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 7)
+                    requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE)
                 }.create().show()
 
     @TargetApi(M)
@@ -130,8 +133,11 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when {
             grantResults[0] == PackageManager.PERMISSION_GRANTED -> showMainFragmentIfNecessary()
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> showPermissionDialog()
+            shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION) -> showPermissionDialog()
             else -> {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.setData(Uri.fromParts("package", packageName, null))
+                startActivity(intent)
                 shortToast(R.string.get_perm_by_settings)
                 finish()
             }
