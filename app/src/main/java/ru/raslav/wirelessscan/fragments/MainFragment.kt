@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.annotation.SuppressLint
+import android.app.BackgroundServiceStartNotAllowedException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.content.res.Configuration
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
+import android.os.Build.VERSION_CODES.S
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -135,7 +137,7 @@ class MainFragment : Fragment(), Titled {
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
 
         if (savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) != false)
-            startScanServiceIfWifiEnabled(binding.buttons.buttonResume)
+            tryStartScanServiceIfWifiEnabled(binding.buttons.buttonResume)
 
         if (savedInstanceState != null)
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
@@ -204,10 +206,17 @@ class MainFragment : Fragment(), Titled {
         }
     }
 
-    private fun startScanServiceIfWifiEnabled(buttonResume: View) {
+    private fun tryStartScanServiceIfWifiEnabled(buttonResume: View) {
         buttonResume.isActivated = wifiManager.isWifiEnabled
-        if (buttonResume.isActivated)
-            startScanService()
+        when {
+            !buttonResume.isActivated -> Unit
+            SDK_INT < S -> startScanService()
+            else -> try {
+                startScanService()
+            } catch (e: BackgroundServiceStartNotAllowedException) {
+                report(e.toString())
+            }
+        }
     }
 
     private fun startScanService() {
