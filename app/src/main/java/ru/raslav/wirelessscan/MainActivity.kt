@@ -52,8 +52,8 @@ class MainActivity : AppCompatActivity() {
                 .addToBackStack(fragment.javaClass.name)
                 .apply { hide(current ?: return@apply) }
                 .add(R.id.fragment_container, fragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commitAllowingStateLoss()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                .commit()
         }
     }
 
