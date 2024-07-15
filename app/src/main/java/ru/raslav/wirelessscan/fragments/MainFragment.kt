@@ -49,6 +49,7 @@ import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
@@ -154,7 +155,7 @@ class MainFragment : Fragment(), Titled {
             showDescription(binding.layoutDescription, null)
         }
         binding.permissionDisclaimer.isVisible = !locationGranted()
-        binding.btnGrant.setOnClickListener { openPermissionSettings() }
+        binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
         if (savedInstanceState != null)
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
@@ -254,7 +255,6 @@ class MainFragment : Fragment(), Titled {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
         if (requestCode == Const.NOTIFICATIONS_REQUEST_CODE) {
             // do nothing
@@ -262,15 +262,8 @@ class MainFragment : Fragment(), Titled {
             binding.permissionDisclaimer.isVisible = false
             tryStartScanService()
         } else if (!shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION)) {
-            openPermissionSettings()
+            requireContext().openPermissionSettings()
         }
-    }
-
-    private fun openPermissionSettings() {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        intent.setData(Uri.fromParts("package", requireContext().packageName, null))
-        startActivity(intent)
-        requireContext().shortToast(R.string.get_perm_by_settings)
     }
 
     private fun LayoutButtonsPaneBinding.tryStartScanServiceIfWifiEnabled() {

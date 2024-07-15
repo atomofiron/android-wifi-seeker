@@ -1,8 +1,12 @@
 package ru.raslav.wirelessscan.fragments
 
+import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -22,6 +26,7 @@ import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.longToast
+import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
 
@@ -95,7 +100,14 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         when (preference.key) {
             Const.PREF_DETECT_ATTACKS -> attackScreen.isEnabled = newValue as Boolean
             Const.PREF_AUTO_OFF_WIFI -> updateNoScanPreference(newValue as Boolean)
-            Const.PREF_WORK_IN_BG -> if (newValue == true) noScanInBg.isChecked = false
+            Const.PREF_WORK_IN_BG -> when {
+                newValue != true -> Unit
+                backgroundLocationGranted() -> noScanInBg.isChecked = false
+                else -> {
+                    requestPermissions(arrayOf(ACCESS_BACKGROUND_LOCATION), Const.BG_LOCATION_REQUEST_CODE)
+                    return false
+                }
+            }
             Const.PREF_NO_SCAN_IN_BG -> if (newValue == true) scanInBg.isChecked = false
         }
         return true
@@ -136,4 +148,15 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         } else
             Toast.makeText(requireContext(), R.string.no_activity, Toast.LENGTH_SHORT).show()
     }
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when {
+            requestCode != Const.BG_LOCATION_REQUEST_CODE -> Unit
+            grantResults.first() == PackageManager.PERMISSION_GRANTED -> scanInBg.isChecked = true
+            else -> requireContext().openPermissionSettings()
+        }
+    }
+
+    private fun backgroundLocationGranted() = SDK_INT < Q || requireContext().checkSelfPermission(ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
 }
