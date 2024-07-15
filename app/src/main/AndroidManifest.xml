@@ -59,9 +59,10 @@
                 />
         </service>
         <provider
-            android:name=".utils.FileContentProvider"
+            android:name=".utils.SnapshotProvider"
             android:authorities="${PROVIDER}"
             android:exported="true"
+            tools:ignore="ExportedContentProvider"
             />
     </application>
 

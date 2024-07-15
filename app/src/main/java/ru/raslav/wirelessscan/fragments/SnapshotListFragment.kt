@@ -47,10 +47,9 @@ class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapsho
     }
 
     private fun share(name: String) {
-        val suffix = if (BuildConfig.DEBUG) ".debug" else ""
         val intent = Intent(Intent.ACTION_SEND)
-                .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://ru.raslav.wirelessscan$suffix/$name"))
-                .setType("text/xml")
+            .putExtra(Intent.EXTRA_STREAM, Uri.parse("content://${BuildConfig.AUTHORITY}/$name"))
+            .setType("text/xml")
 
         if (intent.resolveActivity(requireContext().packageManager) != null)
             startActivity(intent)

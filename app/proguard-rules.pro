@@ -27,7 +27,7 @@
 -keep class ru.raslav.wirelessscan.App
 -keep class ru.raslav.wirelessscan.MainActivity
 -keep class ru.raslav.wirelessscan.ScanService
--keep class ru.raslav.wirelessscan.utils.FileContentProvider
+-keep class ru.raslav.wirelessscan.utils.SnapshotProvider
 -keepclasseswithmembers class ru.raslav.wirelessscan.utils.Point { *; }
 -keepclasseswithmembers class ru.raslav.wirelessscan.utils.SnapshotManager$Snapshot { *; }
 
