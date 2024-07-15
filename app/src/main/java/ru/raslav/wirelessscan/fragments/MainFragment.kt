@@ -36,7 +36,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.ViewInsetsDelegate
-import lib.atomofiron.insets.insetsMix
+import lib.atomofiron.insets.insetsDelegate
+import lib.atomofiron.insets.setInsetsDebug
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
@@ -84,6 +85,8 @@ class MainFragment : Fragment(), Titled {
         // todo deprecation
         setHasOptionsMenu(true)
 
+        setInsetsDebug(true)
+
         flashAnim.setAnimationListener(FlashAnimationListener())
 
         scanConnection.bindService(requireContext())
@@ -130,14 +133,14 @@ class MainFragment : Fragment(), Titled {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         adapter.initAnim()
 
-        val description = binding.layoutDescription.root.insetsMix { }
-        val counter = binding.counter.insetsMix { }
-        val header = binding.layoutItem.root.insetsMix { }
-        val list = binding.listView.insetsMix { }
-        val buttons = binding.buttons.root.insetsMix { }
-        val filters = binding.filters.root.insetsMix { }
+        val counterInsets = binding.counter.insetsDelegate()
+        val headerInsets = binding.layoutItem.root.insetsDelegate()
+        val listInsets = binding.listView.insetsDelegate()
+        val descriptionInsets = binding.layoutDescription.root.insetsDelegate()
+        val filtersInsets = binding.filters.root.insetsDelegate()
+        val buttonsInsets = binding.buttons.root.insetsDelegate()
         binding.root.layoutChanges {
-            binding.onLayoutChanged(counter, description, header, list, filters, buttons, it)
+            binding.onLayoutChanged(it, counterInsets, headerInsets, listInsets, descriptionInsets, filtersInsets, buttonsInsets)
         }
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             val point = adapter[position]
@@ -421,13 +424,13 @@ class MainFragment : Fragment(), Titled {
     }
 
     private fun FragmentMainBinding.onLayoutChanged(
-        counter: ViewInsetsDelegate,
-        descriptionInsets: ViewInsetsDelegate,
+        orientation: Orientation,
+        counterInsets: ViewInsetsDelegate,
         headerInsets: ViewInsetsDelegate,
         listInsets: ViewInsetsDelegate,
+        descriptionInsets: ViewInsetsDelegate,
         filtersInsets: ViewInsetsDelegate,
         buttonsInsets: ViewInsetsDelegate,
-        orientation: Orientation,
     ) {
         root.removeAllViews()
         if (orientation == Orientation.Start) {
@@ -447,14 +450,14 @@ class MainFragment : Fragment(), Titled {
                 else -> scrollView.addView(layoutFilters.root)
             }
         }
-        counter.changeInsets {
+        counterInsets.changeInsets {
             if (orientation != Orientation.End) padding(end)
         }
         descriptionInsets.changeInsets {
             when (orientation) {
-                Orientation.Start -> padding(end)
+                Orientation.Start -> padding(end, bottom)
                 Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start)
+                Orientation.End -> padding(start, bottom)
             }
         }
         headerInsets.changeInsets {
@@ -466,9 +469,9 @@ class MainFragment : Fragment(), Titled {
         }
         listInsets.changeInsets {
             when (orientation) {
-                Orientation.Start -> padding(end)
+                Orientation.Start -> padding(end, bottom)
                 Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start)
+                Orientation.End -> padding(start, bottom)
             }
         }
         filtersInsets.changeInsets {
