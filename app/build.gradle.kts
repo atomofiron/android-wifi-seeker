@@ -50,7 +50,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.1")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    implementation("io.github.atomofiron:extended-insets:2.0.0-rc0")
+    implementation("io.github.atomofiron:extended-insets:2.0.0-rc1")
     implementation("org.simpleframework:simple-xml:2.7.1") {
         exclude("stax", "stax")
         exclude("stax-api", "stax-api")
