@@ -27,16 +27,16 @@ android {
         jvmTarget = "1.8"
     }
     buildTypes {
-        val fileProvider = ".FileProvider"
+        val snapshots = ".snapshots"
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            val providerAuthority = packageName + applicationIdSuffix + fileProvider
+            val providerAuthority = packageName + applicationIdSuffix + snapshots
             manifestPlaceholders["PROVIDER"] = providerAuthority
             buildConfigField("String", "AUTHORITY", "\"$providerAuthority\"")
         }
         getByName("release") {
             isMinifyEnabled = true
-            val providerAuthority = packageName + fileProvider
+            val providerAuthority = packageName + snapshots
             manifestPlaceholders["PROVIDER"] = providerAuthority
             buildConfigField("String", "AUTHORITY", "\"$providerAuthority\"")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
