@@ -1,7 +1,6 @@
 package ru.raslav.wirelessscan
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.*
 import android.net.wifi.WifiManager
 import android.os.*
@@ -11,7 +10,6 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.graphics.drawable.Icon
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.JELLY_BEAN
 import android.os.Build.VERSION_CODES.M
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -292,19 +290,15 @@ class ScanService : IntentService("ScanService") {
 
         if (SDK_INT >= M) builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
-        val notification = if (SDK_INT >= JELLY_BEAN)
-            builder.addAction(
-                    if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
-                    getString(if (foreground) R.string.pause else R.string.resume),
-                    PendingIntent.getService(
-                            co, code++,
-                            Intent(co, ScanService::class.java)
-                                    .setAction(if (foreground) ACTION_PAUSE else ACTION_RESUME),
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-            ).build()
-        else
-            builder.notification
+        val notification = builder.addAction(
+            if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
+            getString(if (foreground) R.string.pause else R.string.resume),
+            PendingIntent.getService(
+                co, code++,
+                Intent(co, ScanService::class.java).setAction(if (foreground) ACTION_PAUSE else ACTION_RESUME),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        ).build()
 
         if (foreground) // todo request notification permission
             ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
@@ -340,7 +334,6 @@ class ScanService : IntentService("ScanService") {
         notificationManager.notify(id, notification)
     }
 
-    @TargetApi(JELLY_BEAN)
     private fun request(point: Point) {
         val co = applicationContext
         val id = point.bssid.hashCode() + 1
