@@ -13,7 +13,7 @@
         android:layout_weight="0"
         android:id="@+id/pwr"
         android:text="PW"
-        android:layout_marginLeft="2dp"
+        android:layout_marginStart="2dp"
         android:gravity="center"
         android:maxLines="1"
         />
