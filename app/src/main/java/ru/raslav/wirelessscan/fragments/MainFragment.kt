@@ -37,7 +37,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.ViewInsetsDelegate
 import lib.atomofiron.insets.insetsDelegate
-import lib.atomofiron.insets.setInsetsDebug
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
@@ -84,8 +83,6 @@ class MainFragment : Fragment(), Titled {
         super.onCreate(savedInstanceState)
         // todo deprecation
         setHasOptionsMenu(true)
-
-        setInsetsDebug(true)
 
         flashAnim.setAnimationListener(FlashAnimationListener())
 
