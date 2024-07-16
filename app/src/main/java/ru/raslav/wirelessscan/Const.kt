@@ -9,6 +9,7 @@ object Const {
 
     const val PREF_MAIL = "mail_to_dev"
     const val PREF_OUI_SOURCE = "oui_source"
+    const val PREF_PRIVACY_POLICY = "privacy_policy"
     const val PREF_SOURCE_CODE = "source_code"
     const val PREF_DEFAULT_DELAY = "default_delay"
     const val PREF_SHOW_DESCRIPTION = "show_description"

@@ -49,6 +49,7 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
 
         findPreference<Preference>(Const.PREF_MAIL)!!.setOnPreferenceClickListener { mailToDeveloper(); true }
         findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.setOnPreferenceClickListener { openOuiSource(); true }
+        findPreference<Preference>(Const.PREF_PRIVACY_POLICY)!!.setOnPreferenceClickListener { openPrivacyPolicy(); true }
         findPreference<Preference>(Const.PREF_SOURCE_CODE)!!.setOnPreferenceClickListener { openSourceCode(); true }
         val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
         val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
@@ -128,6 +129,11 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
             .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
             .putExtra(Intent.EXTRA_TEXT, getString(R.string.dear_dev))
             .showChooser(R.string.send_email)
+    }
+
+    private fun openPrivacyPolicy() {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/atomofiron/android-wifi-seeker/blob/master/privacy-policy.md"))
+            .showChooser(R.string.open_an_url)
     }
 
     private fun openOuiSource() {

@@ -1,9 +1,5 @@
 <resources>
     <string name="app_name">WiFi Seeker</string>
-    <string name="settings">Settings</string>
-    <string name="email_dev">Mail to developer</string>
-    <string name="oui_source">OUI base source</string>
-    <string name="source_code">Source code</string>
     <string name="ok">OK</string>
     <string name="snapshot_saved">Snapshot was saved</string>
     <string name="no_activity">You have no application able to perform this action</string>
@@ -17,6 +13,7 @@
     <string name="title_preferences">Settings</string>
 
     <!-- prefs -->
+    <string name="settings">Settings</string>
     <string name="default_delay">Default delay</string>
     <string name="show_description">Show pont\'s details</string>
     <string name="show_description_sum">Table above the list</string>
@@ -35,6 +32,10 @@
     <string name="no_scan_in_bg">Energy saving mode</string>
     <string name="no_scan_in_bg_sum">Do not scan in background</string>
     <string name="other">Other</string>
+    <string name="email_dev">Mail to developer</string>
+    <string name="oui_source">OUI base source</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="source_code">Source code</string>
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>
