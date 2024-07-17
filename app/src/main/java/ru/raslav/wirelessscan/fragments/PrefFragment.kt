@@ -13,6 +13,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -67,6 +68,9 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         savedInstanceState: Bundle?,
     ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
         insetsPadding(start = true, end = true, bottom = true)
+        if (SDK_INT >= Q) {
+            verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

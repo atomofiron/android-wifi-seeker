@@ -17,6 +17,7 @@
         android:id="@+id/list_view"
         android:divider="@null"
         android:clipToPadding="false"
+        android:scrollbarThumbVertical="@drawable/scroll_vertical"
         />
     <include
         android:id="@+id/description"

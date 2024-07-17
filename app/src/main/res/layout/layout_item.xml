@@ -54,6 +54,7 @@
         android:id="@+id/essid"
         android:text="ESSID"
         android:maxLines="1"
+        android:ellipsize="end"
         />
     <TextView
         android:layout_width="128sp"
