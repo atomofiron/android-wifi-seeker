@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/layout_item"
     android:orientation="horizontal"
-    android:background="@color/colorFrame">
+    android:background="@color/black_lite">
 
     <TextView
         android:layout_width="28dp"
