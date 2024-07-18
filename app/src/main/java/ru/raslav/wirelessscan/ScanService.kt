@@ -35,14 +35,24 @@ class ScanService : IntentService("ScanService") {
         fun connected() = boundCount++
         fun disconnected() = boundCount--
     }
-    private lateinit var mainPendingIntent: PendingIntent
+    private val mainPendingIntent: PendingIntent by unsafeLazy {
+        PendingIntent.getActivity(
+            this,
+            code++,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
     private lateinit var receiver: BroadcastReceiver
-    private lateinit var wifiManager: WifiManager
-    private lateinit var commandMessenger: Messenger
-    private lateinit var notificationManager: NotificationManager
+    private val wifiManager by unsafeLazy { getSystemService(Context.WIFI_SERVICE) as WifiManager }
+    @SuppressLint("HandlerLeak")
+    private val commandMessenger: Messenger = Messenger(object : Handler() {
+        override fun handleMessage(msg: Message) = this@ScanService.handleMessage(msg)
+    })
+    private val notificationManager by unsafeLazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val sp by unsafeLazy { sp() }
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
-    private var isStartedForeground = false
     private var period = 10
     private var process = false
     private var code = 1
@@ -50,22 +60,6 @@ class ScanService : IntentService("ScanService") {
     override fun onCreate() {
         report("ScanService: onCreate()")
         super.onCreate()
-
-        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        commandMessenger = Messenger(@SuppressLint("HandlerLeak")
-        object : Handler() {
-            override fun handleMessage(msg: Message) {
-                this@ScanService.handleMessage(msg)
-            }
-        })
-
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mainPendingIntent = PendingIntent.getActivity(
-            baseContext,
-            code++,
-            Intent(baseContext, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
 
         if (SDK_INT >= Build.VERSION_CODES.O)
             notificationManager.createNotificationChannel(NotificationChannel(
@@ -238,8 +232,6 @@ class ScanService : IntentService("ScanService") {
     }*/
 
     private fun showNotification(foreground: Boolean) {
-        isStartedForeground = foreground
-
         val co = applicationContext
         val builder = NotificationCompat.Builder(co, NOTIFICATION_CHANNEL)
         builder.setContentText(getString(R.string.touch_to_look))
@@ -247,7 +239,7 @@ class ScanService : IntentService("ScanService") {
                 .setSmallIcon(R.drawable.ws)
                 .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
 
-        val notification = builder.addAction(
+        if (foreground || sp.getBoolean(Const.PREF_WORK_IN_BG, false)) builder.addAction(
             if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
             getString(if (foreground) R.string.pause else R.string.resume),
             PendingIntent.getService(
@@ -255,8 +247,8 @@ class ScanService : IntentService("ScanService") {
                 Intent(co, ScanService::class.java).setAction(if (foreground) ACTION_PAUSE else ACTION_RESUME),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-        ).build()
-
+        )
+        val notification = builder.build()
         if (foreground)
             ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         else
