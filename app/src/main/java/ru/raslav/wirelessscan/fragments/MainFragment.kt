@@ -20,7 +20,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.provider.Settings
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.text.format.Formatter
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -142,7 +145,7 @@ class MainFragment : Fragment(), Titled {
         }
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             val point = adapter[position]
-            showDescription(binding.layoutDescription, point)
+            binding.layoutDescription.showDescription(point)
             adapter.setFocused(point)
         }
         binding.listView.adapter = adapter
@@ -152,7 +155,7 @@ class MainFragment : Fragment(), Titled {
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
         binding.layoutDescription.cross.setOnClickListener {
             adapter.resetFocus()
-            showDescription(binding.layoutDescription, null)
+            binding.layoutDescription.showDescription(null)
         }
         binding.permissionDisclaimer.isVisible = !locationGranted()
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
@@ -233,7 +236,7 @@ class MainFragment : Fragment(), Titled {
             label.text = adapter.clear()
         }.onClickListener {
             adapter.resetFocus()
-            showDescription(binding.layoutDescription, null)
+            binding.layoutDescription.showDescription(null)
         })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
@@ -369,18 +372,25 @@ class MainFragment : Fragment(), Titled {
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showDescription(description: LayoutDescriptionBinding, point: Point?) {
+    private fun LayoutDescriptionBinding.showDescription(point: Point?) {
         if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, true)) {
-            description.root.visibility = View.VISIBLE
+            root.isVisible = true
 
-            description.tvEssid.text = getString(R.string.essid_format, point.getNotEmptyESSID())
-            description.tvBssid.text = getString(R.string.bssid_format, point.bssid)
-            description.tvCapab.text = getString(R.string.capab_format, point.capabilities)
-            description.tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
-            description.tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
-            description.tvManufDesc.text = point.manufacturerDesc
+            tvEssid.text = if (point.essid.isEmpty()) {
+                val empty = getString(R.string.essid_empty)
+                SpannableStringBuilder(getString(R.string.essid_format, empty)).apply {
+                    setSpan(ForegroundColorSpan(Point.yellow), length - empty.length, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            } else {
+                getString(R.string.essid_format, point.essid)
+            }
+            tvBssid.text = getString(R.string.bssid_format, point.bssid)
+            tvCapab.text = getString(R.string.capab_format, point.capabilities)
+            tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
+            tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
+            tvManufDesc.text = point.manufacturerDesc
         } else
-            description.root.visibility = View.GONE
+            root.isVisible = false
     }
 
     private fun updateConnectionInfo() {

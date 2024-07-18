@@ -15,7 +15,7 @@
     <!-- prefs -->
     <string name="settings">Settings</string>
     <string name="default_delay">Default delay</string>
-    <string name="show_description">Show pont\'s details</string>
+    <string name="show_description">Show point\'s details</string>
     <string name="show_description_sum">Table above the list</string>
     <string name="work_in_bg">Scan in the background</string>
 
@@ -27,6 +27,7 @@
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>
+    <string name="essid_empty">empty</string>
     <string name="bssid_format">BSSID: %s</string>
     <string name="capab_format">Capabilities: %s</string>
     <string name="frequ_format">Frequency: %1$d, chanel: %2$d, pwr: %3$d</string>
@@ -49,7 +50,7 @@
     <string name="send_email">Send an email</string>
     <string name="open_an_url">Open an URL</string>
     <string name="dear_dev">Dear developer, </string>
-    <string name="geolocation_need">Starting from Android 5.0 to get a list of WiFi networks you must enable geolocation</string>
+    <string name="geolocation_need">Starting from Android 6 to get a list of WiFi networks you must enable geolocation</string>
     <string name="got_it">Got it</string>
     <string name="error">Error</string>
     <string name="oui_lookup_tool" translatable="false">OUI Lookup Tool</string>

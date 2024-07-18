@@ -27,6 +27,7 @@
 
     <!-- Description -->
     <string name="essid_format">SSID: %s</string>
+    <string name="essid_empty">пусто</string>
     <string name="bssid_format">BSSID: %s</string>
     <string name="capab_format">Возможности: %s</string>
     <string name="frequ_format">Частота: %1$d, канал: %2$d, мощь: %3$d</string>
@@ -49,7 +50,7 @@
     <string name="send_email">Отправить письмо</string>
     <string name="open_an_url">Открыть ссылку</string>
     <string name="dear_dev">Дорогой разработчик, </string>
-    <string name="geolocation_need">Начиная с Android 6.0, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
+    <string name="geolocation_need">Начиная с Android 6, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
     <string name="got_it">Понятно</string>
     <string name="error">Ошибка</string>
 </resources>
