@@ -24,44 +24,6 @@
         android:key="work_in_bg"
         android:defaultValue="false"
         />
-    <SwitchPreference
-        android:title="@string/detect_attacks"
-        android:icon="@drawable/ic_shield"
-        android:summary="@string/detect_attacks_sum"
-        android:key="detect_attacks"
-        android:defaultValue="false"
-        />
-    <PreferenceCategory
-        android:title="@string/attack_screen"
-        android:key="attack_screen">
-        <CheckBoxPreference
-            android:title="@string/smart_detection"
-            android:summary="@string/smart_detection_sum"
-            android:key="smart_detection"
-            android:defaultValue="false"
-            />
-        <EditTextPreference
-            android:title="@string/extras"
-            android:key="extras"
-            android:maxHeight="200dp"
-            />
-        <PreferenceCategory
-            android:title="@string/guarding">
-            <CheckBoxPreference
-                android:title="@string/auto_off_wifi"
-                android:summary="@string/auto_off_wifi_sum"
-                android:key="auto_off_wifi"
-                android:defaultValue="false"
-                />
-            <CheckBoxPreference
-                android:title="@string/no_scan_in_bg"
-                android:summary="@string/no_scan_in_bg_sum"
-                android:key="no_scan_in_bg"
-                android:defaultValue="false"
-                />
-        </PreferenceCategory>
-    </PreferenceCategory>
-
     <PreferenceCategory
         android:title="@string/other"
         android:key="other"

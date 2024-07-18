@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.longToast
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
@@ -36,8 +35,6 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 
     private lateinit var scanInBg: TwoStatePreference
-    private lateinit var attackScreen: PreferenceCategory
-    private lateinit var noScanInBg: TwoStatePreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,13 +49,7 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.setOnPreferenceClickListener { openOuiSource(); true }
         findPreference<Preference>(Const.PREF_PRIVACY_POLICY)!!.setOnPreferenceClickListener { openPrivacyPolicy(); true }
         findPreference<Preference>(Const.PREF_SOURCE_CODE)!!.setOnPreferenceClickListener { openSourceCode(); true }
-        val detectAttacks = findPreference<TwoStatePreference>(Const.PREF_DETECT_ATTACKS)!!
-        val autoOff = findPreference<TwoStatePreference>(Const.PREF_AUTO_OFF_WIFI)!!
         scanInBg = findPreference(Const.PREF_WORK_IN_BG)!!
-        attackScreen = findPreference(Const.PREF_ATTACK_SCREEN)!!
-        attackScreen.isEnabled = detectAttacks.isChecked
-        noScanInBg = findPreference(Const.PREF_NO_SCAN_IN_BG)!!
-        noScanInBg.isEnabled = autoOff.isChecked
         setListeners(preferenceScreen)
     }
 
@@ -103,29 +94,12 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
         updateSummary(preference, newValue)
         when (preference.key) {
-            Const.PREF_DETECT_ATTACKS -> attackScreen.isEnabled = newValue as Boolean
-            Const.PREF_AUTO_OFF_WIFI -> updateNoScanPreference(newValue as Boolean)
-            Const.PREF_WORK_IN_BG -> when {
-                newValue != true -> Unit
-                backgroundLocationGranted() -> noScanInBg.isChecked = false
-                else -> {
-                    requestPermissions(arrayOf(ACCESS_BACKGROUND_LOCATION), Const.BG_LOCATION_REQUEST_CODE)
-                    return false
-                }
+            Const.PREF_WORK_IN_BG -> if (newValue == true && !backgroundLocationGranted()) {
+                requestPermissions(arrayOf(ACCESS_BACKGROUND_LOCATION), Const.BG_LOCATION_REQUEST_CODE)
+                return false
             }
-            Const.PREF_NO_SCAN_IN_BG -> if (newValue == true) scanInBg.isChecked = false
         }
         return true
-    }
-
-    private fun updateNoScanPreference(value: Boolean) {
-        noScanInBg.isEnabled = value
-
-        when (false) {
-            value -> noScanInBg.isChecked = false
-            sp.getBoolean(Const.PREF_WORK_IN_BG, false) -> requireContext().longToast(R.string.recom)
-            else -> Unit
-        }
     }
 
     private fun mailToDeveloper() {

@@ -18,19 +18,7 @@
     <string name="show_description">Подробная информация о выбранной сети</string>
     <string name="show_description_sum">Таблица над списком</string>
     <string name="work_in_bg">Работать в фоне</string>
-    <string name="detect_attacks">Обнаружение атак</string>
-    <string name="detect_attacks_sum">Предупреждать о появлении точек доступа с одинаковыми именами</string>
 
-    <string name="attack_screen">Настройки обнаружения</string>
-    <string name="smart_detection">Умное обнаружение</string>
-    <string name="smart_detection_sum">Пропускать сети с похожими MAC адресами</string>
-    <string name="extras">Сети исключения (на каждой строке)</string>
-    <string name="guarding">Защита подключения</string>
-    <string name="recom">Рекомендуется включить работу в фоне</string>
-    <string name="auto_off_wifi">Автоотключение WiFi</string>
-    <string name="auto_off_wifi_sum">При подключении к подозрительной сети</string>
-    <string name="no_scan_in_bg">Энергосберегающий режим</string>
-    <string name="no_scan_in_bg_sum">Не сканировать сети в фоне</string>
     <string name="other">Прочее</string>
     <string name="email_dev">Написать разработчику</string>
     <string name="oui_source">Источник OUI базы</string>
@@ -52,15 +40,10 @@
 
     <!-- Notification -->
     <string name="scanning">Сканирование…</string>
-    <string name="scanning_battery_save">Сканирование… (экономия заряда)</string>
     <string name="scanning_was_paused">Сканирование приостановлено</string>
     <string name="touch_to_look">Нажмите, чтобы наблюдать</string>
     <string name="pause">Приостановить</string>
     <string name="resume">Возобновить</string>
-    <string name="clone_detected">Была обнаружена копия вашей точки доступа</string>
-    <string name="wifi_was_disabled">WiFi был выключен</string>
-    <string name="allow_network">Разрешить эту сеть</string>
-    <string name="turn_wifi_on">Включить WiFi</string>
 
     <!-- Other -->
     <string name="send_email">Отправить письмо</string>

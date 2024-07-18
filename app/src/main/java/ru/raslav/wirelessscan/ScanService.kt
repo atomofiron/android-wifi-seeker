@@ -17,16 +17,13 @@ import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.utils.Point
 
+private const val ONLY_APP_IS_BOUND = 1
+
 @Suppress("DEPRECATION") // I don't care
 class ScanService : IntentService("ScanService") {
     companion object {
         private const val ACTION_PAUSE = "ACTION_PAUSE"
         private const val ACTION_RESUME = "ACTION_RESUME"
-        private const val ACTION_ALLOW = "ACTION_ALLOW"
-        private const val ACTION_TURN_WIFI_ON = "ACTION_TURN_WIFI_ON"
-
-        private const val EXTRA_ID = "EXTRA_ID"
-        private const val EXTRA_POINT = "EXTRA_POINT"
 
         private const val SECOND = 1000L
         private const val SCAN_DELAY_OFFSET = 2
@@ -48,7 +45,6 @@ class ScanService : IntentService("ScanService") {
     private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
-    private val trustedPoints = mutableListOf<Point>()
     private var isStartedForeground = false
     private var lastBoundCount = 0
     private var delay = 10
@@ -58,14 +54,6 @@ class ScanService : IntentService("ScanService") {
     override fun onCreate() {
         report("ScanService: onCreate()")
         super.onCreate()
-
-        val filter = IntentFilter()
-        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
-        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-        registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(p0: Context?, p1: Intent?) = detectAttacksIfNeeded()
-        }, filter)
 
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         commandMessenger = Messenger(@SuppressLint("HandlerLeak")
@@ -120,16 +108,6 @@ class ScanService : IntentService("ScanService") {
         when (intent?.action) {
             ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
             ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
-            ACTION_TURN_WIFI_ON -> {
-                wifiManager.isWifiEnabled = true
-                notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
-            }
-            ACTION_ALLOW -> {
-                trustedPoints.add(intent.getParcelableExtra(EXTRA_POINT)!!)
-
-                wifiManager.isWifiEnabled = true
-                notificationManager.cancel(intent.getIntExtra(EXTRA_ID, 0))
-            }
             else -> return false
         }
         return true
@@ -148,7 +126,6 @@ class ScanService : IntentService("ScanService") {
         if (waitForWifi()) {
             updatePoints()
             sendResults()
-            detectAttacksIfNeeded()
         }
 
         var i = SCAN_DELAY_OFFSET
@@ -156,8 +133,7 @@ class ScanService : IntentService("ScanService") {
             sleepAndUpdateNotificationIfNeeded(SECOND)
     }
 
-    private fun scanningIsNotRequired(): Boolean =
-            sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) && sp.getBoolean(Const.PREF_NO_SCAN_IN_BG, false) && boundCount <= 1
+    private fun scanningIsNotRequired(): Boolean = boundCount <= ONLY_APP_IS_BOUND
 
     /** @return process */
     private fun waitForWifi(): Boolean {
@@ -239,10 +215,11 @@ class ScanService : IntentService("ScanService") {
         }
     }
 
+    /* I don't know how it should work, and looks like it is not so needed
     private fun detectAttacksIfNeeded() {
         if (!sp.getBoolean(Const.PREF_DETECT_ATTACKS, false))
             return
-
+        private val trustedPoints = mutableListOf<Point>()
         val bssid = wifiManager.connectionInfo.bssid ?: ""
         var essid = wifiManager.connectionInfo.ssid
         val hidden = wifiManager.connectionInfo.hiddenSSID
@@ -254,9 +231,9 @@ class ScanService : IntentService("ScanService") {
             val smart = sp.getBoolean(Const.PREF_SMART_DETECTION, false)
 
             when {
-                !sp.getBoolean(Const.PREF_AUTO_OFF_WIFI, false) -> Unit
+                !sp.getBoolean("Const.PREF_AUTO_OFF_WIFI", false) -> Unit
                 trustedPoints.contains(current) -> Unit
-                !trustedPoints.any { it.isSimilar(current, smart) } -> trustedPoints.add(current)
+                trustedPoints.any { it.isSimilar(current, smart) } -> trustedPoints.add(current)
                 else -> {
                     wifiManager.isWifiEnabled = false
                     request(current)
@@ -264,11 +241,11 @@ class ScanService : IntentService("ScanService") {
             }
             points.filter {
                 it.level > Point.MIN_LEVEL
-                        && it.isSimilar(current, smart)
+                        && !it.isSimilar(current, smart)
                         && !trustedPoints.contains(it)
             }.forEach { warning(it) }
         }
-    }
+    }*/
 
     private fun showNotification(foreground: Boolean) {
         isStartedForeground = foreground
@@ -306,7 +283,7 @@ class ScanService : IntentService("ScanService") {
             notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
     }
 
-    private fun warning(point: Point) {
+    /*private fun warning(point: Point) {
         val co = applicationContext
         val id = point.bssid.hashCode()
 
@@ -321,10 +298,10 @@ class ScanService : IntentService("ScanService") {
 
         val notification = builder.addAction(
             R.drawable.ic_check,
-            getString(R.string.allow_network),
+            getString(R.string.allow_point),
             PendingIntent.getService(co, code++,
                 Intent(co, ScanService::class.java)
-                    .setAction(ACTION_ALLOW)
+                    //.setAction(ACTION_ALLOW)
                     .putExtra(EXTRA_ID, id)
                     .putExtra(EXTRA_POINT, point),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
@@ -351,10 +328,10 @@ class ScanService : IntentService("ScanService") {
         val notification = builder
                 .addAction(
                         R.drawable.ic_check,
-                        getString(R.string.allow_network),
+                        getString(R.string.allow_point),
                         PendingIntent.getService(co, code++,
                                 Intent(co, ScanService::class.java)
-                                        .setAction(ACTION_ALLOW)
+                                        //.setAction(ACTION_ALLOW)
                                         .putExtra(EXTRA_ID, id)
                                         .putExtra(EXTRA_POINT, point),
                                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
@@ -364,12 +341,12 @@ class ScanService : IntentService("ScanService") {
                         getString(R.string.turn_wifi_on),
                         PendingIntent.getService(co, code++,
                                 Intent(co, ScanService::class.java)
-                                        .setAction(ACTION_TURN_WIFI_ON)
+                                        //.setAction(ACTION_TURN_WIFI_ON)
                                         .putExtra(EXTRA_ID, id),
                                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                         )
                 ).build()
 
         notificationManager.notify(id, notification)
-    }
+    }*/
 }

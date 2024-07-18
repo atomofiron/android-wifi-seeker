@@ -18,19 +18,7 @@
     <string name="show_description">Show pont\'s details</string>
     <string name="show_description_sum">Table above the list</string>
     <string name="work_in_bg">Scan in the background</string>
-    <string name="detect_attacks">Attack detection</string>
-    <string name="detect_attacks_sum">To warn about the appearance of access points with the same name</string>
 
-    <string name="attack_screen">Configure detecting</string>
-    <string name="smart_detection">Smart detection</string>
-    <string name="smart_detection_sum">To pass network with a similar MAC addresses</string>
-    <string name="extras">Network exceptions (on each line)</string>
-    <string name="guarding">Protect connection</string>
-    <string name="recom">It is recommended to enable the Scan in the background</string>
-    <string name="auto_off_wifi">Auto turning off WiFi</string>
-    <string name="auto_off_wifi_sum">When you connect to suspicious networks</string>
-    <string name="no_scan_in_bg">Energy saving mode</string>
-    <string name="no_scan_in_bg_sum">Do not scan in background</string>
     <string name="other">Other</string>
     <string name="email_dev">Mail to developer</string>
     <string name="oui_source">OUI base source</string>
@@ -52,15 +40,10 @@
 
     <!-- Notification -->
     <string name="scanning">Scanning…</string>
-    <string name="scanning_battery_save">Lazy scanning…</string>
     <string name="scanning_was_paused">Scanning was paused</string>
     <string name="touch_to_look">Touch to look</string>
     <string name="pause">Pause</string>
     <string name="resume">Continue</string>
-    <string name="clone_detected">The clone of your AP was found</string>
-    <string name="wifi_was_disabled">WiFi was disabled</string>
-    <string name="allow_network">Allow that network</string>
-    <string name="turn_wifi_on">Turn WiFi on</string>
 
     <!-- Other -->
     <string name="send_email">Send an email</string>

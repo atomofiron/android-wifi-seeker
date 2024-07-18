@@ -133,15 +133,6 @@ class Point private constructor(): Parcelable {
         return o.essid == essid && o.bssid == bssid
     }
 
-    fun compare(bssid: String, essid: String, hidden: Boolean): Boolean =
-            this.bssid == bssid && (this.essid == essid || this.level > MIN_LEVEL && this.essid.isEmpty() && hidden)
-
-    fun isSimilar(point: Point, smart: Boolean): Boolean = this.essid == point.essid &&
-            if (smart)
-                point.bssid.length >= 8 && !this.bssid.startsWith(point.bssid.substring(0, 8))
-            else
-                this.bssid != point.bssid
-
     fun getNotEmptyESSID(): String = if (essid.isEmpty()) bssid else essid
 
     companion object {
