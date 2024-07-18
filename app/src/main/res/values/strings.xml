@@ -54,4 +54,5 @@
     <string name="got_it">Got it</string>
     <string name="error">Error</string>
     <string name="oui_lookup_tool" translatable="false">OUI Lookup Tool</string>
+    <string name="channel_name">Indication</string>
 </resources>

@@ -53,4 +53,5 @@
     <string name="geolocation_need">Начиная с Android 6, чтобы получить список WiFi сетей, необходимо включить функцию геолокации</string>
     <string name="got_it">Понятно</string>
     <string name="error">Ошибка</string>
+    <string name="channel_name">Индикация</string>
 </resources>

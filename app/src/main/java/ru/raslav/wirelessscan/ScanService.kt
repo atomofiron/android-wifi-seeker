@@ -29,7 +29,7 @@ class ScanService : IntentService("ScanService") {
         private const val WIFI_WAITING_PERIOD = 300L
 
         private const val FOREGROUND_NOTIFICATION_ID = 1
-        private const val NOTIFICATION_CHANNEL = "channel_wtf"
+        private const val NOTIFICATION_CHANNEL_ID = "channel_id"
 
         private var boundCount = 0
         fun connected() = boundCount++
@@ -63,9 +63,9 @@ class ScanService : IntentService("ScanService") {
 
         if (SDK_INT >= Build.VERSION_CODES.O)
             notificationManager.createNotificationChannel(NotificationChannel(
-                    NOTIFICATION_CHANNEL,
-                    "channelName",
-                    NotificationManager.IMPORTANCE_LOW
+                NOTIFICATION_CHANNEL_ID,
+                getString(R.string.channel_name),
+                NotificationManager.IMPORTANCE_LOW
             ))
     }
 
@@ -233,7 +233,7 @@ class ScanService : IntentService("ScanService") {
 
     private fun showNotification(foreground: Boolean) {
         val co = applicationContext
-        val builder = NotificationCompat.Builder(co, NOTIFICATION_CHANNEL)
+        val builder = NotificationCompat.Builder(co, NOTIFICATION_CHANNEL_ID)
         builder.setContentText(getString(R.string.touch_to_look))
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws)
