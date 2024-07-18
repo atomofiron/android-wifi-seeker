@@ -14,7 +14,7 @@
 
     <!-- prefs -->
     <string name="settings">Settings</string>
-    <string name="default_delay">Default delay</string>
+    <string name="default_period">Default period</string>
     <string name="show_description">Show point\'s details</string>
     <string name="show_description_sum">Table above the list</string>
     <string name="work_in_bg">Scan in the background</string>

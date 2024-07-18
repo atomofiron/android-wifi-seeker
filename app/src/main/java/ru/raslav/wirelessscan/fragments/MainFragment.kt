@@ -102,7 +102,7 @@ class MainFragment : Fragment(), Titled {
 
     private fun onServiceConnected() {
         scanConnection.sendGetRequest()
-        sendScanDelay()
+        sendScanPeriod()
     }
 
     override fun onStop() {
@@ -228,10 +228,10 @@ class MainFragment : Fragment(), Titled {
             else
                 checkPermissionAndStartScan()
         }
-        buttons.spinnerDelay.setSelection(sp.getString(Const.PREF_DEFAULT_DELAY, 1.toString())!!.toInt())
-        buttons.spinnerDelay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        buttons.spinnerPeriod.setSelection(sp.getString(Const.PREF_DEFAULT_PERIOD, 1.toString())!!.toInt())
+        buttons.spinnerPeriod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = sendScanDelay()
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = sendScanPeriod()
         }
         buttons.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
@@ -309,10 +309,10 @@ class MainFragment : Fragment(), Titled {
 
     private fun stopScanService() = scanConnection.stopScanService()
 
-    private fun sendScanDelay() {
-        val selected = binding.buttons.spinnerDelay.selectedItemPosition
-        val delay = resources.getIntArray(R.array.delay_arr_int)[selected]
-        scanConnection.sendScanDelay(delay)
+    private fun sendScanPeriod() {
+        val selected = binding.buttons.spinnerPeriod.selectedItemPosition
+        val period = resources.getIntArray(R.array.period_arr_int)[selected]
+        scanConnection.sendScanPeriod(period)
     }
 
     private fun FragmentMainBinding.updateState(mesaage: Message) {

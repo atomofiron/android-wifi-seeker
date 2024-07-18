@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="delay_arr">
+    <string-array name="period_arr">
         <item>3 сек</item>
         <item>5 сек</item>
         <item>10 сек</item>

@@ -36,9 +36,9 @@
     <Spinner
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
-        android:id="@+id/spinner_delay"
+        android:id="@+id/spinner_period"
         android:layout_weight="1"
-        android:entries="@array/delay_arr"
+        android:entries="@array/period_arr"
         android:gravity="center"
         android:background="?selectableItemBackgroundBorderless"
         />

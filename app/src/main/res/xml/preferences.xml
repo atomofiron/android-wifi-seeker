@@ -4,11 +4,11 @@
     android:title="@string/settings"
     >
     <ListPreference
-        android:title="@string/default_delay"
+        android:title="@string/default_period"
         android:icon="@drawable/ic_timer"
-        android:key="default_delay"
-        android:entryValues="@array/delay_arr_val"
-        android:entries="@array/delay_arr"
+        android:key="default_period"
+        android:entryValues="@array/period_arr_val"
+        android:entries="@array/period_arr"
         android:defaultValue="1"
         />
     <CheckBoxPreference

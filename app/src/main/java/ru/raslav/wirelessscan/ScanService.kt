@@ -43,7 +43,7 @@ class ScanService : IntentService("ScanService") {
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
     private var isStartedForeground = false
-    private var delay = 10
+    private var period = 10
     private var process = false
     private var code = 1
 
@@ -126,7 +126,7 @@ class ScanService : IntentService("ScanService") {
         }
 
         var i = SCAN_DELAY_OFFSET
-        while ((i++ < delay || scanningIsNotRequired()) && process)
+        while ((i++ < period || scanningIsNotRequired()) && process)
             Thread.sleep(SECOND)
     }
 
@@ -201,7 +201,7 @@ class ScanService : IntentService("ScanService") {
             Event.GET.ordinal -> sendResults()
             Event.CLEAR.ordinal-> points.clear()
             Event.STOP.ordinal -> stop()
-            Event.DELAY.ordinal -> delay = message.arg1
+            Event.PERIOD.ordinal -> period = message.arg1
         }
     }
 

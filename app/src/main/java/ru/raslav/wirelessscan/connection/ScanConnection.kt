@@ -13,8 +13,8 @@ class ScanConnection(
 
     fun sendGetRequest() = send(newMessage(Event.GET.ordinal))
 
-    fun sendScanDelay(sec: Int) {
-        val message = newMessage(Event.DELAY.ordinal)
+    fun sendScanPeriod(sec: Int) {
+        val message = newMessage(Event.PERIOD.ordinal)
         message.arg1 = sec
         send(message)
     }

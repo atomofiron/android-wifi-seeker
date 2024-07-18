@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="delay_arr">
+    <string-array name="period_arr">
         <item>3 sec</item>
         <item>5 sec</item>
         <item>10 sec</item>
@@ -9,7 +9,7 @@
         <item>3 min</item>
         <item>5 min</item>
     </string-array>
-    <string-array name="delay_arr_val"  translatable="false">
+    <string-array name="period_arr_val"  translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
@@ -18,7 +18,7 @@
         <item>5</item>
         <item>6</item>
     </string-array>
-    <integer-array name="delay_arr_int" translatable="false">
+    <integer-array name="period_arr_int" translatable="false">
         <item>3</item>
         <item>5</item>
         <item>10</item>

@@ -14,7 +14,7 @@
 
     <!-- prefs -->
     <string name="settings">Настройки</string>
-    <string name="default_delay">Задержка по умолчанию</string>
+    <string name="default_period">Период по умолчанию</string>
     <string name="show_description">Подробная информация о выбранной сети</string>
     <string name="show_description_sum">Таблица над списком</string>
     <string name="work_in_bg">Работать в фоне</string>
