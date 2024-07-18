@@ -2,7 +2,6 @@ package ru.raslav.wirelessscan.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
 import android.os.Build.VERSION_CODES.TIRAMISU as T
@@ -106,11 +105,14 @@ class MainFragment : Fragment(), Titled {
         sendScanDelay()
     }
 
+    override fun onStop() {
+        super.onStop()
+        if (!sp.getBoolean(Const.PREF_WORK_IN_BG, false))
+            stopScanService()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        if (isRemoving && !sp.getBoolean(Const.PREF_WORK_IN_BG, false))
-            stopScanService()
-
         scanConnection.unbindService(requireContext())
         requireContext().unregisterReceiver(connectionReceiver)
     }

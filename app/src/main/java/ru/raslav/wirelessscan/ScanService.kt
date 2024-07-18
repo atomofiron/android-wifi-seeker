@@ -8,9 +8,7 @@ import android.app.PendingIntent
 import android.content.*
 import android.content.pm.ServiceInfo
 import android.os.Build
-import android.graphics.drawable.Icon
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import ru.raslav.wirelessscan.connection.Connection.Event
@@ -41,12 +39,10 @@ class ScanService : IntentService("ScanService") {
     private lateinit var receiver: BroadcastReceiver
     private lateinit var wifiManager: WifiManager
     private lateinit var commandMessenger: Messenger
-    private val sp: SharedPreferences by unsafeLazy { sp() }
     private lateinit var notificationManager: NotificationManager
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
     private var isStartedForeground = false
-    private var lastBoundCount = 0
     private var delay = 10
     private var process = false
     private var code = 1
@@ -119,9 +115,10 @@ class ScanService : IntentService("ScanService") {
         if (!waitForWifi())
             return
 
+        showNotification(true)
         sendStartScan()
         wifiManager.startScan()
-        sleepAndUpdateNotificationIfNeeded(SCAN_DELAY)
+        Thread.sleep(SCAN_DELAY)
 
         if (waitForWifi()) {
             updatePoints()
@@ -130,7 +127,7 @@ class ScanService : IntentService("ScanService") {
 
         var i = SCAN_DELAY_OFFSET
         while ((i++ < delay || scanningIsNotRequired()) && process)
-            sleepAndUpdateNotificationIfNeeded(SECOND)
+            Thread.sleep(SECOND)
     }
 
     private fun scanningIsNotRequired(): Boolean = boundCount <= ONLY_APP_IS_BOUND
@@ -138,25 +135,11 @@ class ScanService : IntentService("ScanService") {
     /** @return process */
     private fun waitForWifi(): Boolean {
         while (!wifiManager.isWifiEnabled || scanningIsNotRequired()) {
-            sleepAndUpdateNotificationIfNeeded(WIFI_WAITING_PERIOD)
-
+            Thread.sleep(WIFI_WAITING_PERIOD)
             if (!process)
                 return false
         }
         return process
-    }
-
-    private fun sleepAndUpdateNotificationIfNeeded(millis: Long) {
-        updateNotificationIfNeeded()
-        Thread.sleep(millis)
-        updateNotificationIfNeeded()
-    }
-
-    private fun updateNotificationIfNeeded() {
-        if (isStartedForeground && (lastBoundCount <= 1 && boundCount > 1 || lastBoundCount > 1 && boundCount <=1))
-            showNotification(true)
-
-        lastBoundCount = boundCount
     }
 
     private fun stop() {
@@ -170,11 +153,18 @@ class ScanService : IntentService("ScanService") {
     private fun updatePoints() {
         val currentPoints = wifiManager.scanResults.map { Point(it) }
 
-        currentPoints.forEach {
-            val manuf = OuiManager.find(it.bssid)
-            it.hex = manuf.digits
-            it.manufacturer = manuf.label
-            it.manufacturerDesc = manuf.description
+        currentPoints.forEach { new ->
+            points.find { it.bssid == new.bssid }
+                ?.let {
+                    new.hex = it.hex
+                    new.manufacturer = it.manufacturer
+                    new.manufacturerDesc = it.manufacturerDesc
+                }
+                ?: OuiManager.find(new.bssid).let {
+                    new.hex = it.digits
+                    new.manufacturer = it.label
+                    new.manufacturerDesc = it.description
+                }
         }
 
         points.removeAll(currentPoints)
@@ -255,17 +245,7 @@ class ScanService : IntentService("ScanService") {
         builder.setContentText(getString(R.string.touch_to_look))
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws)
-                .setContentTitle(getString(
-                        if (foreground)
-                            if (scanningIsNotRequired())
-                                R.string.scanning_battery_save
-                            else
-                                R.string.scanning
-                        else
-                            R.string.scanning_was_paused
-                ))
-
-        if (SDK_INT >= M) builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
+                .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
 
         val notification = builder.addAction(
             if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
@@ -277,7 +257,7 @@ class ScanService : IntentService("ScanService") {
             )
         ).build()
 
-        if (foreground) // todo request notification permission
+        if (foreground)
             ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         else
             notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
@@ -293,8 +273,6 @@ class ScanService : IntentService("ScanService") {
                 .setContentText("${point.manufacturer} - ${point.bssid}")
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws_yellow)
-
-        if (SDK_INT >= M) builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
         val notification = builder.addAction(
             R.drawable.ic_check,
@@ -321,9 +299,6 @@ class ScanService : IntentService("ScanService") {
                 .setContentText("${point.manufacturer} - ${point.bssid}")
                 .setContentIntent(mainPendingIntent)
                 .setSmallIcon(R.drawable.ws_red)
-
-        if (SDK_INT >= M)
-            builder.setLargeIcon(Icon.createWithResource(co, R.mipmap.ic_launcher))
 
         val notification = builder
                 .addAction(
