@@ -146,6 +146,8 @@ class Point private constructor(): Parcelable {
             private set
         var red_lite= 0
             private set
+        var red_dark_lite = 0
+            private set
 
         private var red_middle = 0
         var grey = 0; private set
@@ -165,6 +167,7 @@ class Point private constructor(): Parcelable {
             transparent = ContextCompat.getColor(co, R.color.transparent)
             black_lite = ContextCompat.getColor(co, R.color.black_lite)
             red_lite = ContextCompat.getColor(co, R.color.red_lite)
+            red_dark_lite = ContextCompat.getColor(co, R.color.red_dark_lite)
             red_middle = ContextCompat.getColor(co, R.color.red_middle)
             grey = ContextCompat.getColor(co, R.color.grey)
             blue_light = ContextCompat.getColor(co, R.color.blue_light)

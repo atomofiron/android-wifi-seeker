@@ -6,16 +6,21 @@ import android.net.wifi.WifiInfo
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
 import android.provider.Settings
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
@@ -38,7 +43,7 @@ private class Holder(
 }
 
 class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChangeListener,
-    ValueAnimator.AnimatorUpdateListener {
+    ValueAnimator.AnimatorUpdateListener, AdapterView.OnItemClickListener {
     companion object {
         const val FILTER_DEFAULT = 0
         const val FILTER_INCLUDE = 1
@@ -49,6 +54,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     val allPoints = mutableListOf<Point>()
     private val points = mutableListOf<Point>()
     private var focused: Point? = null
+    private val closeDescription: (View) -> Unit = { resetFocus() }
     private var filtering = false
     private val focusedDrawable = SideDrawable(
         ContextCompat.getColor(context, R.color.grey),
@@ -61,8 +67,6 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     private var animType = AnimType.None
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
-
-    operator fun get(index: Int): Point = points[index]
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val holder: Holder = if (convertView == null) {
@@ -87,7 +91,15 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     }
 
     private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
-        drawItemRoot(holder.root, point, position)
+        drawItemRoot(holder.itemRows, point, position)
+        holder.updateDescription(point.takeIf { it.bssid == focused?.bssid })
+        if (SDK_INT >= M) holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
+        val even = position % 2 == 0
+        holder.root.setBackgroundColor(when {
+            point.level <= Point.MIN_LEVEL -> if (even) Point.red_lite else Point.red_dark_lite
+            even -> Point.transparent
+            else -> Point.black_lite
+        })
 
         // point.level == -1 experiment
         holder.pwr.setTextColor(if (point.level == -1) -65281 else point.pwColor)
@@ -124,21 +136,55 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
             focused.hex.isEmpty() && point.hex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
             else -> focused.hex == point.hex
         }
-        if (SDK_INT >= M) layout.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
         if (associating)
             layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
         else
-            layout.setBackgroundColor(when {
-                point.level <= Point.MIN_LEVEL -> Point.red_lite
-                position % 2 == 0 -> Point.transparent
-                else -> Point.black_lite
-            })
+            layout.background = null
 
         if (point.level == -1)
             report("WOW: point.level == -1")
     }
 
-    fun setFocused(point: Point) {
+    private fun LayoutItemBinding.updateDescription(point: Point?) {
+        val description = root.findViewById<View>(R.id.layout_description)
+            ?.let { LayoutDescriptionBinding.bind(it) }
+        when {
+            point != null && description != null -> description.bind(point)
+            point == null && description != null -> root.removeView(description.root)
+            point != null && description == null -> LayoutInflater.from(root.context)
+                .let { LayoutDescriptionBinding.inflate(it, root, true) }
+                .bind(point)
+        }
+    }
+
+    private fun LayoutDescriptionBinding.bind(point: Point) {
+        val resources = root.resources
+        tvEssid.text = if (point.essid.isEmpty()) {
+            val empty = resources.getString(R.string.essid_empty)
+            SpannableStringBuilder(resources.getString(R.string.essid_format, empty)).apply {
+                setSpan(ForegroundColorSpan(Point.yellow), length - empty.length, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        } else {
+            resources.getString(R.string.essid_format, point.essid)
+        }
+        tvBssid.text = resources.getString(R.string.bssid_format, point.bssid)
+        tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
+        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.ch, point.level)
+        tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
+        tvManufDesc.text = point.manufacturerDesc
+        tvManufDesc.isVisible = point.manufacturerDesc.isNotBlank()
+        cross.setOnClickListener(closeDescription)
+    }
+
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        val point = points[position]
+        when (point.bssid) {
+            focused?.bssid -> resetFocus()
+            else -> setFocused(point)
+        }
+    }
+
+    private fun setFocused(point: Point) {
         focused = point
         notifyDataSetChanged()
     }

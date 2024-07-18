@@ -2,19 +2,13 @@ package ru.raslav.wirelessscan.fragments
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.adapters.PointListAdapter
-import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
-import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
-import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.unsafeLazy
 
@@ -62,18 +56,11 @@ class SnapshotFragment : Fragment(), Titled {
 
         binding.description.root.insetsPadding(start = true, end = true, bottom = true)
         binding.layoutItem.root.insetsPadding(start = true, end = true)
-        val listInsets = binding.listView.insetsPadding(start = true, end = true, bottom = true)
+        binding.listView.insetsPadding(start = true, end = true, bottom = true)
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
-        binding.listView.setOnItemClickListener { _, _, position, _ ->
-            val point = adapter[position]
-            binding.description.showDescription(point)
-            adapter.setFocused(point)
-            listInsets.changeInsets { padding(start, end) }
-        }
+        binding.listView.onItemClickListener = adapter
         binding.description.cross.setOnClickListener {
             adapter.resetFocus()
-            binding.description.showDescription(null)
-            listInsets.changeInsets { padding(start, end, bottom) }
         }
 
         return binding.root
@@ -82,26 +69,5 @@ class SnapshotFragment : Fragment(), Titled {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
-    }
-
-    private fun LayoutDescriptionBinding.showDescription(point: Point?) {
-        if (point != null) {
-            root.isVisible = true
-
-            tvEssid.text = if (point.essid.isEmpty()) {
-                val empty = getString(R.string.essid_empty)
-                val spannable = SpannableStringBuilder(getString(R.string.essid_format, empty))
-                spannable.setSpan(ForegroundColorSpan(Point.yellow), spannable.length - empty.length, spannable.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                spannable
-            } else {
-                getString(R.string.essid_format, point.essid)
-            }
-            tvBssid.text = getString(R.string.bssid_format, point.bssid)
-            tvCapab.text = getString(R.string.capab_format, point.capabilities)
-            tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
-            tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
-            tvManufDesc.text =  point.manufacturerDesc
-        } else
-            root.isVisible = false
     }
 }

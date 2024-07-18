@@ -19,10 +19,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.provider.Settings
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.format.Formatter
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,7 +45,6 @@ import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
-import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.openPermissionSettings
@@ -139,26 +135,17 @@ class MainFragment : Fragment(), Titled {
         val counterInsets = binding.counter.insetsDelegate()
         val headerInsets = binding.layoutItem.root.insetsDelegate()
         val listInsets = binding.listView.insetsDelegate()
-        val descriptionInsets = binding.layoutDescription.root.insetsDelegate()
         val filtersInsets = binding.filters.root.insetsDelegate()
         val buttonsInsets = binding.buttons.root.insetsDelegate()
         binding.root.layoutChanges {
-            binding.onLayoutChanged(it, counterInsets, headerInsets, listInsets, descriptionInsets, filtersInsets, buttonsInsets)
+            binding.onLayoutChanged(it, counterInsets, headerInsets, listInsets, filtersInsets, buttonsInsets)
         }
-        binding.listView.setOnItemClickListener { _, _, position, _ ->
-            val point = adapter[position]
-            binding.layoutDescription.showDescription(point)
-            adapter.setFocused(point)
-        }
+        binding.listView.onItemClickListener = adapter
         binding.listView.adapter = adapter
 
         initFilters(binding.filters.layoutFilters.root)
         binding.initButtons(binding.counter)
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
-        binding.layoutDescription.cross.setOnClickListener {
-            adapter.resetFocus()
-            binding.layoutDescription.showDescription(null)
-        }
         binding.permissionDisclaimer.isVisible = !locationGranted()
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
@@ -238,7 +225,6 @@ class MainFragment : Fragment(), Titled {
             label.text = adapter.clear()
         }.onClickListener {
             adapter.resetFocus()
-            binding.layoutDescription.showDescription(null)
         })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
@@ -374,27 +360,6 @@ class MainFragment : Fragment(), Titled {
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
-    private fun LayoutDescriptionBinding.showDescription(point: Point?) {
-        if (point != null && sp.getBoolean(Const.PREF_SHOW_DESCRIPTION, true)) {
-            root.isVisible = true
-
-            tvEssid.text = if (point.essid.isEmpty()) {
-                val empty = getString(R.string.essid_empty)
-                SpannableStringBuilder(getString(R.string.essid_format, empty)).apply {
-                    setSpan(ForegroundColorSpan(Point.yellow), length - empty.length, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                }
-            } else {
-                getString(R.string.essid_format, point.essid)
-            }
-            tvBssid.text = getString(R.string.bssid_format, point.bssid)
-            tvCapab.text = getString(R.string.capab_format, point.capabilities)
-            tvFrequ.text = getString(R.string.frequ_format, point.frequency, point.ch, point.level)
-            tvManuf.text = getString(R.string.manuf_format, point.manufacturer)
-            tvManufDesc.text = point.manufacturerDesc
-        } else
-            root.isVisible = false
-    }
-
     private fun updateConnectionInfo() {
         adapter.connectionInfo = wifiManager.connectionInfo
         if (isResumed) {
@@ -430,7 +395,6 @@ class MainFragment : Fragment(), Titled {
         counterInsets: ViewInsetsDelegate,
         headerInsets: ViewInsetsDelegate,
         listInsets: ViewInsetsDelegate,
-        descriptionInsets: ViewInsetsDelegate,
         filtersInsets: ViewInsetsDelegate,
         buttonsInsets: ViewInsetsDelegate,
     ) {
@@ -454,13 +418,6 @@ class MainFragment : Fragment(), Titled {
         }
         counterInsets.changeInsets {
             if (orientation != Orientation.End) padding(end)
-        }
-        descriptionInsets.changeInsets {
-            when (orientation) {
-                Orientation.Start -> padding(end, bottom)
-                Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start, bottom)
-            }
         }
         headerInsets.changeInsets {
             when (orientation) {

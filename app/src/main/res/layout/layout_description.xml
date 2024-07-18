@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/layout_description"
-    android:background="@color/colorFrame"
     android:paddingStart="8dp"
     android:paddingBottom="4dp"
     >
@@ -16,6 +15,7 @@
         <TextView
             style="@style/Description"
             android:id="@+id/tv_essid"
+            android:layout_marginEnd="32dp"
             />
         <TextView
             style="@style/Description"

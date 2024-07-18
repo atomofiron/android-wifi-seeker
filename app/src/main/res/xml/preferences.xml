@@ -11,14 +11,6 @@
         android:entries="@array/period_arr"
         android:defaultValue="1"
         />
-    <CheckBoxPreference
-        android:title="@string/show_description"
-        android:icon="@drawable/ic_notes"
-        android:summary="@string/show_description_sum"
-        android:key="show_description"
-        android:defaultValue="true"
-        android:enabled="true"
-        />
     <SwitchPreference
         android:title="@string/work_in_bg"
         android:icon="@drawable/ic_radar"
