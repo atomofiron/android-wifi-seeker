@@ -2,6 +2,7 @@ package ru.raslav.wirelessscan.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import ru.raslav.wirelessscan.report
 import java.io.File
@@ -18,6 +19,7 @@ private const val COLUMN_DESC = "description"
 
 class OuiManager private constructor(context: Context) {
     companion object {
+
         private lateinit var instance: OuiManager
 
         fun init(context: Context) {
@@ -25,6 +27,8 @@ class OuiManager private constructor(context: Context) {
         }
 
         fun find(bssid: String): Manufacturer = instance.find(bssid)
+
+        fun entries(): Long = DatabaseUtils.queryNumEntries(instance.db, TABLE)
     }
     private val db: SQLiteDatabase
     private val tmpDbPath = context.filesDir.absolutePath + "/tmp.db"

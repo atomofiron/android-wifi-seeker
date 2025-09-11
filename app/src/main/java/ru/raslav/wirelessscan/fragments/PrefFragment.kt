@@ -29,6 +29,7 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.OuiManager
 
 class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
@@ -46,7 +47,10 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         addPreferencesFromResource(R.xml.preferences)
 
         findPreference<Preference>(Const.PREF_MAIL)!!.setOnPreferenceClickListener { mailToDeveloper(); true }
-        findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.setOnPreferenceClickListener { openOuiSource(); true }
+        findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.run {
+            setOnPreferenceClickListener { openOuiSource(); true }
+            summary = "$summary (${resources.getString(R.string.x_entries, OuiManager.entries())})"
+        }
         findPreference<Preference>(Const.PREF_PRIVACY_POLICY)!!.setOnPreferenceClickListener { openPrivacyPolicy(); true }
         findPreference<Preference>(Const.PREF_SOURCE_CODE)!!.setOnPreferenceClickListener { openSourceCode(); true }
         scanInBg = findPreference(Const.PREF_WORK_IN_BG)!!
