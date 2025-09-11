@@ -301,14 +301,14 @@ class MainFragment : Fragment(), Titled {
         scanConnection.sendScanPeriod(period)
     }
 
-    private fun FragmentMainBinding.updateState(mesaage: Message) {
-        report("-> ${mesaage.run { Event.entries[what] }}")
+    private fun FragmentMainBinding.updateState(message: Message) {
+        report("-> ${message.run { Event.entries[what] }}")
         if (view == null) return
 
-        progress.isVisible = mesaage.what == Event.START_SCAN.ordinal
-        when (mesaage.what) {
+        progress.isVisible = message.what == Event.START_SCAN.ordinal
+        when (message.what) {
             Event.START_SCAN.ordinal -> adapter.animScanStart()
-            Event.RESULTS.ordinal -> updateList(mesaage)
+            Event.RESULTS.ordinal -> updateList(message)
             Event.STARTED.ordinal -> buttons.buttonResume.isActivated = true
             Event.STOPPED.ordinal -> {
                 buttons.buttonResume.isActivated = false
