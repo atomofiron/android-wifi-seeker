@@ -263,6 +263,7 @@ class MainFragment : Fragment(), Titled {
                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), Const.NOTIFICATIONS_REQUEST_CODE)
             }
             buttonResume.isActivated = true
+            binding.progress.isVisible = true
             tryStartScanService()
         }
     }

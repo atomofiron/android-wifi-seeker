@@ -55,6 +55,7 @@ class ScanService : IntentService("ScanService") {
     private val points = mutableListOf<Point>()
     private var period = 10
     private var process = false
+    private var scanned = false
     private var code = 1
 
     override fun onCreate() {
@@ -115,6 +116,7 @@ class ScanService : IntentService("ScanService") {
         Thread.sleep(SCAN_DELAY)
 
         if (waitForWifi()) {
+            scanned = true
             updatePoints()
             sendResults()
         }
@@ -192,7 +194,7 @@ class ScanService : IntentService("ScanService") {
         resultMessenger = message.replyTo ?: resultMessenger
 
         when (message.what) {
-            Event.GET.ordinal -> sendResults()
+            Event.GET.ordinal -> if (scanned) sendResults()
             Event.CLEAR.ordinal-> points.clear()
             Event.STOP.ordinal -> stop()
             Event.PERIOD.ordinal -> period = message.arg1
