@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
+import android.util.LayoutDirection
+import android.view.View
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 
@@ -34,3 +36,4 @@ fun Context.openPermissionSettings() {
     shortToast(R.string.get_perm_by_settings)
 }
 
+fun View.isRtl() = layoutDirection == LayoutDirection.RTL

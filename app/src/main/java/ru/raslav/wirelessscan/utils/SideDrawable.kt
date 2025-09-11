@@ -12,6 +12,7 @@ class SideDrawable(
 ) : Drawable() {
 
     private val paint = Paint()
+    private var rtl = false
 
     init {
         paint.isAntiAlias = true
@@ -19,9 +20,17 @@ class SideDrawable(
         paint.strokeWidth = strokeWidth * 2
     }
 
+    fun setRtl(value: Boolean) {
+        rtl = value
+    }
+
     override fun draw(canvas: Canvas) {
-        bounds.run { canvas.drawLine(left.toFloat(), top.toFloat(), left.toFloat(), bottom.toFloat(), paint) }
-        bounds.run { canvas.drawLine(right.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint) }
+        bounds.run {
+            when {
+                rtl -> canvas.drawLine(right.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+                else -> canvas.drawLine(left.toFloat(), top.toFloat(), left.toFloat(), bottom.toFloat(), paint)
+            }
+        }
     }
 
     override fun setAlpha(alpha: Int) = Unit

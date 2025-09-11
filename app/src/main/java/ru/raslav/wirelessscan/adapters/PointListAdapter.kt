@@ -22,6 +22,7 @@ import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
+import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
@@ -94,6 +95,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         drawItemRoot(holder.itemRows, point, position)
         holder.updateDescription(point.takeIf { it.bssid == focused?.bssid })
         if (SDK_INT >= M) holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
+        focusedDrawable.setRtl(holder.root.isRtl())
         val even = position % 2 == 0
         holder.root.setBackgroundColor(when {
             point.level <= Point.MIN_LEVEL -> if (even) Point.red_lite else Point.red_dark_lite
