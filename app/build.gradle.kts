@@ -6,7 +6,7 @@ plugins {
 android {
     val packageName = "ru.raslav.wirelessscan"
     namespace = packageName
-    compileSdk = 34
+    compileSdk = 36
 
     buildFeatures {
         viewBinding = true
@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 18
         versionName = "2.1.0"
     }
@@ -45,12 +45,12 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.fragment:fragment-ktx:1.8.1")
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    implementation("io.github.atomofiron:extended-insets:2.0.0-rc1")
+    implementation("io.github.atomofiron:extended-insets:2.0.0")
     implementation("org.simpleframework:simple-xml:2.7.1") {
         exclude("stax", "stax")
         exclude("stax-api", "stax-api")
