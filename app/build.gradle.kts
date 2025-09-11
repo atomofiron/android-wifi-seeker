@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
 }
 
-android {
+android { // key alias raslav_2016
     val packageName = "ru.raslav.wirelessscan"
     namespace = packageName
     compileSdk = 36
