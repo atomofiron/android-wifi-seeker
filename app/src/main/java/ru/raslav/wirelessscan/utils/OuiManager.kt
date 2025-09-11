@@ -3,15 +3,12 @@ package ru.raslav.wirelessscan.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-
-import java.io.File
-
 import ru.raslav.wirelessscan.report
+import java.io.File
 import java.io.FileOutputStream
 import java.util.regex.Pattern
 
 private const val DB_NAME = "oui.db"
-private const val OUI_SIZE = 2539520L
 private val DIGITS = arrayOf(6, 7, 9)
 
 private const val TABLE = "OUI"
@@ -64,16 +61,13 @@ class OuiManager private constructor(context: Context) {
 
     private fun Context.verifyFile() {
         val file = File(dbPath)
-        if (!file.exists() || file.length() != OUI_SIZE) {
-            copyOui()
+        assets.open(DB_NAME).use { input ->
+            if (!file.exists() || file.length() != input.available().toLong()) {
+                FileOutputStream(dbPath).use { output ->
+                    input.copyTo(output)
+                }
+            }
         }
-    }
-
-    private fun Context.copyOui() {
-        val stream = assets.open(DB_NAME)
-        val dst = FileOutputStream(dbPath)
-        stream.copyTo(dst)
-        dst.close()
     }
 
     private fun parseTxt() {
@@ -81,6 +75,7 @@ class OuiManager private constructor(context: Context) {
         // 08:45:D1         	Cisco       	Cisco Systems, Inc
         // 00:55:DA:90/28   	QuantumCommu	Quantum Communication Technology Co., Ltd.,Anhui
         // 00:1B:C5:0B:90/36	DenkiKogyo  	Denki Kogyo Company, Limited
+        // json alternative https://www.wireshark.org/json/manuf.json
         val file = File(txtPath)
         if (!file.exists()) {
             return report("no OUI text file")
