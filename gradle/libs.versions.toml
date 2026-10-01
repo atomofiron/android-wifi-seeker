@@ -1,0 +1,21 @@
+[versions]
+agp = "9.3.3"
+coreKtx = "1.19.0"
+appcompat = "1.8.0"
+material = "1.14.0"
+activity = "1.13.0"
+preference = "1.2.1"
+recyclerview = "1.4.0"
+insets = "2.0.0"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+insets = { group = "io.github.atomofiron", name = "extended-insets", version.ref = "insets" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

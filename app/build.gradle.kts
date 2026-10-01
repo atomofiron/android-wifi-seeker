@@ -1,12 +1,11 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
+    alias(libs.plugins.android.application)
 }
 
 android { // key alias raslav_2016
     val packageName = "ru.raslav.wirelessscan"
     namespace = packageName
-    compileSdk = 36
+    compileSdk = 37
 
     buildFeatures {
         viewBinding = true
@@ -14,17 +13,14 @@ android { // key alias raslav_2016
     }
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 36
+        minSdk = 23
+        targetSdk = 37
         versionCode = 20
         versionName = "2.2.1"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildTypes {
         val snapshots = ".snapshots"
@@ -36,6 +32,7 @@ android { // key alias raslav_2016
         }
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             val providerAuthority = packageName + snapshots
             manifestPlaceholders["PROVIDER"] = providerAuthority
             buildConfigField("String", "AUTHORITY", "\"$providerAuthority\"")
@@ -45,12 +42,13 @@ android { // key alias raslav_2016
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.fragment:fragment-ktx:1.8.9")
-    implementation("androidx.preference:preference-ktx:1.2.1")
-
-    implementation("io.github.atomofiron:extended-insets:2.0.0")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.material)
+    implementation(libs.insets)
     implementation("org.simpleframework:simple-xml:2.7.1") {
         exclude("stax", "stax")
         exclude("stax-api", "stax-api")

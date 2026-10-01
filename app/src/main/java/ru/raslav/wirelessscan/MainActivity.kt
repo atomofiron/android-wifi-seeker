@@ -57,10 +57,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        when (intent?.action) {
+        when (intent.action) {
             ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotListFragment())
             ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)!!))
         }
