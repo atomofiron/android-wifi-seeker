@@ -15,8 +15,8 @@ android { // key alias raslav_2016
     defaultConfig {
         minSdk = 23
         targetSdk = 37
-        versionCode = 20
-        versionName = "2.2.1"
+        versionCode = 21
+        versionName = "2.3.0"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
