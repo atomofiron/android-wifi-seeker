@@ -20,7 +20,7 @@
         android:layout_width="@dimen/button_size"
         android:layout_height="@dimen/button_size"
         android:id="@+id/button_clear"
-        android:src="@drawable/ic_trash"
+        android:src="@drawable/ic_delete"
         android:layout_weight="1"
         android:background="@drawable/ripple_40"
         app:tint="@color/clear_btn"

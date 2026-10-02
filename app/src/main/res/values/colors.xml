@@ -12,9 +12,6 @@
     <color name="colorFrame">@color/colorDarkDarkGray</color>
     <color name="colorFlash">#88ffffff</color>
 
-    <color name="red_faint">#ffaa5555</color>
-    <color name="green_faint">#ff33aa33</color>
-
     <color name="transparent">#00000000</color>
     <color name="black_lite">#33000000</color>
     <color name="red_lite">#11ff0000</color>
