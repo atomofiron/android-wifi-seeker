@@ -1,10 +1,6 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
-import android.os.Build.VERSION_CODES.TIRAMISU as T
 import android.annotation.SuppressLint
 import android.app.BackgroundServiceStartNotAllowedException
 import android.content.BroadcastReceiver
@@ -12,8 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.wifi.WifiManager
+import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.S
 import android.os.Bundle
 import android.os.Handler
@@ -30,10 +28,10 @@ import android.widget.AdapterView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.ViewInsetsDelegate
 import lib.atomofiron.insets.insetsDelegate
 import ru.raslav.wirelessscan.Const
@@ -60,6 +58,7 @@ import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
+import android.os.Build.VERSION_CODES.TIRAMISU as T
 
 class MainFragment : Fragment(), Titled {
     companion object {
@@ -287,8 +286,8 @@ class MainFragment : Fragment(), Titled {
 
         requireContext().startService(Intent(requireContext(), ScanService::class.java))
 
-        if (SDK_INT >= M && Settings.Secure.getInt(requireContext().contentResolver, Settings.Secure.LOCATION_MODE) == 0)
-            AlertDialog.Builder(requireContext())
+        if (Settings.Secure.getInt(requireContext().contentResolver, Settings.Secure.LOCATION_MODE) == 0)
+            MaterialAlertDialogBuilder(requireContext())
                     .setMessage(R.string.geolocation_need)
                     .setPositiveButton(R.string.got_it, null)
                     .setCancelable(false)
@@ -336,8 +335,7 @@ class MainFragment : Fragment(), Titled {
         val file = File(requireContext().filesDir, lastName)
         if (file.exists()) {
             val editText = FileNameInputText(requireContext())
-            editText.setText(lastName)
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.rename_to)
                     .setView(editText)
                     .setCancelable(false)
