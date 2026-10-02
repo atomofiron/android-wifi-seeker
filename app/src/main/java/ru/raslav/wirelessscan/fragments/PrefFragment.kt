@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -14,6 +15,7 @@ import android.view.MenuInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -30,6 +32,7 @@ import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.OuiManager
+import android.os.Build.VERSION_CODES.TIRAMISU as T
 
 class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
@@ -114,22 +117,27 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
     }
 
     private fun openPrivacyPolicy() {
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/atomofiron/android-wifi-seeker/blob/master/privacy-policy.md"))
+        Intent(Intent.ACTION_VIEW, "https://github.com/atomofiron/android-wifi-seeker/blob/master/privacy-policy.md".toUri())
             .showChooser(R.string.open_an_url)
     }
 
     private fun openOuiSource() {
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://www.wireshark.org/tools/oui-lookup"))
+        Intent(Intent.ACTION_VIEW, "https://www.wireshark.org/tools/oui-lookup".toUri())
             .showChooser(R.string.open_an_url)
     }
 
     private fun openSourceCode() {
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/atomofiron/android-wifi-seeker"))
+        Intent(Intent.ACTION_VIEW, "https://github.com/atomofiron/android-wifi-seeker".toUri())
             .showChooser(R.string.open_an_url)
     }
 
+    private fun Context.canHandle(intent: Intent): Boolean = when {
+        SDK_INT >= T -> packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+        else -> packageManager.queryIntentActivities(intent, 0)
+    }.isNotEmpty()
+
     private fun Intent.showChooser(title: Int) {
-        if (resolveActivity(requireContext().packageManager) != null) {
+        if (requireContext().canHandle(this)) {
             val chooser = Intent.createChooser(this, getString(title))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(chooser)
