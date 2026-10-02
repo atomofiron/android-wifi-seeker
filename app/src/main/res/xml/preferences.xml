@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/settings"
-    >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/settings">
     <ListPreference
         android:title="@string/default_period"
         android:icon="@drawable/ic_timer"
@@ -11,11 +10,12 @@
         android:entries="@array/period_arr"
         android:defaultValue="1"
         />
-    <SwitchPreference
+    <SwitchPreferenceCompat
         android:title="@string/work_in_bg"
         android:icon="@drawable/ic_radar"
         android:key="work_in_bg"
         android:defaultValue="false"
+        app:widgetLayout="@layout/widget_switch"
         />
     <PreferenceCategory
         android:title="@string/other"
