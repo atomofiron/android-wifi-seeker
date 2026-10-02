@@ -1,10 +1,10 @@
 package ru.raslav.wirelessscan.utils
 
 import android.content.Context
-import android.widget.EditText
+import androidx.appcompat.widget.AppCompatEditText
 import java.util.regex.Pattern
 
-class FileNameInputText(co: Context) : EditText(co) {
+class FileNameInputText(co: Context) : AppCompatEditText(co) {
     companion object { // necessary
         private val pattern = Pattern.compile("[^a-zA-Zа-яА-Я0-9.()_-]")
     }
