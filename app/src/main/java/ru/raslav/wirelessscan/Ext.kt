@@ -11,6 +11,7 @@ import android.util.LayoutDirection
 import android.view.View
 import android.widget.Toast
 import androidx.preference.PreferenceManager
+import ru.raslav.wirelessscan.utils.Point
 
 
 fun Context.sp(): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -37,3 +38,13 @@ fun Context.openPermissionSettings() {
 }
 
 fun View.isRtl() = layoutDirection == LayoutDirection.RTL
+
+fun MutableList<Point>.clearOutOfRange() {
+    val it = listIterator()
+    while (it.hasNext()) {
+        if (it.next().outOfRange) {
+            it.remove()
+        }
+    }
+}
+

@@ -21,5 +21,7 @@ class ScanConnection(
 
     fun clearPointsList() = send(newMessage(Event.CLEAR.ordinal))
 
+    fun clearOutOfRangePoints() = send(newMessage(Event.CLEAR_OUT_OF_RANGE.ordinal))
+
     fun stopScanService() = send(newMessage(Event.STOP.ordinal))
 }

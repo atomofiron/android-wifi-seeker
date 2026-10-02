@@ -6,6 +6,7 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
+import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.content.ContextCompat
@@ -31,7 +32,9 @@ class Point private constructor(): Parcelable {
     @get:Element(name = "level")
     @set:Element(name = "level")
     var level = 0
-        set(value) { field = value; pwColor = getPowerColor(value)
+        set(value) {
+            field = value
+            pwColor = getPowerColor(value)
         }
     @get:Element(name = "frequency")
     @set:Element(name = "frequency")
@@ -72,12 +75,20 @@ class Point private constructor(): Parcelable {
     var wpsColor = 0
         private set
 
+    val outOfRange get() = level <= MIN_LEVEL
+
     constructor(sr: ScanResult) : this() {
         level = sr.level
         frequency = sr.frequency
         ch = getChanel(frequency)
         capabilities = sr.capabilities
-        essid = sr.SSID
+        essid = when {
+            SDK_INT >= TIRAMISU -> sr.wifiSsid
+                ?.bytes
+                ?.let { String(it) }
+                ?: sr.SSID
+            else -> sr.SSID
+        }
         bssid = sr.BSSID
     }
 
@@ -137,11 +148,9 @@ class Point private constructor(): Parcelable {
         return o.essid == essid && o.bssid == bssid
     }
 
-    fun getNotEmptyESSID(): String = if (essid.isEmpty()) bssid else essid
-
     companion object {
-		private val MAX_INDICATOR_LEVEL = 512
-        val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
+		private const val MAX_INDICATOR_LEVEL = 512
+        const val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
 
         // todo move this into adapter/holder
         var transparent = 0

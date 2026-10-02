@@ -23,8 +23,8 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
     // todo why unused?
     fun clear() {
         dbDir.listFiles()
-                .filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
-                .forEach { it.delete() }
+            .filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
+            .forEach { it.delete() }
 
         update()
     }

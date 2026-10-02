@@ -3,8 +3,6 @@ package ru.raslav.wirelessscan.adapters
 import android.animation.ValueAnimator
 import android.content.Context
 import android.net.wifi.WifiInfo
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
 import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -20,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.isRtl
@@ -94,7 +93,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
         drawItemRoot(holder.itemRows, point, position)
         holder.updateDescription(point.takeIf { it.bssid == focused?.bssid })
-        if (SDK_INT >= M) holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
+        holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
         focusedDrawable.setRtl(holder.root.isRtl())
         val even = position % 2 == 0
         holder.root.setBackgroundColor(when {
@@ -252,6 +251,14 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     fun clear(): String {
         allPoints.clear()
         points.clear()
+
+        notifyDataSetChanged()
+        return getCounters()
+    }
+
+    fun clearOutOfRange(): String {
+        allPoints.clearOutOfRange()
+        points.clearOutOfRange()
 
         notifyDataSetChanged()
         return getCounters()

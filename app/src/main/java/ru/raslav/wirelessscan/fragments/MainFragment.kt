@@ -224,7 +224,8 @@ class MainFragment : Fragment(), Titled {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
         }.onClickListener {
-            adapter.resetFocus()
+            scanConnection.clearOutOfRangePoints()
+            label.text = adapter.clearOutOfRange()
         })
         buttons.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
@@ -232,7 +233,7 @@ class MainFragment : Fragment(), Titled {
         }
     }
 
-    private fun locationGranted() = SDK_INT < M || requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
+    private fun locationGranted() = requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
 
     private fun notificationsGranted() = SDK_INT < T || requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 

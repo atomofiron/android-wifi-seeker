@@ -1,14 +1,21 @@
 package ru.raslav.wirelessscan
 
 import android.annotation.SuppressLint
-import android.app.*
-import android.net.wifi.WifiManager
-import android.os.*
+import android.app.IntentService
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
+import android.os.Handler
+import android.os.IBinder
+import android.os.Message
+import android.os.Messenger
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import ru.raslav.wirelessscan.connection.Connection.Event
@@ -196,6 +203,7 @@ class ScanService : IntentService("ScanService") {
         when (message.what) {
             Event.GET.ordinal -> if (scanned) sendResults()
             Event.CLEAR.ordinal-> points.clear()
+            Event.CLEAR_OUT_OF_RANGE.ordinal-> points.clearOutOfRange()
             Event.STOP.ordinal -> stop()
             Event.PERIOD.ordinal -> period = message.arg1
         }
