@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="@style/Theme.Material3.Dark.NoActionBar">
         <item name="android:fitsSystemWindows">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -22,6 +22,7 @@
         <item name="android:textColor">@color/filter_btn</item>
         <item name="android:textSize">14sp</item>
         <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:padding">0dp</item>
     </style>
     <style name="Description">
         <item name="android:layout_width">match_parent</item>
