@@ -17,6 +17,8 @@ object Const {
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f
 
+    const val ZeroByte: Byte = 0x00
+
     const val LOCATION_REQUEST_CODE = 7
     const val BG_LOCATION_REQUEST_CODE = 8
     const val NOTIFICATIONS_REQUEST_CODE = 9

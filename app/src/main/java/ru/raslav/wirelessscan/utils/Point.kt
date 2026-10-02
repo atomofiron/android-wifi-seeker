@@ -12,6 +12,7 @@ import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
+import ru.raslav.wirelessscan.Const.ZeroByte
 import ru.raslav.wirelessscan.R
 
 @Root(name = "point")
@@ -85,6 +86,7 @@ class Point private constructor(): Parcelable {
         essid = when {
             SDK_INT >= TIRAMISU -> sr.wifiSsid
                 ?.bytes
+                ?.takeIf { it.isNotEmpty() && (it.size > 1 || it.first() != ZeroByte) }
                 ?.let { String(it) }
                 ?: sr.SSID
             else -> sr.SSID
