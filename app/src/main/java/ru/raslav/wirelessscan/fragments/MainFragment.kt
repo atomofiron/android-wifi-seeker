@@ -367,7 +367,6 @@ class MainFragment : Fragment(), Titled {
                 notificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
             buttonResume.isActivated = true
-            scanDrawable.showAnimation(true)
             tryStartScanService()
         }
     }
