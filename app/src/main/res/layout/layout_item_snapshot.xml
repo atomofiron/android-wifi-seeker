@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
-    android:descendantFocusability="blocksDescendants">
+    android:descendantFocusability="blocksDescendants"
+    android:paddingHorizontal="@dimen/padding_common"
+    >
 
     <TextView
         android:layout_width="0dp"
@@ -15,14 +17,14 @@
         android:singleLine="true"
         android:ellipsize="middle"
         android:textSize="@dimen/item_title"
-        android:layout_marginStart="16dp"
         />
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/share"
         android:src="@drawable/ic_share"
-        android:padding="@dimen/image_button_padding"
+        android:paddingHorizontal="@dimen/padding_half"
+        android:paddingVertical="@dimen/padding_common"
         android:layout_weight="0"
         android:background="@drawable/ripple_40"
         />
@@ -31,7 +33,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/delete"
         android:src="@drawable/ic_delete_state"
-        android:padding="@dimen/image_button_padding"
+        android:paddingHorizontal="@dimen/padding_half"
+        android:paddingVertical="@dimen/padding_common"
         android:layout_weight="0"
         android:background="@drawable/ripple_40"
         />
