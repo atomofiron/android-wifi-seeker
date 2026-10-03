@@ -10,6 +10,7 @@ android { // key alias raslav_2016
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        resValues = true
     }
 
     defaultConfig {
@@ -17,6 +18,8 @@ android { // key alias raslav_2016
         targetSdk = 37
         versionCode = 21
         versionName = "2.3.0"
+
+        resValue("string", "app_version", "v$versionName ($versionCode)")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

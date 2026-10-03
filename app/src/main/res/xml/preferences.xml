@@ -30,11 +30,12 @@
         android:key="other"
         >
         <PreferenceScreen
-            android:key="privacy_policy"
-            android:id="@+id/privacy_policy"
-            android:title="@string/privacy_policy"
-            android:icon="@drawable/ic_privacy"
+            android:key="source_code"
+            android:id="@+id/source_code"
+            android:title="@string/source_code"
+            android:icon="@drawable/ic_github"
             android:widgetLayout="@layout/widget_outside"
+            android:summary="@string/app_version"
             />
         <PreferenceScreen
             android:key="oui_source"
@@ -45,10 +46,10 @@
             android:widgetLayout="@layout/widget_outside"
             />
         <PreferenceScreen
-            android:key="source_code"
-            android:id="@+id/source_code"
-            android:title="@string/source_code"
-            android:icon="@drawable/ic_github"
+            android:key="privacy_policy"
+            android:id="@+id/privacy_policy"
+            android:title="@string/privacy_policy"
+            android:icon="@drawable/ic_privacy"
             android:widgetLayout="@layout/widget_outside"
             />
         <PreferenceScreen
