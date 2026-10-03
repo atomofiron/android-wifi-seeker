@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="period_3s" type="id" />
+    <item name="period_5s" type="id" />
+    <item name="period_10s" type="id" />
+    <item name="period_30s" type="id" />
+    <item name="period_1m" type="id" />
+    <item name="period_3m" type="id" />
+    <item name="period_5m" type="id" />
+</resources>

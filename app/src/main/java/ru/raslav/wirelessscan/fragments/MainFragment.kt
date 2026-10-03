@@ -20,6 +20,9 @@ import android.provider.Settings
 import android.text.format.Formatter
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.View.NO_ID
 import android.view.ViewGroup
@@ -46,6 +49,7 @@ import lib.atomofiron.insets.InsetsSource
 import lib.atomofiron.insets.insetsPadding
 import lib.atomofiron.insets.insetsSource
 import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.Const.PREF_DEFAULT_PERIOD
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
@@ -63,6 +67,7 @@ import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
+import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AppCompatAttr
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
@@ -74,7 +79,6 @@ import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
-import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
 import android.os.Build.VERSION_CODES.TIRAMISU as T
@@ -90,6 +94,8 @@ class MainFragment : Fragment(), Titled {
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private val connectionReceiver = ConnectionReceiver()
     private lateinit var scanDrawable: ScanDrawable
+    private var scanPeriod = 0
+    private lateinit var periodItem: MenuItem
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
@@ -111,6 +117,10 @@ class MainFragment : Fragment(), Titled {
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         requireContext().registerReceiver(connectionReceiver, filter)
+        scanPeriod = requireContext().sp()
+            .getString(PREF_DEFAULT_PERIOD, "0")!!
+            .toInt()
+            .let { resources.getIntArray(R.array.period_arr_int)[it] }
 
         Point.initColors(requireContext())
     }
@@ -204,6 +214,41 @@ class MainFragment : Fragment(), Titled {
             locationGranted() -> binding.bottomToolbar.tryStartScanServiceIfWifiEnabled()
             else -> requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE).also { report("onViewCreated requestPermissions") }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main, menu)
+        periodItem = menu.findItem(R.id.period)
+        updatePeriodIcon()
+        val subMenu = periodItem.subMenu ?: return
+        resources.getStringArray(R.array.period_arr).forEachIndexed { index, it ->
+            subMenu.add(Menu.NONE, PeriodIds[index], Menu.NONE, it)
+        }
+    }
+
+    private fun updatePeriodIcon() {
+        val index = resources.getIntArray(R.array.period_arr_int)
+            .indexOf(scanPeriod)
+        periodItem.setIcon(PeriodIcons[index])
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val periods = resources.getIntArray(R.array.period_arr_int)
+        when (item.itemId) {
+            R.id.period_3s,
+            R.id.period_5s,
+            R.id.period_10s,
+            R.id.period_30s,
+            R.id.period_1m,
+            R.id.period_3m,
+            R.id.period_5m -> {
+                scanPeriod = periods[PeriodIds.indexOf(item.itemId)]
+                sendScanPeriod()
+                updatePeriodIcon()
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
     }
 
     override fun onDestroyView() {
@@ -341,11 +386,7 @@ class MainFragment : Fragment(), Titled {
 
     private fun stopScanService() = scanConnection.stopScanService()
 
-    private fun sendScanPeriod() {
-        /*val selected = binding.bottomToolbar.spinnerPeriod.selectedItemPosition
-        val period = resources.getIntArray(R.array.period_arr_int)[selected]
-        scanConnection.sendScanPeriod(period)*/
-    }
+    private fun sendScanPeriod() = scanConnection.sendScanPeriod(scanPeriod)
 
     private fun FragmentMainBinding.updateState(message: Message) {
         report("-> ${message.run { Event.entries[what] }}")
@@ -483,3 +524,6 @@ class MainFragment : Fragment(), Titled {
         adapter.notifyDataSetChanged()
     }
 }
+
+private val PeriodIds = intArrayOf(R.id.period_3s, R.id.period_5s, R.id.period_10s, R.id.period_30s, R.id.period_1m, R.id.period_3m, R.id.period_5m)
+private val PeriodIcons = intArrayOf(R.drawable.ic_3_sec, R.drawable.ic_5_sec, R.drawable.ic_10_sec, R.drawable.ic_30_sec, R.drawable.ic_1_min, R.drawable.ic_3_min, R.drawable.ic_5_min)

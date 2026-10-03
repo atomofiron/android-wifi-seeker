@@ -56,4 +56,5 @@
     <string name="got_it">Got it</string>
     <string name="error">Error</string>
     <string name="channel_name">Indication</string>
+    <string name="period">Period</string>
 </resources>

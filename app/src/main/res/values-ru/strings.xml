@@ -55,4 +55,5 @@
     <string name="got_it">Понятно</string>
     <string name="error">Ошибка</string>
     <string name="channel_name">Индикация</string>
+    <string name="period">Период</string>
 </resources>

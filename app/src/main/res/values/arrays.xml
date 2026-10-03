@@ -18,7 +18,7 @@
         <item>5</item>
         <item>6</item>
     </string-array>
-    <integer-array name="period_arr_int" translatable="false">
+    <integer-array name="period_arr_int">
         <item>3</item>
         <item>5</item>
         <item>10</item>

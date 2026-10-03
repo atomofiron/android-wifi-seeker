@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item
+        android:id="@+id/period"
+        android:title="@string/period"
+        android:icon="@drawable/ic_timer"
+        app:showAsAction="ifRoom"
+        >
+        <menu />
+    </item>
     <item
         android:id="@+id/settings"
         android:title="@string/settings"
         android:icon="@drawable/ic_settings"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         />
-
 </menu>

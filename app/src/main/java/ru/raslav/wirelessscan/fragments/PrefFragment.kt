@@ -10,8 +10,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.Q
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -42,7 +40,6 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // todo deprecation
         setHasOptionsMenu(true)
     }
 
@@ -69,11 +66,6 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         if (SDK_INT >= Q) {
             verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.removeItem(R.id.settings)
     }
 
     private fun setListeners(screen: PreferenceGroup) {

@@ -2,15 +2,17 @@ package ru.raslav.wirelessscan.fragments
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.adapters.PointListAdapter
-import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.SnapshotManager
 
 class SnapshotFragment : Fragment(), Titled {
     companion object {
@@ -35,11 +37,6 @@ class SnapshotFragment : Fragment(), Titled {
         super.onCreate(savedInstanceState)
         // todo deprecation
         setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.clear()
     }
 
     override fun onStart() {
