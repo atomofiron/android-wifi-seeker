@@ -478,14 +478,6 @@ class MainFragment : Fragment(), Titled {
 
     private fun FragmentMainBinding.onLayoutChanged(orientation: Orientation) {
         val vertical = orientation.vertical
-        root.removeAllViews()
-        if (orientation is Orientation.Start) {
-            root.addView(bottomToolbar.root)
-            root.addView(container)
-        } else {
-            root.addView(container)
-            root.addView(bottomToolbar.root)
-        }
         bottomToolbar.root.updateLayoutParams<FrameLayout.LayoutParams> {
             gravity = when (orientation) {
                 is Orientation.Start -> Gravity.START or Gravity.CENTER_VERTICAL
@@ -498,11 +490,11 @@ class MainFragment : Fragment(), Titled {
             (filters.parent as ViewGroup).removeView(filters)
             if (orientation == Orientation.Bottom) {
                 bottomToolbar.horizontalFilters.addView(filters)
-                bottomToolbar.horizontalFilters.isVisible = bottomToolbar.verticalFilters.isVisible
+                bottomToolbar.horizontalFilters.isVisible = bottomToolbar.buttonFilter.isActivated
                 bottomToolbar.verticalFilters.isVisible = false
             } else {
                 bottomToolbar.verticalFilters.addView(filters)
-                bottomToolbar.verticalFilters.isVisible = bottomToolbar.horizontalFilters.isVisible
+                bottomToolbar.verticalFilters.isVisible = bottomToolbar.buttonFilter.isActivated
                 bottomToolbar.horizontalFilters.isVisible = false
             }
             filters.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
