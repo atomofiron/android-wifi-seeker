@@ -15,12 +15,13 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
+import ru.raslav.wirelessscan.utils.Orientation as LayoutOrientation
 
 class ScanDrawable(
     color: Int,
     scanColor: Int,
     cornerRadius: Float,
-    private val bottom: Int,
+    private val anchor: Int,
 ) : GradientDrawable(Orientation.BOTTOM_TOP, intArrayOf(color, color)) {
 
     private val animator = ValueAnimator.ofFloat(0f, 3f)
@@ -28,8 +29,11 @@ class ScanDrawable(
     private val path = Path()
     private var out = 0f
     private var inn = 0f
+    private var x = 0
+    private var y = 0
     private var radius = 0f
     private var show = false
+    private var orientation: LayoutOrientation = LayoutOrientation.Bottom
 
     init {
         this.cornerRadius = cornerRadius
@@ -44,6 +48,11 @@ class ScanDrawable(
         paint.style = Paint.Style.FILL
     }
 
+    fun showOrientation(new: LayoutOrientation) {
+        orientation = new
+        onBoundsChange(bounds)
+    }
+
     fun showAnimation(show: Boolean) {
         if (show == this.show) return
         this.show = show
@@ -54,21 +63,26 @@ class ScanDrawable(
 
     override fun onBoundsChange(rect: Rect) {
         super.onBoundsChange(rect)
-        val horizontal = rect.width().half().sqr()
-        val vertical = max(rect.height() - bottom, bottom).sqr()
+        val (x, y) = when {
+            orientation.left -> anchor to rect.height().half()
+            orientation.right -> (rect.width() - anchor) to rect.height().half()
+            else -> rect.width().half() to (rect.height() - anchor)
+        }
+        this.x = x
+        this.y = y
+        val horizontal = max(rect.width() - x, x).sqr()
+        val vertical = max(rect.height() - y, y).sqr()
         radius = sqrt((horizontal + vertical).toDouble()).toFloat()
     }
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        val x = bounds.width() / 2f
-        val y = bounds.height() - bottom.toFloat()
         val outRadius = radius * sin(out * PI / 2).toFloat()
         val innRadius = radius * (1f - cos(inn * PI / 2).toFloat())
         path.reset()
-        path.addCircle(x, y, innRadius, Path.Direction.CW)
-        path.addCircle(x, y, outRadius, Path.Direction.CCW)
+        path.addCircle(x.toFloat(), y.toFloat(), innRadius, Path.Direction.CW)
+        path.addCircle(x.toFloat(), y.toFloat(), outRadius, Path.Direction.CCW)
         canvas.drawPath(path, paint)
         if (show && !animator.isRunning) {
             animator.start()

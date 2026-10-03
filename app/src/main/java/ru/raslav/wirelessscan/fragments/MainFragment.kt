@@ -178,7 +178,7 @@ class MainFragment : Fragment(), Titled {
             color = requireContext().colorAttr(MaterialAttr.colorSurface),
             scanColor = requireContext().colorAttr(AppCompatAttr.colorPrimary) withAlpha 0.1f,
             cornerRadius = resources.getDimension(R.dimen.toolbar_corner),
-            bottom = resources.getDimensionPixelSize(R.dimen.toolbar_padding)
+            anchor = resources.getDimensionPixelSize(R.dimen.toolbar_padding)
                     + resources.getDimensionPixelSize(R.dimen.toolbar_button_margin)
                     + resources.getDimensionPixelSize(R.dimen.toolbar_button_size) / 2
         )
@@ -521,6 +521,7 @@ class MainFragment : Fragment(), Titled {
             startToEnd = if (orientation.start) R.id.buttons else NO_ID
             endToStart = if (orientation.start) NO_ID else R.id.buttons
         }
+        scanDrawable.showOrientation(orientation)
         adapter.notifyDataSetChanged()
     }
 }
