@@ -8,7 +8,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_marginHorizontal="@dimen/padding_common"
-    android:layout_marginBottom="@dimen/padding_common"
+    tools:layout_marginBottom="@dimen/padding_common"
     android:padding="@dimen/toolbar_padding"
     android:clipToPadding="false"
     android:clipChildren="false"

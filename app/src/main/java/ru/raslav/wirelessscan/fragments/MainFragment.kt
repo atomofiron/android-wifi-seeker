@@ -46,6 +46,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.InsetsSource
+import lib.atomofiron.insets.ViewInsetsDelegate
+import lib.atomofiron.insets.insetsMargin
 import lib.atomofiron.insets.insetsPadding
 import lib.atomofiron.insets.insetsSource
 import ru.raslav.wirelessscan.Const
@@ -164,9 +166,10 @@ class MainFragment : Fragment(), Titled {
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counter.insetsPadding(insets, horizontal = true)
         binding.listTitle.root.insetsPadding(insets, horizontal = true)
+        val toolbarDelegate = binding.bottomToolbar.root.insetsMargin(start = true, end = true, bottom = true)
         binding.listView.insetsPadding(insets, start = true, end = true, bottom = true)
         binding.root.layoutChanges {
-            binding.onLayoutChanged(it)
+            binding.onLayoutChanged(it, toolbarDelegate)
         }
         binding.listView.onItemClickListener = adapter
         binding.listView.adapter = adapter
@@ -476,7 +479,10 @@ class MainFragment : Fragment(), Titled {
         override fun onReceive(context: Context, intent: Intent) = updateConnectionInfo()
     }
 
-    private fun FragmentMainBinding.onLayoutChanged(orientation: Orientation) {
+    private fun FragmentMainBinding.onLayoutChanged(
+        orientation: Orientation,
+        toolbarDelegate: ViewInsetsDelegate,
+    ) {
         val vertical = orientation.vertical
         bottomToolbar.root.updateLayoutParams<FrameLayout.LayoutParams> {
             gravity = when (orientation) {
@@ -484,7 +490,8 @@ class MainFragment : Fragment(), Titled {
                 is Orientation.End -> Gravity.END or Gravity.CENTER_VERTICAL
                 is Orientation.Bottom -> Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             }
-            bottomMargin = if (orientation.vertical) resources.getDimensionPixelSize(R.dimen.padding_common) else 0
+            val margin = resources.getDimensionPixelSize(R.dimen.padding_common)
+            bottomMargin += if (orientation.vertical) margin else -margin
         }
         bottomToolbar.filters.root.let { filters ->
             (filters.parent as ViewGroup).removeView(filters)
@@ -498,6 +505,13 @@ class MainFragment : Fragment(), Titled {
                 bottomToolbar.horizontalFilters.isVisible = false
             }
             filters.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+        }
+        toolbarDelegate.changeInsets {
+            when (orientation) {
+                is Orientation.Start -> margin(start, bottom)
+                is Orientation.End -> margin(bottom, end)
+                is Orientation.Bottom -> margin(start, end, bottom)
+            }
         }
         bottomToolbar.buttons.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
         bottomToolbar.buttons.updateLayoutParams<ConstraintLayout.LayoutParams> {
