@@ -5,12 +5,16 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.provider.Settings
 import android.util.LayoutDirection
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.AttrRes
+import androidx.core.graphics.ColorUtils
 import androidx.preference.PreferenceManager
+import com.google.android.material.color.MaterialColors
 import ru.raslav.wirelessscan.utils.Point
 
 
@@ -47,4 +51,16 @@ fun MutableList<Point>.clearOutOfRange() {
         }
     }
 }
+
+fun Int.half() = this / 2
+
+fun Int.sqr() = this * this
+
+fun Context.colorAttr(@AttrRes attr: Int) = MaterialColors.getColor(this, attr, Color.MAGENTA)
+
+fun Float.toIntAlpha(): Int = (this * 255).toInt().coerceIn(0, 255)
+
+infix fun Int.withAlpha(alpha: Float): Int = this withAlpha alpha.toIntAlpha()
+
+infix fun Int.withAlpha(alpha: Int): Int = ColorUtils.setAlphaComponent(this, alpha)
 

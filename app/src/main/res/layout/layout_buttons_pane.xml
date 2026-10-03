@@ -12,7 +12,7 @@
     android:padding="@dimen/toolbar_inner_padding"
     android:clipToPadding="false"
     android:clipChildren="false"
-    android:background="@drawable/toolbar_background"
+    tools:layout_gravity="bottom|center_horizontal"
     >
     <HorizontalScrollView
         android:id="@+id/horizontal_filters"

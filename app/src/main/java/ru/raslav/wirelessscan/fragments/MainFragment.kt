@@ -50,6 +50,7 @@ import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.adapters.PointListAdapter
+import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
@@ -63,14 +64,18 @@ import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.AppCompatAttr
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
+import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
+import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
+import ru.raslav.wirelessscan.withAlpha
 import java.io.File
 import android.os.Build.VERSION_CODES.TIRAMISU as T
 
@@ -84,6 +89,7 @@ class MainFragment : Fragment(), Titled {
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private val connectionReceiver = ConnectionReceiver()
+    private lateinit var scanDrawable: ScanDrawable
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
@@ -158,6 +164,13 @@ class MainFragment : Fragment(), Titled {
         initFilters(binding.bottomToolbar.filters)
         binding.initButtons(binding.counter)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
+        scanDrawable = ScanDrawable(
+            color = requireContext().colorAttr(MaterialAttr.colorSurface),
+            scanColor = requireContext().colorAttr(AppCompatAttr.colorPrimary) withAlpha 0.1f,
+            cornerRadius = resources.getDimension(R.dimen.toolbar_corner),
+        )
+        binding.bottomToolbar.root.background = scanDrawable
+        binding.bottomToolbar.root.clipToOutline = true
         binding.permissionDisclaimer.isVisible = !locationGranted()
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
@@ -292,7 +305,7 @@ class MainFragment : Fragment(), Titled {
                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), Const.NOTIFICATIONS_REQUEST_CODE)
             }
             buttonResume.isActivated = true
-            binding.progress.isVisible = true
+            scanDrawable.showAnimation(true)
             tryStartScanService()
         }
     }
@@ -335,7 +348,7 @@ class MainFragment : Fragment(), Titled {
         report("-> ${message.run { Event.entries[what] }}")
         if (view == null) return
 
-        progress.isVisible = message.what == Event.START_SCAN.ordinal
+        scanDrawable.showAnimation(message.what == Event.START_SCAN.ordinal)
         when (message.what) {
             Event.START_SCAN.ordinal -> adapter.animScanStart()
             Event.RESULTS.ordinal -> updateList(message)
