@@ -68,7 +68,7 @@ class ScanService : Service() {
     private var code = 1
 
     override fun onCreate() {
-        report("ScanService: onCreate()")
+        dlog("ScanService: onCreate()")
         super.onCreate()
 
         scanThread = HandlerThread("ScanService").apply { start() }
@@ -83,7 +83,7 @@ class ScanService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        report("ScanService: onDestroy()")
+        dlog("ScanService: onDestroy()")
         scanThread.quitSafely()
     }
 
@@ -98,7 +98,7 @@ class ScanService : Service() {
     }
 
     private fun startScanning() {
-        report("ScanService: startScanning()")
+        dlog("ScanService: startScanning()")
         showNotification(true)
 
         // wait for the connection to the service to be established
@@ -120,7 +120,7 @@ class ScanService : Service() {
     }
 
     private fun scan() {
-        report("scan...")
+        dlog("scan...")
 
         if (!waitForWifi())
             return
@@ -212,7 +212,7 @@ class ScanService : Service() {
     }
 
     fun handleMessage(message: Message) {
-        report("<- ${message.run { Event.entries[what] }}")
+        dlog("<- ${message.run { Event.entries[what] }}")
         resultMessenger = message.replyTo ?: resultMessenger
 
         when (message.what) {

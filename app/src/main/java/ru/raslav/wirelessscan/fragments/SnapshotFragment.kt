@@ -18,12 +18,11 @@ class SnapshotFragment : Fragment(), Titled {
     companion object {
         private const val EXTRA_NAME = "EXTRA_NAME"
 
-        fun newInstance(name: String): SnapshotFragment {
+        operator fun invoke(name: String): SnapshotFragment {
             val bundle = Bundle()
             bundle.putString(EXTRA_NAME, name)
             val fragment = SnapshotFragment()
             fragment.arguments = bundle
-
             return fragment
         }
     }

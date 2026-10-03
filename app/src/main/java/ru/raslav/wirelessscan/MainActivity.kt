@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         when (intent.action) {
             ACTION_OPEN_SNAPSHOTS_LIST -> setFragment(SnapshotListFragment())
-            ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment.newInstance(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)!!))
+            ACTION_OPEN_SNAPSHOT -> setFragment(SnapshotFragment(intent.getStringExtra(EXTRA_SNAPSHOT_NAME)!!))
         }
     }
 

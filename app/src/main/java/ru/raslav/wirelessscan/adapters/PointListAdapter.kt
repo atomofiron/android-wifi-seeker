@@ -21,9 +21,9 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
+import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isWide
-import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.max
@@ -143,8 +143,9 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
             else -> layout.setBackgroundResource(R.drawable.grille)
         }
 
-        if (point.level == -1)
-            report("WOW: point.level == -1")
+        if (point.level == -1) {
+            elog("WOW: point.level == -1")
+        }
     }
 
     private fun LayoutItemBinding.updateDescription(point: Point?) {

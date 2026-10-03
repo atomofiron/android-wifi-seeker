@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
-import ru.raslav.wirelessscan.report
+import ru.raslav.wirelessscan.elog
 import java.io.File
 import java.io.FileOutputStream
 import java.util.regex.Pattern
@@ -82,7 +82,7 @@ class OuiManager private constructor(context: Context) {
         // json alternative https://www.wireshark.org/json/manuf.json
         val file = File(txtPath)
         if (!file.exists()) {
-            return report("no OUI text file")
+            return elog("no OUI text file")
         }
         val delimiter = Pattern.compile(" *\t")
         file.readText(Charsets.UTF_8)
@@ -90,7 +90,7 @@ class OuiManager private constructor(context: Context) {
             .map { line ->
                 val parts = line.split(delimiter)
                 if (parts.size != 3) {
-                    return report("invalid line: $line")
+                    return elog("invalid line: $line")
                 }
                 val address = parts.first().split('/') // "08:45:D1" or "00:55:DA:90/28" or "00:1B:C5:0B:90/36"
                 var mac = address.first().replace(":", "") // "0845D1" or "0055DA90" or "001BC50B90"

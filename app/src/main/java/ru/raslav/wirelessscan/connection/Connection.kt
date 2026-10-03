@@ -9,7 +9,7 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import ru.raslav.wirelessscan.ScanService
-import ru.raslav.wirelessscan.report
+import ru.raslav.wirelessscan.dlog
 
 open class Connection(
     private val onServiceConnectedListener: () -> Unit = {},
@@ -30,7 +30,7 @@ open class Connection(
     }
 
     final override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        report("onServiceConnected()")
+        dlog("onServiceConnected()")
         commandMessenger = Messenger(service)
         onServiceConnectedListener()
         ScanService.connected()

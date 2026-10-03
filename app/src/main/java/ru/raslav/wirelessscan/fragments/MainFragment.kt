@@ -74,11 +74,12 @@ import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
+import ru.raslav.wirelessscan.dlog
+import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.longToast
 import ru.raslav.wirelessscan.openPermissionSettings
-import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
@@ -324,7 +325,6 @@ class MainFragment : Fragment(), Titled {
         bottomToolbar.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (adapter.allPoints.isNotEmpty()) {
                 binding.flash.startAnimation(flashAnim)
-
                 snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
@@ -376,7 +376,7 @@ class MainFragment : Fragment(), Titled {
             startScanService()
         } catch (e: BackgroundServiceStartNotAllowedException) {
             requireContext().longToast(e.toString())
-            report(e.toString())
+            elog(e.toString())
         }
     }
 
@@ -407,7 +407,7 @@ class MainFragment : Fragment(), Titled {
     private fun sendScanPeriod() = scanConnection.sendScanPeriod(scanPeriod)
 
     private fun FragmentMainBinding.updateState(message: Message) {
-        report("-> ${message.run { Event.entries[what] }}")
+        dlog("-> ${message.run { Event.entries[what] }}")
         view ?: return
 
         scanDrawable.showAnimation(message.what == Event.START_SCAN.ordinal)

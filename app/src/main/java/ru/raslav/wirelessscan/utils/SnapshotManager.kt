@@ -2,16 +2,16 @@ package ru.raslav.wirelessscan.utils
 
 import android.content.Context
 import android.widget.Toast
-import ru.raslav.wirelessscan.R
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
+import org.simpleframework.xml.ElementList
 import org.simpleframework.xml.Root
 import org.simpleframework.xml.core.Persister
-import org.simpleframework.xml.ElementList
 import ru.raslav.wirelessscan.Const
-import ru.raslav.wirelessscan.report
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.elog
+import java.io.File
 import java.io.StringWriter
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class SnapshotManager(private val co: Context) {
 
@@ -33,7 +33,7 @@ class SnapshotManager(private val co: Context) {
             stream.flush()
             stream.close()
         } catch (e: Exception) {
-            report(e.toString())
+            elog(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
             return null
         }
@@ -55,9 +55,8 @@ class SnapshotManager(private val co: Context) {
                     }
                 }
         } catch (e: Exception) {
-            report(e.toString())
+            elog(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
-
             null
         }
     }
