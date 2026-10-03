@@ -68,7 +68,6 @@ import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.adapters.PointListAdapter
-import ru.raslav.wirelessscan.canHandle
 import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection

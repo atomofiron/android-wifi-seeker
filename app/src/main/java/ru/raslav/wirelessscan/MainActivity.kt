@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main, InsetsProviderImpl())
         setSupportActionBar(findViewById(R.id.toolbar))
-        findViewById<View>(R.id.app_bar)
-            .insetsPadding(start = true, top = true, end = true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back)
+        findViewById<View>(R.id.app_bar).insetsPadding(start = true, top = true, end = true)
 
         supportFragmentManager.addOnBackStackChangedListener {
             updateTitle()
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            android.R.id.home -> supportFragmentManager.popBackStack()
             R.id.settings -> setFragment(PrefFragment())
             else -> return super.onOptionsItemSelected(item)
         }
@@ -79,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateTitle() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(supportFragmentManager.backStackEntryCount > 0)
         val current = supportFragmentManager.fragments.findLast { it.isVisible }
         current ?: return
         current as Titled
