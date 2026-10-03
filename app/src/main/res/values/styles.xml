@@ -19,7 +19,7 @@
     <style name="FilterButtonStyle" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">56sp</item>
         <item name="android:layout_height">36dp</item>
-        <item name="android:layout_margin">@dimen/toolbar_inner_padding</item>
+        <item name="android:layout_margin">@dimen/toolbar_padding</item>
         <item name="android:textColor">@color/filter_btn</item>
         <item name="android:textSize">14sp</item>
         <item name="android:background">@drawable/toolbar_button</item>

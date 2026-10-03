@@ -11,6 +11,7 @@ import ru.raslav.wirelessscan.half
 import ru.raslav.wirelessscan.sqr
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -19,6 +20,7 @@ class ScanDrawable(
     color: Int,
     scanColor: Int,
     cornerRadius: Float,
+    private val bottom: Int,
 ) : GradientDrawable(Orientation.BOTTOM_TOP, intArrayOf(color, color)) {
 
     private val animator = ValueAnimator.ofFloat(0f, 3f)
@@ -50,16 +52,18 @@ class ScanDrawable(
         }
     }
 
-    override fun onBoundsChange(r: Rect) {
-        super.onBoundsChange(r)
-        radius = sqrt((bounds.width().half().sqr() + bounds.height().half().sqr()).toDouble()).toFloat()
+    override fun onBoundsChange(rect: Rect) {
+        super.onBoundsChange(rect)
+        val horizontal = rect.width().half().sqr()
+        val vertical = max(rect.height() - bottom, bottom).sqr()
+        radius = sqrt((horizontal + vertical).toDouble()).toFloat()
     }
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
         val x = bounds.width() / 2f
-        val y = bounds.height() / 2f
+        val y = bounds.height() - bottom.toFloat()
         val outRadius = radius * sin(out * PI / 2).toFloat()
         val innRadius = radius * (1f - cos(inn * PI / 2).toFloat())
         path.reset()
