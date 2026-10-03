@@ -13,6 +13,7 @@ import androidx.core.graphics.toColorInt
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.isReadable
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
@@ -52,7 +53,7 @@ class Point private constructor(): Parcelable {
     @field:Element(name = "essid", required = false) // empty values couldn't be required (WTF)
     var essid = ""
     @field:Element(name = "essid_hex", required = false)
-    var essidHex = "" // todo
+    var essidHex = ""
     @field:Element(name = "bssid")
     var bssid = ""
     var bssidHex = ""
@@ -90,6 +91,7 @@ class Point private constructor(): Parcelable {
         ch = getChanel(frequency)
         capabilities = sr.capabilities
         essid = sr.getSsid()
+        essidHex = sr.getSsidHexIfNeeded(essid)
         bssid = sr.BSSID
     }
 
@@ -285,17 +287,24 @@ private fun ScanResult.getSsid(): String = when {
         null -> ""
         else -> {
             val out = CharBuffer.allocate(32)
-            val result = Decoder.decode(ByteBuffer.wrap(bytes), out, true)
+            Utf8decoder.decode(ByteBuffer.wrap(bytes), out, true)
             out.flip()
-            when {
-                result.isError -> ""
-                else -> out.toString()
-            }
+            out.toString()
         }
     }
 }
 
-private val Decoder = StandardCharsets.UTF_8
+private fun ScanResult.getSsidHexIfNeeded(ssid: String): String {
+    return when {
+        ssid.isNotEmpty() && ssid.all { it.isReadable() } -> return ""
+        SDK_INT >= TIRAMISU -> wifiSsid?.bytes ?: ssid.toByteArray()
+        else -> ssid.toByteArray()
+    }.toHexString(SpacedHexFormat)
+}
+
+private val SpacedHexFormat = HexFormat { bytes.byteSeparator = " " }
+
+private val Utf8decoder = StandardCharsets.UTF_8
     .newDecoder()
-    .onMalformedInput(CodingErrorAction.REPORT)
-    .onUnmappableCharacter(CodingErrorAction.REPORT)
+    .onMalformedInput(CodingErrorAction.REPLACE)
+    .onUnmappableCharacter(CodingErrorAction.REPLACE)

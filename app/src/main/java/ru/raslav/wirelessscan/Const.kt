@@ -23,4 +23,24 @@ object Const {
         SDK_INT >= Q -> Manifest.permission.ACCESS_FINE_LOCATION
         else -> Manifest.permission.ACCESS_COARSE_LOCATION
     }
+
+    val InvisibleChars = buildString {
+        for (c in '\u0000'..'\u001F') append(c)
+        append('\u007F')
+        for (c in '\u0080'..'\u009F') append(c)
+        append("\u00AD") // Soft Hyphen
+        append("\u200B") // Zero Width Space
+        append("\u200C") // Zero Width Non-Joiner
+        append("\u200D") // Zero Width Joiner
+        append("\u2028") // Line Separator
+        append("\u2029") // Paragraph Separator
+        append("\u2060") // Word Joiner
+        append("\uFEFF") // BOM / Zero Width No-Break Space
+        append("\u00A0") // NBSP
+        append("\u1680") // Ogham Space
+        for (c in '\u2000'..'\u200A') append(c) // En/Em/Thin/Hair Spaces
+        append("\u202F") // NNBSP
+        append("\u205F") // MMSP
+        append("\u3000") // Ideographic Space
+    }
 }

@@ -17,7 +17,9 @@ import androidx.annotation.AttrRes
 import androidx.core.graphics.ColorUtils
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
+import ru.raslav.wirelessscan.Const.InvisibleChars
 import ru.raslav.wirelessscan.utils.Point
+import kotlin.text.CharCategory.UNASSIGNED
 
 
 fun Context.sp(): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -77,3 +79,10 @@ fun Context.tryStartActivity(intent: Intent) = when {
     canHandle(intent) -> startActivity(intent)
     else -> Toast.makeText(this, R.string.no_any_app, Toast.LENGTH_LONG).show()
 }
+
+fun Char.isReadable() = !isISOControl() && category != UNASSIGNED && isVisible()
+
+fun String.isVisible() = any { it.isVisible() }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Char.isVisible() = this !in InvisibleChars

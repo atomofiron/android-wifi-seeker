@@ -2,6 +2,7 @@ package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Resources
 import android.net.wifi.WifiInfo
 import android.provider.Settings
 import android.text.Spannable
@@ -23,6 +24,7 @@ import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
+import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SideDrawable
@@ -91,7 +93,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     }
 
     private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
-        drawItemRoot(holder.itemRows, point)
+        drawItemRoot(holder.itemColumns, point)
         holder.updateDescription(point.takeIf { it.bssid == focused?.bssid })
         holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
         focusedDrawable.setRtl(holder.root.isRtl())
@@ -118,13 +120,17 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         holder.wps.setTextColor(point.wpsColor)
 
         val connected = connectionInfo?.bssid == point.bssid
-        holder.essid.text = if (point.essid.isEmpty()) point.bssid else point.essid
-        holder.essid.setTextColor(when {
+        holder.essid.text = when {
+            point.essid.isEmpty() -> point.bssid
+            point.essid.isVisible() -> point.essid
+            else -> point.essidHex
+        }
+        when {
             connected -> Point.green_light
             point.essid.isEmpty() -> Point.yellow
-            else -> Point.gray
-        })
-
+            point.essid.isVisible() -> Point.gray
+            else -> Point.yellow
+        }.let { holder.essid.setTextColor(it) }
         holder.bssid.text = point.bssid
         holder.bssid.setTextColor(if (connected) Point.green_light else Point.gray)
         holder.bssid.isVisible = holder.root.resources.configuration.isWide()
@@ -162,14 +168,13 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
 
     private fun LayoutDescriptionBinding.bind(point: Point) {
         val resources = root.resources
-        tvEssid.text = if (point.essid.isEmpty()) {
-            val empty = resources.getString(R.string.essid_empty)
-            SpannableStringBuilder(resources.getString(R.string.essid_format, empty)).apply {
-                setSpan(ForegroundColorSpan(Point.yellow), length - empty.length, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-        } else {
-            resources.getString(R.string.essid_format, point.essid)
+        tvEssid.text = when {
+            point.essid.isEmpty() -> resources.yellow("")
+            else -> resources.getString(R.string.essid_format, point.essid)
         }
+        tvEssidHex.text = point.essidHex.takeIf { it.isNotEmpty() }
+            ?.let { resources.getString(R.string.essid_hex_format, it) }
+        tvEssidHex.isVisible = tvEssidHex.text.isNotEmpty()
         tvBssid.text = resources.getString(R.string.bssid_format, point.bssid)
         tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
         tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.ch, point.level)
@@ -177,6 +182,13 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         tvManufDesc.text = point.manufacturerDesc
         tvManufDesc.isVisible = point.manufacturerDesc.isNotBlank()
         cross.setOnClickListener(closeDescription)
+    }
+
+    private fun Resources.yellow(text: String): CharSequence {
+        val text = text.takeIf { it.isNotEmpty() } ?: getString(R.string.essid_empty)
+        return SpannableStringBuilder(getString(R.string.essid_format, text)).apply {
+            setSpan(ForegroundColorSpan(Point.yellow), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

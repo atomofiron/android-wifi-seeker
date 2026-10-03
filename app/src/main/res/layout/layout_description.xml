@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/layout_description"
-    android:paddingStart="8dp"
-    android:paddingBottom="4dp"
+    android:paddingStart="@dimen/padding_half"
+    android:paddingBottom="@dimen/padding_mini"
     >
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +15,12 @@
         <TextView
             style="@style/Description"
             android:id="@+id/tv_essid"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="@dimen/padding_double"
+            />
+        <TextView
+            style="@style/Description"
+            android:id="@+id/tv_essid_hex"
+            android:layout_marginEnd="@dimen/padding_double"
             />
         <TextView
             style="@style/Description"

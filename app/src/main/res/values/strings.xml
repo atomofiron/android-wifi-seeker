@@ -28,9 +28,10 @@
     <string name="source_code">Source code</string>
 
     <!-- Description -->
-    <string name="essid_format">SSID: %s</string>
+    <string name="essid_format" translatable="false">SSID: %s</string>
     <string name="essid_empty">empty</string>
-    <string name="bssid_format">BSSID: %s</string>
+    <string name="essid_hex_format" translatable="false">SSID HEX: %s</string>
+    <string name="bssid_format" translatable="false">BSSID: %s</string>
     <string name="capab_format">Capabilities: %s</string>
     <string name="frequ_format">Frequency: %1$d, chanel: %2$d, pwr: %3$d</string>
     <string name="manuf_format">Manufacturer: %s</string>
