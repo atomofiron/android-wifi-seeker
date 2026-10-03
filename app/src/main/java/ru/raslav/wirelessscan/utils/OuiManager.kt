@@ -1,6 +1,5 @@
 package ru.raslav.wirelessscan.utils
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
@@ -49,15 +48,19 @@ class OuiManager private constructor(context: Context) {
         return Manufacturer.Unknown
     }
 
-    @SuppressLint("Range")
     private fun SQLiteDatabase.find(digits: String): Manufacturer? {
         val cursor = rawQuery("select * from $TABLE where $COLUMN_MAC=?;", arrayOf(digits))
         val manufacturer = cursor.takeIf { it.moveToFirst() }?.run {
-            Manufacturer(
-                digits,
-                label = getString(cursor.getColumnIndex(COLUMN_LABEL)),
-                description = getString(cursor.getColumnIndex(COLUMN_DESC)),
-            )
+            val label = cursor.getColumnIndex(COLUMN_LABEL)
+                .takeIf { it >= 0 }
+                ?.let { getString(it) }
+            val description = cursor.getColumnIndex(COLUMN_DESC)
+                .takeIf { it >= 0 }
+                ?.let { getString(it) }
+            if (label == null && description == null) {
+                return@run null
+            }
+            Manufacturer(digits, label = label ?: "", description = description ?: "")
         }
         cursor.close()
         return manufacturer
