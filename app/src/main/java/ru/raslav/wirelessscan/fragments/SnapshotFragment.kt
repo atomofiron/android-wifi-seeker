@@ -16,7 +16,7 @@ import ru.raslav.wirelessscan.utils.SnapshotManager
 
 class SnapshotFragment : Fragment(), Titled {
     companion object {
-        private val EXTRA_NAME = "EXTRA_NAME"
+        private const val EXTRA_NAME = "EXTRA_NAME"
 
         fun newInstance(name: String): SnapshotFragment {
             val bundle = Bundle()
@@ -33,19 +33,13 @@ class SnapshotFragment : Fragment(), Titled {
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // todo deprecation
-        setHasOptionsMenu(true)
-    }
-
     override fun onStart() {
         super.onStart()
 
         requireActivity().title = requireArguments().getString(EXTRA_NAME)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
         binding.listView.adapter = adapter

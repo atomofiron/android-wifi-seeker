@@ -57,4 +57,5 @@
     <string name="error">Error</string>
     <string name="channel_name">Indication</string>
     <string name="period">Period</string>
+    <string name="no_any_app">No app found that can perform this action</string>
 </resources>

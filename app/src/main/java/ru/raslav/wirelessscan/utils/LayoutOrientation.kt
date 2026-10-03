@@ -1,10 +1,11 @@
 package ru.raslav.wirelessscan.utils
 
 import android.content.Context
+import android.hardware.display.DisplayManager
 import android.util.LayoutDirection
+import android.view.Display
 import android.view.Surface
 import android.view.View
-import android.view.WindowManager
 import ru.raslav.wirelessscan.R
 
 class LayoutOrientation private constructor(
@@ -51,12 +52,14 @@ class LayoutOrientation private constructor(
             width < range.first -> width > height
             else -> width < height
         }
-        val display = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager?)!!.defaultDisplay
+        val display = context.getSystemService(Context.DISPLAY_SERVICE)
+            .let { it as? DisplayManager }
+            ?.getDisplay(Display.DEFAULT_DISPLAY)
         val rtl = layoutDirection == LayoutDirection.RTL
         val orientation = when {
             vertical -> Orientation.Bottom
-            display.rotation == Surface.ROTATION_90 -> if (rtl) Orientation.Start(true) else Orientation.End(false)
-            display.rotation == Surface.ROTATION_270 -> if (rtl) Orientation.End(true) else Orientation.Start(false)
+            display?.rotation == Surface.ROTATION_90 -> if (rtl) Orientation.Start(true) else Orientation.End(false)
+            display?.rotation == Surface.ROTATION_270 -> if (rtl) Orientation.End(true) else Orientation.Start(false)
             else -> Orientation.Bottom
         }
         return orientation

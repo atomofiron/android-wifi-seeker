@@ -1,7 +1,6 @@
 package ru.raslav.wirelessscan.utils
 
 import android.content.Context
-import android.graphics.Color
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
@@ -10,10 +9,15 @@ import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
-import ru.raslav.wirelessscan.Const.ZeroByte
 import ru.raslav.wirelessscan.R
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.nio.charset.CodingErrorAction
+import java.nio.charset.StandardCharsets
+import kotlin.math.min
 
 @Root(name = "point")
 class Point private constructor(): Parcelable {
@@ -47,9 +51,11 @@ class Point private constructor(): Parcelable {
         set(value) { field = value; parseCapabilities(value) }
     @field:Element(name = "essid", required = false) // empty values couldn't be required (WTF)
     var essid = ""
+    @field:Element(name = "essid_hex", required = false)
+    var essidHex = "" // todo
     @field:Element(name = "bssid")
     var bssid = ""
-    var hex = ""
+    var bssidHex = ""
 
     @field:Element(name = "channel")
     var ch = 0
@@ -83,14 +89,7 @@ class Point private constructor(): Parcelable {
         frequency = sr.frequency
         ch = getChanel(frequency)
         capabilities = sr.capabilities
-        essid = when {
-            SDK_INT >= TIRAMISU -> sr.wifiSsid
-                ?.bytes
-                ?.takeIf { it.isNotEmpty() && (it.size > 1 || it.first() != ZeroByte) }
-                ?.let { String(it) }
-                ?: sr.SSID
-            else -> sr.SSID
-        }
+        essid = sr.getSsid()
         bssid = sr.BSSID
     }
 
@@ -200,12 +199,13 @@ class Point private constructor(): Parcelable {
             green_light = ContextCompat.getColor(co, R.color.green_light)
         }
 
+        @Suppress("DEPRECATION")
         private fun getPowerColor(level: Int): Int {
 			/* не знаю в чём причина, но, начиная с Android 8,
 			   функция WifiManager.calculateSignalLevel(int, int)
 			   возвращает неадекватные значения */
             val pwr = when {
-                SDK_INT >= O -> MAX_INDICATOR_LEVEL * (Math.min(level, -50) + 100) / 50
+                SDK_INT >= O -> MAX_INDICATOR_LEVEL * (min(level, -50) + 100) / 50
                 else -> WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
             }
 
@@ -213,12 +213,12 @@ class Point private constructor(): Parcelable {
             var green = if (pwr >= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(pwr)
 
             if (red.length < 2)
-                red = "0" + red
+                red = "0$red"
 
             if (green.length < 2)
-                green = "0" + green
+                green = "0$green"
 
-            return Color.parseColor("#ff$red${green}00")
+            return "#ff$red${green}00".toColorInt()
         }
 
         private fun getChanel(frequency: Int): Int {
@@ -236,8 +236,7 @@ class Point private constructor(): Parcelable {
                     fr -= 5
                     ans++
                 }
-            } else if (fr in 4940..4990
-                    && fr % 5 != 0) {
+            } else if (fr in 4940..4990 && fr % 5 != 0) {
                 ans = 19
                 while (fr >= 4940) {
                     fr -= 7
@@ -278,3 +277,25 @@ class Point private constructor(): Parcelable {
         }
     }
 }
+
+@Suppress("DEPRECATION")
+private fun ScanResult.getSsid(): String = when {
+    SDK_INT < TIRAMISU -> SSID
+    else -> when (val bytes = wifiSsid?.bytes) {
+        null -> ""
+        else -> {
+            val out = CharBuffer.allocate(32)
+            val result = Decoder.decode(ByteBuffer.wrap(bytes), out, true)
+            out.flip()
+            when {
+                result.isError -> ""
+                else -> out.toString()
+            }
+        }
+    }
+}
+
+private val Decoder = StandardCharsets.UTF_8
+    .newDecoder()
+    .onMalformedInput(CodingErrorAction.REPORT)
+    .onUnmappableCharacter(CodingErrorAction.REPORT)

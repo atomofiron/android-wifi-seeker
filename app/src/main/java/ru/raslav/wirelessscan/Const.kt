@@ -17,11 +17,8 @@ object Const {
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f
 
-    const val ZeroByte: Byte = 0x00
+    const val Dot = "\u25CF " // ●
 
-    const val LOCATION_REQUEST_CODE = 7
-    const val BG_LOCATION_REQUEST_CODE = 8
-    const val NOTIFICATIONS_REQUEST_CODE = 9
     val LOCATION_PERMISSION = when {
         SDK_INT >= Q -> Manifest.permission.ACCESS_FINE_LOCATION
         else -> Manifest.permission.ACCESS_COARSE_LOCATION

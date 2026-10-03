@@ -1,7 +1,6 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -12,6 +11,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.preference.EditTextPreference
@@ -26,11 +26,11 @@ import androidx.recyclerview.widget.RecyclerView
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.canHandle
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.OuiManager
-import android.os.Build.VERSION_CODES.TIRAMISU as T
 
 class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
@@ -38,9 +38,11 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
 
     private lateinit var scanInBg: TwoStatePreference
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
+    private val backgroundLocationLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        when {
+            granted -> scanInBg.isChecked = true
+            else -> requireContext().openPermissionSettings()
+        }
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -73,7 +75,8 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
                 .map { screen.getPreference(it) }
                 .forEach {
                     when (it) {
-                        is PreferenceScreen, is PreferenceCategory -> setListeners(it as PreferenceGroup)
+                        is PreferenceScreen,
+                        is PreferenceCategory -> setListeners(it)
                         else -> {
                             it.onPreferenceChangeListener = this
                             updateSummary(it, null)
@@ -94,7 +97,7 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         updateSummary(preference, newValue)
         when (preference.key) {
             Const.PREF_WORK_IN_BG -> if (newValue == true && !backgroundLocationGranted()) {
-                requestPermissions(arrayOf(ACCESS_BACKGROUND_LOCATION), Const.BG_LOCATION_REQUEST_CODE)
+                backgroundLocationLauncher.launch(ACCESS_BACKGROUND_LOCATION)
                 return false
             }
         }
@@ -123,11 +126,6 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
             .showChooser(R.string.open_an_url)
     }
 
-    private fun Context.canHandle(intent: Intent): Boolean = when {
-        SDK_INT >= T -> packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
-        else -> packageManager.queryIntentActivities(intent, 0)
-    }.isNotEmpty()
-
     private fun Intent.showChooser(title: Int) {
         if (requireContext().canHandle(this)) {
             val chooser = Intent.createChooser(this, getString(title))
@@ -135,15 +133,6 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
             startActivity(chooser)
         } else
             Toast.makeText(requireContext(), R.string.no_activity, Toast.LENGTH_SHORT).show()
-    }
-
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when {
-            requestCode != Const.BG_LOCATION_REQUEST_CODE -> Unit
-            grantResults.first() == PackageManager.PERMISSION_GRANTED -> scanInBg.isChecked = true
-            else -> requireContext().openPermissionSettings()
-        }
     }
 
     private fun backgroundLocationGranted() = SDK_INT < Q || requireContext().checkSelfPermission(ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED

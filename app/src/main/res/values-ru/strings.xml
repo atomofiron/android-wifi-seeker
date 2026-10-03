@@ -56,4 +56,5 @@
     <string name="error">Ошибка</string>
     <string name="channel_name">Индикация</string>
     <string name="period">Период</string>
+    <string name="no_any_app">Приложение, способное выполнить это действие, не найдено</string>
 </resources>

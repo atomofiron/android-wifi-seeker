@@ -49,7 +49,7 @@ class SnapshotManager(private val co: Context) {
                 .points?.apply {
                     for (point in this) {
                         val manuf = OuiManager.find(point.bssid)
-                        point.hex = manuf.digits
+                        point.bssidHex = manuf.digits
                         point.manufacturer = manuf.label
                         point.manufacturerDesc = manuf.description
                     }

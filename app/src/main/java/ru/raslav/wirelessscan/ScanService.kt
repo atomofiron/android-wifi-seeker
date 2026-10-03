@@ -1,19 +1,21 @@
 package ru.raslav.wirelessscan
 
 import android.annotation.SuppressLint
-import android.app.IntentService
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.O
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import androidx.core.app.NotificationCompat
@@ -24,8 +26,7 @@ import ru.raslav.wirelessscan.utils.Point
 
 private const val ONLY_APP_IS_BOUND = 1
 
-@Suppress("DEPRECATION") // I don't care
-class ScanService : IntentService("ScanService") {
+class ScanService : Service() {
     companion object {
         private const val ACTION_PAUSE = "ACTION_PAUSE"
         private const val ACTION_RESUME = "ACTION_RESUME"
@@ -50,10 +51,11 @@ class ScanService : IntentService("ScanService") {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
-    private lateinit var receiver: BroadcastReceiver
+    private lateinit var scanThread: HandlerThread
+    private lateinit var scanHandler: Handler
     private val wifiManager by unsafeLazy { getSystemService(Context.WIFI_SERVICE) as WifiManager }
     @SuppressLint("HandlerLeak")
-    private val commandMessenger: Messenger = Messenger(object : Handler() {
+    private val commandMessenger: Messenger = Messenger(object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) = this@ScanService.handleMessage(msg)
     })
     private val notificationManager by unsafeLazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -69,28 +71,34 @@ class ScanService : IntentService("ScanService") {
         report("ScanService: onCreate()")
         super.onCreate()
 
-        if (SDK_INT >= Build.VERSION_CODES.O)
-            notificationManager.createNotificationChannel(NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                getString(R.string.channel_name),
-                NotificationManager.IMPORTANCE_LOW
-            ))
+        scanThread = HandlerThread("ScanService").apply { start() }
+        scanHandler = Handler(scanThread.looper)
+
+        if (SDK_INT >= O) {
+            val name = getString(R.string.channel_name)
+            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         report("ScanService: onDestroy()")
-        unregisterReceiver(receiver)
+        scanThread.quitSafely()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
-            if (isNotificationAction(intent) || process)
-                START_NOT_STICKY
-            else
-                super.onStartCommand(intent, flags, startId)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!isNotificationAction(intent) && !process) {
+            scanHandler.post {
+                startScanning()
+                stopSelf(startId)
+            }
+        }
+        return START_NOT_STICKY
+    }
 
-    override fun onHandleIntent(intent: Intent?) {
-        report("ScanService: onHandleIntent()")
+    private fun startScanning() {
+        report("ScanService: startScanning()")
         showNotification(true)
 
         // wait for the connection to the service to be established
@@ -119,7 +127,7 @@ class ScanService : IntentService("ScanService") {
 
         showNotification(true)
         sendStartScan()
-        wifiManager.startScan()
+        startScan()
         Thread.sleep(SCAN_DELAY)
 
         if (waitForWifi()) {
@@ -129,11 +137,18 @@ class ScanService : IntentService("ScanService") {
         }
 
         var i = SCAN_DELAY_OFFSET
-        while ((i++ < period || scanningIsNotRequired()) && process)
+        while ((i++ < period || scanningIsNotRequired()) && process) {
             Thread.sleep(SECOND)
+            }
     }
 
     private fun scanningIsNotRequired(): Boolean = boundCount <= ONLY_APP_IS_BOUND
+
+    /** Deprecated since API 28, but there is no replacement for triggering a scan request and the ability to do it is not removed yet */
+    @Suppress("DEPRECATION")
+    private fun startScan() {
+        wifiManager.startScan()
+    }
 
     /** @return process */
     private fun waitForWifi(): Boolean {
@@ -159,12 +174,12 @@ class ScanService : IntentService("ScanService") {
         currentPoints.forEach { new ->
             points.find { it.bssid == new.bssid }
                 ?.let {
-                    new.hex = it.hex
+                    new.bssidHex = it.bssidHex
                     new.manufacturer = it.manufacturer
                     new.manufacturerDesc = it.manufacturerDesc
                 }
                 ?: OuiManager.find(new.bssid).let {
-                    new.hex = it.digits
+                    new.bssidHex = it.digits
                     new.manufacturer = it.label
                     new.manufacturerDesc = it.description
                 }

@@ -78,7 +78,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
             val holder = Holder(binding = binding)
             itemView.tag = holder
 
-            binding.pwr.text = "\u25CF " // ●
+            binding.pwr.text = Const.Dot
             binding.pwr.gravity = Gravity.END
             holder
         } else
@@ -91,7 +91,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     }
 
     private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
-        drawItemRoot(holder.itemRows, point, position)
+        drawItemRoot(holder.itemRows, point)
         holder.updateDescription(point.takeIf { it.bssid == focused?.bssid })
         holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
         focusedDrawable.setRtl(holder.root.isRtl())
@@ -130,17 +130,18 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         holder.bssid.isVisible = holder.root.resources.configuration.isWide()
     }
 
-    private fun drawItemRoot(layout: LinearLayout, point: Point, position: Int) {
+    private fun drawItemRoot(layout: LinearLayout, point: Point) {
         val focused = focused
         val associating =  when {
             focused == null -> false
-            focused.hex.isEmpty() && point.hex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
-            else -> focused.hex == point.hex
+            focused.bssidHex.isEmpty() && point.bssidHex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
+            else -> focused.bssidHex == point.bssidHex
         }
-        if (associating)
-            layout.setBackgroundResource(if (point.level <= Point.MIN_LEVEL) R.drawable.grille_red else R.drawable.grille)
-        else
-            layout.background = null
+        when {
+            !associating -> layout.background = null
+            point.level <= Point.MIN_LEVEL -> layout.setBackgroundResource(R.drawable.grille_red)
+            else -> layout.setBackgroundResource(R.drawable.grille)
+        }
 
         if (point.level == -1)
             report("WOW: point.level == -1")

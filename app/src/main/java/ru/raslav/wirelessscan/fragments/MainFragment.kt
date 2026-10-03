@@ -3,21 +3,26 @@ package ru.raslav.wirelessscan.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.BackgroundServiceStartNotAllowedException
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.os.Build.VERSION_CODES.S
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import android.provider.Settings
-import android.text.format.Formatter
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
@@ -34,9 +39,15 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.graphics.Insets
+import androidx.core.location.LocationManagerCompat
+import androidx.core.os.BundleCompat
+import androidx.core.view.MenuProvider
 import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
@@ -44,6 +55,7 @@ import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.InsetsSource
 import lib.atomofiron.insets.ViewInsetsDelegate
@@ -56,6 +68,7 @@ import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.adapters.PointListAdapter
+import ru.raslav.wirelessscan.canHandle
 import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
@@ -64,14 +77,15 @@ import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.longToast
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.report
 import ru.raslav.wirelessscan.shortToast
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
+import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.unsafeLazy
-import ru.raslav.wirelessscan.utils.AppCompatAttr
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.FileNameInputText
@@ -83,6 +97,7 @@ import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
+import java.net.Inet4Address
 import android.os.Build.VERSION_CODES.TIRAMISU as T
 
 class MainFragment : Fragment(), Titled {
@@ -92,33 +107,32 @@ class MainFragment : Fragment(), Titled {
     }
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
+    private val connectivityManager by unsafeLazy { requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    private val networkRequest by unsafeLazy { NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build() }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
-    private val connectionReceiver = ConnectionReceiver()
+    private val menuProvider = MainMenuProvider()
+    private val networkCallback = if (SDK_INT >= S) NewNetworkCallback() else NetworkCallback()
+    private val mainHandler by unsafeLazy { Handler(Looper.getMainLooper()) }
+    private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission(), LocationPermissionCallback())
+    private val notificationsPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
     private lateinit var scanDrawable: ScanDrawable
     private var scanPeriod = 0
+    private var wifiInfo: WifiInfo? = null
     private lateinit var periodItem: MenuItem
 
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
     private lateinit var binding: FragmentMainBinding
 
-    override val title: String get() = getString(R.string.app_name) + "   " + Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress) // todo deprecation
+    override val title: String get() = getString(R.string.app_name) + "   " + wifiIpAddress()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // todo deprecation
-        setHasOptionsMenu(true)
 
         flashAnim.setAnimationListener(FlashAnimationListener())
-
         scanConnection.bindService(requireContext())
 
-        val filter = IntentFilter()
-        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
-        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-        requireContext().registerReceiver(connectionReceiver, filter)
         scanPeriod = requireContext().sp()
             .getString(PREF_DEFAULT_PERIOD, "0")!!
             .toInt()
@@ -134,6 +148,7 @@ class MainFragment : Fragment(), Titled {
 
     override fun onStop() {
         super.onStop()
+        connectivityManager.unregisterNetworkCallback(networkCallback)
         if (!sp.getBoolean(Const.PREF_WORK_IN_BG, false))
             stopScanService()
     }
@@ -141,7 +156,6 @@ class MainFragment : Fragment(), Titled {
     override fun onDestroy() {
         super.onDestroy()
         scanConnection.unbindService(requireContext())
-        requireContext().unregisterReceiver(connectionReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -154,6 +168,7 @@ class MainFragment : Fragment(), Titled {
     override fun onStart() {
         super.onStart()
 
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
         updateConnectionInfo()
         view?.let { binding.permissionDisclaimer.isVisible = !locationGranted() }
     }
@@ -191,7 +206,7 @@ class MainFragment : Fragment(), Titled {
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
         if (savedInstanceState != null) {
-            adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
+            adapter.updateList(BundleCompat.getParcelableArrayList(savedInstanceState, EXTRA_POINTS, Point::class.java))
         }
         val layoutOrientation = binding.root.layoutOrientation()
         binding.bottomToolbar.root.insetsSource {
@@ -212,20 +227,21 @@ class MainFragment : Fragment(), Titled {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (!isHidden) {
+            requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
         when {
             savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) == false -> Unit
             locationGranted() -> binding.bottomToolbar.tryStartScanServiceIfWifiEnabled()
-            else -> requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE).also { report("onViewCreated requestPermissions") }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.main, menu)
-        periodItem = menu.findItem(R.id.period)
-        updatePeriodIcon()
-        val subMenu = periodItem.subMenu ?: return
-        resources.getStringArray(R.array.period_arr).forEachIndexed { index, it ->
-            subMenu.add(Menu.NONE, PeriodIds[index], Menu.NONE, it)
+    /** A hidden fragment keeps the RESUMED state, so its view is not destroyed and the menu is handled manually */
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        when {
+            hidden -> activity?.removeMenuProvider(menuProvider)
+            else -> activity?.addMenuProvider(menuProvider)
         }
     }
 
@@ -235,23 +251,35 @@ class MainFragment : Fragment(), Titled {
         periodItem.setIcon(PeriodIcons[index])
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val periods = resources.getIntArray(R.array.period_arr_int)
-        when (item.itemId) {
-            R.id.period_3s,
-            R.id.period_5s,
-            R.id.period_10s,
-            R.id.period_30s,
-            R.id.period_1m,
-            R.id.period_3m,
-            R.id.period_5m -> {
-                scanPeriod = periods[PeriodIds.indexOf(item.itemId)]
-                sendScanPeriod()
-                updatePeriodIcon()
+    private inner class MainMenuProvider : MenuProvider {
+        override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
+            inflater.inflate(R.menu.main, menu)
+            periodItem = menu.findItem(R.id.period)
+            updatePeriodIcon()
+            val subMenu = periodItem.subMenu ?: return
+            resources.getStringArray(R.array.period_arr).forEachIndexed { index, it ->
+                subMenu.add(Menu.NONE, PeriodIds[index], Menu.NONE, it)
             }
-            else -> return super.onOptionsItemSelected(item)
         }
-        return true
+
+        override fun onMenuItemSelected(item: MenuItem): Boolean {
+            val periods = resources.getIntArray(R.array.period_arr_int)
+            when (item.itemId) {
+                R.id.period_3s,
+                R.id.period_5s,
+                R.id.period_10s,
+                R.id.period_30s,
+                R.id.period_1m,
+                R.id.period_3m,
+                R.id.period_5m -> {
+                    scanPeriod = periods[PeriodIds.indexOf(item.itemId)]
+                    sendScanPeriod()
+                    updatePeriodIcon()
+                }
+                else -> return false
+            }
+            return true
+        }
     }
 
     override fun onDestroyView() {
@@ -302,16 +330,11 @@ class MainFragment : Fragment(), Titled {
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
         bottomToolbar.buttonResume.setOnClickListener { view ->
-            if (view.isActivated)
-                stopScanService()
-            else
-                checkPermissionAndStartScan()
+            when {
+                view.isActivated -> stopScanService()
+                else -> checkPermissionAndStartScan()
+            }
         }
-        /*bottomToolbar.spinnerPeriod.setSelection(sp.getString(Const.PREF_DEFAULT_PERIOD, 1.toString())!!.toInt())
-        bottomToolbar.spinnerPeriod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = sendScanPeriod()
-        }*/
         bottomToolbar.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
@@ -330,30 +353,17 @@ class MainFragment : Fragment(), Titled {
     private fun notificationsGranted() = SDK_INT < T || requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     private fun checkPermissionAndStartScan() {
-        if (!locationGranted())
-            requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE)
-        else if (!requireContext().granted(Manifest.permission.ACCESS_WIFI_STATE))
-            requireContext().shortToast(R.string.no_perm)
-        else
-            startScanService()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
-        if (requestCode == Const.NOTIFICATIONS_REQUEST_CODE) {
-            // do nothing
-        } else if (requestCode == Const.LOCATION_REQUEST_CODE && granted) {
-            binding.permissionDisclaimer.isVisible = false
-            tryStartScanService()
-        } else if (!shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION)) {
-            requireContext().openPermissionSettings()
+        when {
+            !locationGranted() -> locationPermissionLauncher.launch(Const.LOCATION_PERMISSION)
+            !requireContext().granted(Manifest.permission.ACCESS_WIFI_STATE) -> requireContext().shortToast(R.string.no_perm)
+            else -> startScanService()
         }
     }
 
     private fun LayoutButtonsPaneBinding.tryStartScanServiceIfWifiEnabled() {
         if (wifiManager.isWifiEnabled) {
             if (!notificationsGranted()) {
-                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), Const.NOTIFICATIONS_REQUEST_CODE)
+                notificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
             buttonResume.isActivated = true
             scanDrawable.showAnimation(true)
@@ -361,30 +371,36 @@ class MainFragment : Fragment(), Titled {
         }
     }
 
-    private fun tryStartScanService() {
-        when {
-            SDK_INT < S -> startScanService()
-            else -> try {
-                startScanService()
-            } catch (e: BackgroundServiceStartNotAllowedException) {
-                report(e.toString())
-            }
+    private fun tryStartScanService() = when {
+        SDK_INT < S -> startScanService()
+        else -> try {
+            startScanService()
+        } catch (e: BackgroundServiceStartNotAllowedException) {
+            requireContext().longToast(e.toString())
+            report(e.toString())
         }
     }
 
     private fun startScanService() {
-        if (!wifiManager.isWifiEnabled)
-            // todo deprecation
-            wifiManager.isWifiEnabled = true
-
+        if (!wifiManager.isWifiEnabled) {
+            requestWifiEnabled()
+        }
         requireContext().startService(Intent(requireContext(), ScanService::class.java))
 
-        if (Settings.Secure.getInt(requireContext().contentResolver, Settings.Secure.LOCATION_MODE) == 0)
+        val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!LocationManagerCompat.isLocationEnabled(locationManager))
             MaterialAlertDialogBuilder(requireContext())
-                    .setMessage(R.string.geolocation_need)
-                    .setPositiveButton(R.string.got_it, null)
-                    .setCancelable(false)
-                    .create().show()
+                .setMessage(R.string.geolocation_need)
+                .setPositiveButton(R.string.got_it, null)
+                .setCancelable(false)
+                .create().show()
+    }
+
+    /** Wi-Fi cannot be enabled programmatically starting with Android 10, the system panel is shown instead */
+    @Suppress("DEPRECATION")
+    private fun requestWifiEnabled() = when {
+        SDK_INT >= Q -> requireContext().tryStartActivity(Intent(Settings.Panel.ACTION_WIFI))
+        else -> wifiManager.isWifiEnabled = true
     }
 
     private fun stopScanService() = scanConnection.stopScanService()
@@ -393,7 +409,7 @@ class MainFragment : Fragment(), Titled {
 
     private fun FragmentMainBinding.updateState(message: Message) {
         report("-> ${message.run { Event.entries[what] }}")
-        if (view == null) return
+        view ?: return
 
         scanDrawable.showAnimation(message.what == Event.START_SCAN.ordinal)
         when (message.what) {
@@ -410,8 +426,8 @@ class MainFragment : Fragment(), Titled {
     private fun updateList(msg: Message) {
         if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
             binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
-
-            updateCounters(adapter.updateList(msg.obj as ArrayList<Point>)) // todo wtf
+            @Suppress("UNCHECKED_CAST")
+            updateCounters(adapter.updateList(msg.obj as ArrayList<Point>))
             adapter.animScanEnd()
         }
     }
@@ -424,33 +440,31 @@ class MainFragment : Fragment(), Titled {
         val file = File(requireContext().filesDir, lastName)
         if (file.exists()) {
             val editText = FileNameInputText(requireContext())
+            editText.setText(lastName)
             MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.rename_to)
-                    .setView(editText)
-                    .setCancelable(false)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.ok) { _, _ ->
-                        var text = editText.text.toString()
+                .setTitle(R.string.rename_to)
+                .setView(editText)
+                .setCancelable(false)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok) { _, _ ->
+                    var text = editText.text.toString()
 
-                        if (text.isEmpty())
-                            return@setPositiveButton
+                    if (text.isEmpty())
+                        return@setPositiveButton
 
-                        if (!text.endsWith(Const.SNAPSHOT_FORMAT))
-                            text += Const.SNAPSHOT_FORMAT
+                    if (!text.endsWith(Const.SNAPSHOT_FORMAT))
+                        text += Const.SNAPSHOT_FORMAT
 
-                        val success = file.renameTo(File(file.parent, text))
-                        Toast.makeText(
-                            activity,
-                            if (success) R.string.success else R.string.failure,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }.create().show()
+                    val success = file.renameTo(File(file.parent, text))
+                    val messageId = if (success) R.string.success else R.string.failure
+                    Toast.makeText(context, messageId, Toast.LENGTH_SHORT).show()
+                }.create().show()
         } else
             Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
     private fun updateConnectionInfo() {
-        adapter.connectionInfo = wifiManager.connectionInfo
+        adapter.connectionInfo = currentWifiInfo()
         if (isResumed) {
             // trigger the back stack listeners
             parentFragmentManager.beginTransaction()
@@ -471,13 +485,16 @@ class MainFragment : Fragment(), Titled {
     }
 
     @SuppressLint("HandlerLeak")
-    private inner class MessageHandler : Handler() {
+    private inner class MessageHandler : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) = binding.updateState(msg)
     }
 
-    private inner class ConnectionReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = updateConnectionInfo()
+    private fun notifyConnectionChanged() {
+        mainHandler.post { updateConnectionInfo() }
     }
+
+    @Suppress("DEPRECATION")
+    private fun currentWifiInfo(): WifiInfo? = if (SDK_INT >= S) wifiInfo else wifiManager.connectionInfo
 
     private fun FragmentMainBinding.onLayoutChanged(
         orientation: Orientation,
@@ -529,6 +546,54 @@ class MainFragment : Fragment(), Titled {
         }
         scanDrawable.showOrientation(orientation)
         adapter.notifyDataSetChanged()
+    }
+
+    private fun wifiIpAddress(): String {
+        val network = connectivityManager.activeNetwork ?: return ""
+        connectivityManager.getNetworkCapabilities(network)
+            ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+            ?.takeIf { it }
+            ?: return ""
+        return connectivityManager.getLinkProperties(network)
+            ?.linkAddresses
+            ?.firstOrNull { it.address is Inet4Address }
+            ?.address
+            ?.hostAddress
+            .orEmpty()
+    }
+
+    @RequiresApi(S)
+    private inner class NewNetworkCallback : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+            wifiInfo = capabilities.transportInfo as? WifiInfo
+            notifyConnectionChanged()
+        }
+
+        override fun onLost(network: Network) {
+            wifiInfo = null
+            notifyConnectionChanged()
+        }
+    }
+
+    private inner class NetworkCallback : ConnectivityManager.NetworkCallback() {
+
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) = notifyConnectionChanged()
+
+        override fun onLost(network: Network) = notifyConnectionChanged()
+    }
+
+    private inner class LocationPermissionCallback : ActivityResultCallback<Boolean> {
+
+        override fun onActivityResult(result: Boolean) {
+            when {
+                result -> {
+                    binding.permissionDisclaimer.isVisible = false
+                    tryStartScanService()
+                }
+                !shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION) -> requireContext().openPermissionSettings()
+            }
+        }
     }
 }
 

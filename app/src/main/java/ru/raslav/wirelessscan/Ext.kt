@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.TIRAMISU
 import android.provider.Settings
 import android.util.LayoutDirection
 import android.view.View
@@ -24,7 +26,14 @@ fun Context.shortToast(resId: Int) = Toast.makeText(this, resId, Toast.LENGTH_SH
 
 fun Context.longToast(resId: Int) = Toast.makeText(this, resId, Toast.LENGTH_LONG).show()
 
+fun Context.longToast(message: String) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
 fun Context.granted(permission: String) = checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+
+fun Context.canHandle(intent: Intent): Boolean = when {
+    SDK_INT >= TIRAMISU -> packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+    else -> packageManager.queryIntentActivities(intent, 0)
+}.isNotEmpty()
 
 fun <T> unsafeLazy(provider: () -> T) = lazy(LazyThreadSafetyMode.NONE, provider)
 
@@ -64,3 +73,7 @@ infix fun Int.withAlpha(alpha: Float): Int = this withAlpha alpha.toIntAlpha()
 
 infix fun Int.withAlpha(alpha: Int): Int = ColorUtils.setAlphaComponent(this, alpha)
 
+fun Context.tryStartActivity(intent: Intent) = when {
+    canHandle(intent) -> startActivity(intent)
+    else -> Toast.makeText(this, R.string.no_any_app, Toast.LENGTH_LONG).show()
+}

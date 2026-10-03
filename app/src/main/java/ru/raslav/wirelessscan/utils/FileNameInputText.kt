@@ -3,6 +3,7 @@ package ru.raslav.wirelessscan.utils
 import android.content.Context
 import androidx.appcompat.widget.AppCompatEditText
 import java.util.regex.Pattern
+import kotlin.math.min
 
 class FileNameInputText(co: Context) : AppCompatEditText(co) {
     companion object { // necessary
@@ -13,9 +14,10 @@ class FileNameInputText(co: Context) : AppCompatEditText(co) {
     override fun onTextChanged(text: CharSequence?, start: Int, lengthBefore: Int, lengthAfter: Int) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
 
+        text ?: return
         if (pattern.matcher(text).find()) {
             setText(lastInput)
-            setSelection(Math.min(start, lastInput.length))
+            setSelection(min(start, lastInput.length))
         } else
             lastInput = text.toString()
     }
