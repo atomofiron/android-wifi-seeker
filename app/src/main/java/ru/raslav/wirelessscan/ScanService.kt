@@ -20,9 +20,13 @@ import android.os.Message
 import android.os.Messenger
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import ru.raslav.wirelessscan.Const.DEFAULT_DURATION
+import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
+import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.utils.Point
+import kotlin.math.max
 
 private const val ONLY_APP_IS_BOUND = 1
 
@@ -32,8 +36,6 @@ class ScanService : Service() {
         private const val ACTION_RESUME = "ACTION_RESUME"
 
         private const val SECOND = 1000L
-        private const val SCAN_DELAY_OFFSET = 2
-        private const val SCAN_DELAY = SECOND * SCAN_DELAY_OFFSET
         private const val WIFI_WAITING_PERIOD = 300L
 
         private const val FOREGROUND_NOTIFICATION_ID = 1
@@ -59,10 +61,11 @@ class ScanService : Service() {
         override fun handleMessage(msg: Message) = this@ScanService.handleMessage(msg)
     })
     private val notificationManager by unsafeLazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val durations by unsafeLazy { resources.getIntArray(R.array.duration_arr_int) }
     private val sp by unsafeLazy { sp() }
     private var resultMessenger: Messenger? = null
     private val points = mutableListOf<Point>()
-    private var period = 10
+    private var period = DEFAULT_PERIOD
     private var process = false
     private var scanned = false
     private var code = 1
@@ -122,25 +125,33 @@ class ScanService : Service() {
     private fun scan() {
         dlog("scan...")
 
-        if (!waitForWifi())
+        if (!waitForWifi()) {
             return
-
+        }
         showNotification(true)
         sendStartScan()
         startScan()
-        Thread.sleep(SCAN_DELAY)
-
+        var seconds = 0
+        while (process) {
+            Thread.sleep(SECOND)
+            if (++seconds >= getDuration()) {
+                break
+            }
+        }
         if (waitForWifi()) {
             scanned = true
             updatePoints()
             sendResults()
         }
-
-        var i = SCAN_DELAY_OFFSET
-        while ((i++ < period || scanningIsNotRequired()) && process) {
+        while (process && (seconds++ < period || scanningIsNotRequired())) {
             Thread.sleep(SECOND)
-            }
+        }
     }
+
+    private fun getDuration() = sp.getString(PREF_SCAN_DURATION, null)
+        ?.toIntOrNull()
+        ?.let { durations.getOrNull(it) }
+        ?: DEFAULT_DURATION
 
     private fun scanningIsNotRequired(): Boolean = boundCount <= ONLY_APP_IS_BOUND
 

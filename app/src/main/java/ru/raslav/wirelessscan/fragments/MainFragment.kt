@@ -63,6 +63,7 @@ import lib.atomofiron.insets.insetsDelegate
 import lib.atomofiron.insets.insetsPadding
 import lib.atomofiron.insets.insetsSource
 import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_DEFAULT_PERIOD
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
@@ -134,9 +135,10 @@ class MainFragment : Fragment(), Titled {
         scanConnection.bindService(requireContext())
 
         scanPeriod = requireContext().sp()
-            .getString(PREF_DEFAULT_PERIOD, "0")!!
-            .toInt()
-            .let { resources.getIntArray(R.array.period_arr_int)[it] }
+            .getString(PREF_DEFAULT_PERIOD, null)
+            ?.toIntOrNull()
+            ?.let { resources.getIntArray(R.array.period_arr_int)[it] }
+            ?: DEFAULT_PERIOD
 
         Point.initColors(requireContext())
     }

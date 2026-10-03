@@ -6,7 +6,7 @@
     <item
         android:id="@+id/period"
         android:title="@string/period"
-        android:icon="@drawable/ic_timer"
+        android:icon="@drawable/ic_timer_pause"
         app:showAsAction="ifRoom"
         >
         <menu />

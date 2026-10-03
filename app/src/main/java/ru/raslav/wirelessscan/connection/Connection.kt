@@ -19,8 +19,8 @@ open class Connection(
     private var commandMessenger: Messenger? = null
     private var replyMessenger: Messenger? = null
 
-    fun bindService(context: Context) =
-        context.bindService(Intent(context, ScanService::class.java), this, Context.BIND_AUTO_CREATE)
+    fun bindService(context: Context) = Intent(context, ScanService::class.java)
+        .let { context.bindService(it, this, Context.BIND_AUTO_CREATE) }
 
     /* onServiceDisconnected() is only called in extreme situations (unbindService() is not) */
     fun unbindService(context: Context) {
