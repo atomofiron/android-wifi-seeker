@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -32,9 +32,9 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContentView(R.layout.activity_main, InsetsProviderImpl())
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        toolbar.insetsPadding(start = true, top = true, end = true)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        findViewById<View>(R.id.app_bar)
+            .insetsPadding(start = true, top = true, end = true)
 
         supportFragmentManager.addOnBackStackChangedListener {
             updateTitle()

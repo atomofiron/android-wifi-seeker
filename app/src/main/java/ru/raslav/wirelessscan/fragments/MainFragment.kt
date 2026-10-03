@@ -18,22 +18,33 @@ import android.os.Handler
 import android.os.Message
 import android.provider.Settings
 import android.text.format.Formatter
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.NO_ID
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+import androidx.core.graphics.Insets
+import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
+import androidx.core.view.marginBottom
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import lib.atomofiron.insets.ViewInsetsDelegate
-import lib.atomofiron.insets.insetsDelegate
+import lib.atomofiron.insets.InsetsSource
+import lib.atomofiron.insets.insetsPadding
+import lib.atomofiron.insets.insetsSource
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
@@ -43,6 +54,7 @@ import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
+import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.openPermissionSettings
@@ -52,8 +64,10 @@ import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.FileNameInputText
-import ru.raslav.wirelessscan.utils.LayoutDelegate.Companion.layoutChanges
+import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
+import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Point
 import ru.raslav.wirelessscan.utils.SnapshotManager
@@ -115,7 +129,7 @@ class MainFragment : Fragment(), Titled {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.buttons.buttonResume.isActivated)
+        outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.bottomToolbar.buttonResume.isActivated)
         outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(adapter.allPoints))
     }
 
@@ -131,26 +145,39 @@ class MainFragment : Fragment(), Titled {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         adapter.initAnim()
 
-        val counterInsets = binding.counter.insetsDelegate()
-        val headerInsets = binding.layoutItem.root.insetsDelegate()
-        val listInsets = binding.listView.insetsDelegate()
-        val filtersInsets = binding.filters.root.insetsDelegate()
-        val buttonsInsets = binding.buttons.root.insetsDelegate()
+        val insets = ExtType { barsWithCutout + bottomToolbar }
+        binding.counter.insetsPadding(insets, horizontal = true)
+        binding.listTitle.root.insetsPadding(insets, horizontal = true)
+        binding.listView.insetsPadding(insets, start = true, end = true, bottom = true)
         binding.root.layoutChanges {
-            binding.onLayoutChanged(it, counterInsets, headerInsets, listInsets, filtersInsets, buttonsInsets)
+            binding.onLayoutChanged(it)
         }
         binding.listView.onItemClickListener = adapter
         binding.listView.adapter = adapter
 
-        initFilters(binding.filters.layoutFilters.root)
+        initFilters(binding.bottomToolbar.filters)
         binding.initButtons(binding.counter)
-        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
+        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         binding.permissionDisclaimer.isVisible = !locationGranted()
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
             adapter.updateList(savedInstanceState.getParcelableArrayList(EXTRA_POINTS)) // todo deprecation
-
+        }
+        val layoutOrientation = binding.root.layoutOrientation()
+        binding.bottomToolbar.root.insetsSource {
+            val orientation = layoutOrientation.orientation()
+            val insets = if (orientation is Orientation.Bottom) {
+                Insets.of(0, 0, 0, it.height + it.marginBottom * 2)
+            } else {
+                val width = it.width + it.marginStart + it.marginEnd
+                when {
+                    orientation.right -> Insets.of(0, 0, width, 0)
+                    else -> Insets.of(width, 0, 0, 0)
+                }
+            }
+            InsetsSource.submit(ExtType.bottomToolbar, insets)
+        }
         return binding.root
     }
 
@@ -158,7 +185,7 @@ class MainFragment : Fragment(), Titled {
         super.onViewCreated(view, savedInstanceState)
         when {
             savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) == false -> Unit
-            locationGranted() -> binding.buttons.tryStartScanServiceIfWifiEnabled()
+            locationGranted() -> binding.bottomToolbar.tryStartScanServiceIfWifiEnabled()
             else -> requestPermissions(arrayOf(Const.LOCATION_PERMISSION), Const.LOCATION_REQUEST_CODE).also { report("onViewCreated requestPermissions") }
         }
     }
@@ -170,63 +197,65 @@ class MainFragment : Fragment(), Titled {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        binding.layoutItem.bssid.isVisible = newConfig.isWide()
+        binding.listTitle.bssid.isVisible = newConfig.isWide()
     }
 
-    private fun initFilters(filters: ViewGroup) {
-        val listener = View.OnClickListener { v ->
+    private fun initFilters(binding: LayoutFiltersPaneBinding) {
+        val layout = binding.root
+        val listener = View.OnClickListener { view ->
             var state = PointListAdapter.FILTER_DEFAULT
             when {
-                v.isSelected -> v.isSelected = false
-                v.isActivated -> {
-                    v.isActivated = false
-                    v.isSelected = true
+                view.isSelected -> view.isSelected = false
+                view.isActivated -> {
+                    view.isActivated = false
+                    view.isSelected = true
                     state = PointListAdapter.FILTER_EXCLUDE
                 }
                 else -> {
-                    v.isActivated = true
+                    view.isActivated = true
                     state = PointListAdapter.FILTER_INCLUDE
                 }
             }
-            updateCounters(adapter.updateFilter(filters.indexOfChild(v), state))
+            updateCounters(adapter.updateFilter(layout.indexOfChild(view), state))
         }
-        for (i in 0 until filters.childCount)
-            filters.getChildAt(i).setOnClickListener(listener)
+        for (i in 0 until layout.childCount)
+            layout.getChildAt(i).setOnClickListener(listener)
     }
 
     private fun FragmentMainBinding.initButtons(label: TextView) {
-        buttons.buttonFilter.setOnClickListener { v ->
-            v.isActivated = !v.isActivated
-            updateCounters(adapter.filter(v.isActivated))
-            filters.root.isVisible = v.isActivated
+        bottomToolbar.buttonFilter.setOnClickListener { view ->
+            view.isActivated = !view.isActivated
+            updateCounters(adapter.filter(view.isActivated))
+            bottomToolbar.verticalFilters.isVisible = view.isActivated && bottomToolbar.verticalFilters.isNotEmpty()
+            bottomToolbar.horizontalFilters.isVisible = view.isActivated && bottomToolbar.horizontalFilters.isNotEmpty()
         }
         var snapshotFileName: String? = null
-        buttons.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
-            if (adapter.allPoints.size != 0) {
+        bottomToolbar.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
+            if (adapter.allPoints.isNotEmpty()) {
                 binding.flash.startAnimation(flashAnim)
 
                 snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
-        buttons.buttonResume.setOnClickListener { view ->
+        bottomToolbar.buttonResume.setOnClickListener { view ->
             if (view.isActivated)
                 stopScanService()
             else
                 checkPermissionAndStartScan()
         }
-        buttons.spinnerPeriod.setSelection(sp.getString(Const.PREF_DEFAULT_PERIOD, 1.toString())!!.toInt())
-        buttons.spinnerPeriod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        /*bottomToolbar.spinnerPeriod.setSelection(sp.getString(Const.PREF_DEFAULT_PERIOD, 1.toString())!!.toInt())
+        bottomToolbar.spinnerPeriod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = sendScanPeriod()
-        }
-        buttons.buttonClear.setOnClickListener(DoubleClickMaster {
+        }*/
+        bottomToolbar.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
         }.onClickListener {
             scanConnection.clearOutOfRangePoints()
             label.text = adapter.clearOutOfRange()
         })
-        buttons.buttonList.setOnClickListener {
+        bottomToolbar.buttonList.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
             requireContext().startActivity(intent)
         }
@@ -297,9 +326,9 @@ class MainFragment : Fragment(), Titled {
     private fun stopScanService() = scanConnection.stopScanService()
 
     private fun sendScanPeriod() {
-        val selected = binding.buttons.spinnerPeriod.selectedItemPosition
+        /*val selected = binding.bottomToolbar.spinnerPeriod.selectedItemPosition
         val period = resources.getIntArray(R.array.period_arr_int)[selected]
-        scanConnection.sendScanPeriod(period)
+        scanConnection.sendScanPeriod(period)*/
     }
 
     private fun FragmentMainBinding.updateState(message: Message) {
@@ -310,9 +339,9 @@ class MainFragment : Fragment(), Titled {
         when (message.what) {
             Event.START_SCAN.ordinal -> adapter.animScanStart()
             Event.RESULTS.ordinal -> updateList(message)
-            Event.STARTED.ordinal -> buttons.buttonResume.isActivated = true
+            Event.STARTED.ordinal -> bottomToolbar.buttonResume.isActivated = true
             Event.STOPPED.ordinal -> {
-                buttons.buttonResume.isActivated = false
+                bottomToolbar.buttonResume.isActivated = false
                 adapter.animScanCancel()
             }
         }
@@ -320,7 +349,7 @@ class MainFragment : Fragment(), Titled {
 
     private fun updateList(msg: Message) {
         if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
-            binding.buttons.buttonResume.isActivated = msg.arg1.toBoolean()
+            binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
 
             updateCounters(adapter.updateList(msg.obj as ArrayList<Point>)) // todo wtf
             adapter.animScanEnd()
@@ -390,80 +419,50 @@ class MainFragment : Fragment(), Titled {
         override fun onReceive(context: Context, intent: Intent) = updateConnectionInfo()
     }
 
-    private fun FragmentMainBinding.onLayoutChanged(
-        orientation: Orientation,
-        counterInsets: ViewInsetsDelegate,
-        headerInsets: ViewInsetsDelegate,
-        listInsets: ViewInsetsDelegate,
-        filtersInsets: ViewInsetsDelegate,
-        buttonsInsets: ViewInsetsDelegate,
-    ) {
+    private fun FragmentMainBinding.onLayoutChanged(orientation: Orientation) {
+        val vertical = orientation.vertical
         root.removeAllViews()
-        if (orientation == Orientation.Start) {
-            root.addView(buttons.root)
-            root.addView(filters.root)
+        if (orientation is Orientation.Start) {
+            root.addView(bottomToolbar.root)
             root.addView(container)
         } else {
             root.addView(container)
-            root.addView(filters.root)
-            root.addView(buttons.root)
+            root.addView(bottomToolbar.root)
         }
-        filters.run {
-            val parent = layoutFilters.root.parent as ViewGroup
-            parent.removeView(layoutFilters.root)
-            when (orientation) {
-                Orientation.Bottom -> horizontalScrollView.addView(layoutFilters.root)
-                else -> scrollView.addView(layoutFilters.root)
+        bottomToolbar.root.updateLayoutParams<FrameLayout.LayoutParams> {
+            gravity = when (orientation) {
+                is Orientation.Start -> Gravity.START or Gravity.CENTER_VERTICAL
+                is Orientation.End -> Gravity.END or Gravity.CENTER_VERTICAL
+                is Orientation.Bottom -> Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             }
+            bottomMargin = if (orientation.vertical) resources.getDimensionPixelSize(R.dimen.padding_common) else 0
         }
-        counterInsets.changeInsets {
-            if (orientation != Orientation.End) padding(end)
-        }
-        headerInsets.changeInsets {
-            when (orientation) {
-                Orientation.Start -> padding(end)
-                Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start)
+        bottomToolbar.filters.root.let { filters ->
+            (filters.parent as ViewGroup).removeView(filters)
+            if (orientation == Orientation.Bottom) {
+                bottomToolbar.horizontalFilters.addView(filters)
+                bottomToolbar.horizontalFilters.isVisible = bottomToolbar.verticalFilters.isVisible
+                bottomToolbar.verticalFilters.isVisible = false
+            } else {
+                bottomToolbar.verticalFilters.addView(filters)
+                bottomToolbar.verticalFilters.isVisible = bottomToolbar.horizontalFilters.isVisible
+                bottomToolbar.horizontalFilters.isVisible = false
             }
+            filters.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
         }
-        listInsets.changeInsets {
-            when (orientation) {
-                Orientation.Start -> padding(end, bottom)
-                Orientation.Bottom -> padding(start, end)
-                Orientation.End -> padding(start, bottom)
-            }
+        bottomToolbar.buttons.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+        bottomToolbar.buttons.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = if (vertical) MATCH_PARENT else WRAP_CONTENT
+            height = if (vertical) WRAP_CONTENT else MATCH_PARENT
+            topToTop = if (vertical) NO_ID else PARENT_ID
+            startToStart = if (orientation.start) PARENT_ID else NO_ID
+            endToEnd = if (orientation.end) PARENT_ID else NO_ID
         }
-        filtersInsets.changeInsets {
-            if (orientation == Orientation.Bottom) padding(start, end) else padding(bottom)
-        }
-        buttonsInsets.changeInsets {
-            when (orientation) {
-                Orientation.Start -> padding(start, bottom)
-                Orientation.Bottom -> padding(start, bottom, end)
-                Orientation.End -> padding(bottom, end)
-            }
-        }
-        val vertical = orientation.vertical
-        root.orientation = if (vertical) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
-        container.updateLayoutParams {
-            this.width = if (vertical) LayoutParams.MATCH_PARENT else 0
-            this.height = if (vertical) 0 else LayoutParams.MATCH_PARENT
-        }
-        buttons.root.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
-        val lpWidth = if (vertical) LayoutParams.MATCH_PARENT else LayoutParams.WRAP_CONTENT
-        val lpHeight = if (vertical) LayoutParams.WRAP_CONTENT else LayoutParams.MATCH_PARENT
-        buttons.root.updateLayoutParams {
-            this.width = lpWidth
-            this.height = lpHeight
-        }
-        filters.root.updateLayoutParams {
-            this.width = lpWidth
-            this.height = lpHeight
-        }
-        filters.layoutFilters.root.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
-        filters.layoutFilters.root.updateLayoutParams {
-            this.width = lpWidth
-            this.height = lpHeight
+        bottomToolbar.verticalFilters.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            startToStart = if (orientation.start) NO_ID else PARENT_ID
+            endToEnd = if (orientation.start) PARENT_ID else NO_ID
+            startToEnd = if (orientation.start) R.id.buttons else NO_ID
+            endToStart = if (orientation.start) NO_ID else R.id.buttons
         }
         adapter.notifyDataSetChanged()
     }

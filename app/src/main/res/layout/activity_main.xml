@@ -7,11 +7,17 @@
     android:orientation="vertical"
     tools:context="ru.raslav.wirelessscan.MainActivity"
     >
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <FrameLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        >
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            />
+    </FrameLayout>
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
