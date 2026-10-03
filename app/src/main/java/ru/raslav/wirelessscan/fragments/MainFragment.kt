@@ -176,7 +176,7 @@ class MainFragment : Fragment(), Titled {
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
             color = requireContext().colorAttr(MaterialAttr.colorSurface),
-            scanColor = requireContext().colorAttr(AppCompatAttr.colorPrimary) withAlpha 0.1f,
+            scanColor = requireContext().colorAttr(MaterialAttr.colorPrimaryInverse) withAlpha 0.1f,
             cornerRadius = resources.getDimension(R.dimen.toolbar_corner),
             anchor = resources.getDimensionPixelSize(R.dimen.toolbar_padding)
                     + resources.getDimensionPixelSize(R.dimen.toolbar_button_margin)
