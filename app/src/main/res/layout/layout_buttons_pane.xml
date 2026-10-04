@@ -12,6 +12,8 @@
     android:padding="@dimen/toolbar_padding"
     android:clipToPadding="false"
     android:clipChildren="false"
+    android:clickable="true"
+    android:focusable="false"
     tools:layout_gravity="bottom|center_horizontal"
     >
     <HorizontalScrollView
