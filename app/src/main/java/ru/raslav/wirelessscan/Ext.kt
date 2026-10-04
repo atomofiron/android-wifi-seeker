@@ -1,5 +1,8 @@
 package ru.raslav.wirelessscan
 
+import android.app.AppOpsManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -14,6 +17,7 @@ import android.util.LayoutDirection
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.AttrRes
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
@@ -124,3 +128,31 @@ fun View.scope(): CoroutineScope {
     addOnAttachListener(onDetach = { scope.cancel() })
     return scope
 }
+
+fun ClipboardManager.copy(
+    context: Context,
+    label: String,
+    text: String,
+) {
+    val clip = ClipData.newPlainText(label, text)
+    val (message, duration) = try {
+        setPrimaryClip(clip)
+        context.getString(R.string.copied) to Toast.LENGTH_SHORT
+    } catch (e: Exception) {
+        e.toString() to Toast.LENGTH_LONG
+    }
+    when {
+        SDK_INT >= TIRAMISU && context.clipboardAlertsEnabled() -> Unit
+        else -> Toast.makeText(context, message, duration).show()
+    }
+}
+
+@RequiresApi(TIRAMISU)
+private fun Context.clipboardAlertsEnabled(): Boolean {
+    val appOps = getSystemService(AppOpsManager::class.java)
+    val info = packageManager.getApplicationInfo("com.android.systemui", 0)
+    val mode = appOps.checkOpNoThrow("android:read_clipboard", info.uid, "com.android.systemui")
+    // 0/4 allow, 1 ignore, 3 default
+    return mode == 0 || mode == 4
+}
+

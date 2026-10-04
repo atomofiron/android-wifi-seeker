@@ -16,15 +16,19 @@
             style="@style/Description"
             android:id="@+id/tv_essid"
             android:layout_marginEnd="@dimen/padding_double"
+            android:background="?selectableItemBackground"
             />
         <TextView
             style="@style/Description"
             android:id="@+id/tv_essid_hex"
             android:layout_marginEnd="@dimen/padding_double"
+            android:background="?selectableItemBackground"
             />
         <TextView
             style="@style/Description"
             android:id="@+id/tv_bssid"
+            android:layout_marginEnd="@dimen/padding_double"
+            android:background="?selectableItemBackground"
             />
         <TextView
             style="@style/Description"
@@ -49,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:src="@drawable/ic_circle_cross"
-        android:padding="8dp"
+        android:padding="@dimen/padding_half"
         android:alpha="0.5"
         android:background="@drawable/ripple_40"
         />

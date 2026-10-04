@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
 import android.net.wifi.WifiInfo
@@ -15,11 +16,14 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.clearOutOfRange
+import ru.raslav.wirelessscan.copy
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.elog
@@ -69,6 +73,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     private var animType = AnimType.None
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
+    private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val holder: Holder = if (convertView == null) {
@@ -162,8 +167,31 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
             point == null && description != null -> root.removeView(description.root)
             point != null && description == null -> LayoutInflater.from(root.context)
                 .let { LayoutDescriptionBinding.inflate(it, root, true) }
+                .init()
                 .bind(point)
         }
+    }
+
+    private fun LayoutDescriptionBinding.init(): LayoutDescriptionBinding {
+        val copy = ContextCompat.getDrawable(root.context, R.drawable.ic_copy)!!
+        val size = tvEssid.textSize.toInt()
+        copy.setBounds(0, 0, size, size)
+        copy.alpha = ALPHA_INT_HALF
+        copy.setTintList(tvEssid.textColors)
+        arrayOf(tvEssid, tvEssidHex, tvBssid).forEach { tv ->
+            tv.setCompoundDrawablesRelative(null, null, copy, null)
+            tv.compoundDrawablePadding = size / 2
+            tv.setOnClickListener { tv.onCopiableClick() }
+        }
+        return this
+    }
+
+    private fun TextView.onCopiableClick() {
+        val parts = text.toString()
+            .split(": ")
+        val data = parts.getOrNull(1) ?: return
+        val label = parts.first()
+        clipboard.copy(context, label, data)
     }
 
     private fun LayoutDescriptionBinding.bind(point: Point) {
