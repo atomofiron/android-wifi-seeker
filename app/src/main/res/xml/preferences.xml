@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="@string/settings">
-    <ListPreference
+    android:title="@string/settings"
+    >
+    <ru.raslav.wirelessscan.ui.preference.ChipPreference
         android:title="@string/scan_duration"
         android:icon="@drawable/ic_timer_play"
         android:key="scan_duration"
@@ -10,7 +11,7 @@
         android:entries="@array/duration_arr"
         android:defaultValue="1"
         />
-    <ListPreference
+    <ru.raslav.wirelessscan.ui.preference.ChipPreference
         android:title="@string/default_period"
         android:icon="@drawable/ic_timer_pause"
         android:key="default_period"

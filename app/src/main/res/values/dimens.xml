@@ -6,6 +6,7 @@
     <dimen name="compact_width">300dp</dimen>
     <dimen name="medium_width">480dp</dimen>
     <dimen name="extended_width">640dp</dimen>
+    <dimen name="preference_head_frame_width">44dp</dimen>
     <dimen name="one">1dp</dimen>
 
     <dimen name="padding_mini">4dp</dimen>

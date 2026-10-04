@@ -96,6 +96,8 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientatio
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
+import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
@@ -497,7 +499,7 @@ class MainFragment : Fragment(), Titled {
         toolbarDelegate: ViewInsetsDelegate,
     ) {
         val vertical = orientation.vertical
-        bottomToolbar.root.updateLayoutParams<FrameLayout.LayoutParams> {
+        bottomToolbar.root.updateLayoutParams<FrameLayoutParams> {
             gravity = when (orientation) {
                 is Orientation.Start -> Gravity.START or Gravity.CENTER_VERTICAL
                 is Orientation.End -> Gravity.END or Gravity.CENTER_VERTICAL
@@ -527,14 +529,14 @@ class MainFragment : Fragment(), Titled {
             }
         }
         bottomToolbar.buttons.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
-        bottomToolbar.buttons.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        bottomToolbar.buttons.updateLayoutParams<ConstraintLayoutParams> {
             width = if (vertical) MATCH_PARENT else WRAP_CONTENT
             height = if (vertical) WRAP_CONTENT else MATCH_PARENT
             topToTop = if (vertical) NO_ID else PARENT_ID
             startToStart = if (orientation.start) PARENT_ID else NO_ID
             endToEnd = if (orientation.end) PARENT_ID else NO_ID
         }
-        bottomToolbar.verticalFilters.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        bottomToolbar.verticalFilters.updateLayoutParams<ConstraintLayoutParams> {
             startToStart = if (orientation.start) NO_ID else PARENT_ID
             endToEnd = if (orientation.start) PARENT_ID else NO_ID
             startToEnd = if (orientation.start) R.id.buttons else NO_ID

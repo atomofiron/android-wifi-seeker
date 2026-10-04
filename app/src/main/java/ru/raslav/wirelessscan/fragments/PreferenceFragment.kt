@@ -14,10 +14,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updatePaddingRelative
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -43,6 +45,7 @@ import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.OuiManager
+import ru.raslav.wirelessscan.utils.PreferenceId
 
 class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
@@ -78,7 +81,9 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
         parent: ViewGroup,
         savedInstanceState: Bundle?,
     ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
+        updatePaddingRelative(top = resources.getDimensionPixelSize(R.dimen.padding_half))
         insetsPadding(start = true, end = true, bottom = true)
+        clipToPadding = false
         if (SDK_INT >= Q) {
             verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
         }
@@ -160,48 +165,55 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
         private val preference: Preference,
     ) : RecyclerView.OnChildAttachStateChangeListener {
 
+        private val headFrameWidth = preference.context.resources.getDimensionPixelSize(R.dimen.preference_head_frame_width)
         private var tried = false
 
         override fun onChildViewAttachedToWindow(view: View) {
+            view.findViewById<LinearLayout>(PreferenceId.icon_frame).run {
+                minimumWidth = headFrameWidth
+            }
             if (view.id == R.id.oui_source) {
-                WidgetRefreshAndOutsideBinding.bind(view.findViewById(R.id.widget)).run {
-                    button.contentDescription = view.resources.getString(R.string.update_oui)
-                    if (SDK_INT >= O) button.tooltipText = button.contentDescription
-                    root.scope().launch(Main) {
-                    OuiManager.self.ouiLoading.collect { loading ->
-                        loading ?: return@collect
-                            button.isEnabled = false
-                            button.isVisible = !loading.progress
-                            progress.isVisible = loading.progress
-                            when (loading) {
-                                is Loading.Progress -> {
-                                    progress.isIndeterminate = loading.value == null
-                                    progress.progress = ((loading.value ?: 0f) * progress.max).toInt()
-                                }
-                                is Loading.Finished<Long> -> {
-                                    button.setImageResource(R.drawable.ic_circle_check)
-                                    preference.setOuiEntries(view.resources, loading.data)
-                                    button.setOnClickListener(null)
-                                    button.background = null
-                                }
-                                is Loading.Error if (tried) -> {
-                                    tried = false
-                                    button.setImageResource(R.drawable.ic_error)
-                                    view.context.showError(loading.message)
-                                }
-                                is Loading.Error -> {
-                                    button.setImageResource(R.drawable.ic_refresh)
-                                    button.isEnabled = true
-                                }
-                            }
+                WidgetRefreshAndOutsideBinding.bind(view.findViewById(R.id.widget))
+                    .bindOuiWidget()
+            }
+        }
+
+        private fun WidgetRefreshAndOutsideBinding.bindOuiWidget() {
+            button.contentDescription = root.resources.getString(R.string.update_oui)
+            if (SDK_INT >= O) button.tooltipText = button.contentDescription
+            root.scope().launch(Main) {
+            OuiManager.self.ouiLoading.collect { loading ->
+                loading ?: return@collect
+                    button.isEnabled = false
+                    button.isVisible = !loading.progress
+                    progress.isVisible = loading.progress
+                    when (loading) {
+                        is Loading.Progress -> {
+                            progress.isIndeterminate = loading.value == null
+                            progress.progress = ((loading.value ?: 0f) * progress.max).toInt()
+                        }
+                        is Loading.Finished<Long> -> {
+                            button.setImageResource(R.drawable.ic_circle_check)
+                            preference.setOuiEntries(root.resources, loading.data)
+                            button.setOnClickListener(null)
+                            button.background = null
+                        }
+                        is Loading.Error if (tried) -> {
+                            tried = false
+                            button.setImageResource(R.drawable.ic_error)
+                            root.context.showError(loading.message)
+                        }
+                        is Loading.Error -> {
+                            button.setImageResource(R.drawable.ic_refresh)
+                            button.isEnabled = true
                         }
                     }
-                    button.setOnClickListener {
-                        tried = true
-                        it.isEnabled = false
-                        OuiManager.self.update(view.context)
-                    }
                 }
+            }
+            button.setOnClickListener {
+                tried = true
+                it.isEnabled = false
+                OuiManager.self.update(it.context)
             }
         }
 

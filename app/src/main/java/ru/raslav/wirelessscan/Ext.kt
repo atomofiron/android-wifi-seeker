@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
@@ -15,6 +16,7 @@ import android.os.Build.VERSION_CODES.TIRAMISU
 import android.provider.Settings
 import android.util.LayoutDirection
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
@@ -156,3 +158,8 @@ private fun Context.clipboardAlertsEnabled(): Boolean {
     return mode == 0 || mode == 4
 }
 
+inline fun View.updateMarginLayoutParams(block: ViewGroup.MarginLayoutParams.(Resources) -> Unit) {
+    val params = layoutParams as ViewGroup.MarginLayoutParams
+    params.block(resources)
+    layoutParams = params
+}
