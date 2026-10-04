@@ -2,7 +2,6 @@
     <string name="app_name">WiFi Seeker</string>
     <string name="ok">OK</string>
     <string name="snapshot_saved">Snapshot was saved</string>
-    <string name="no_activity">You have no application able to perform this action</string>
     <string name="cancel">Cancel</string>
     <string name="rename_to">Rename to</string>
     <string name="success">Success</string>

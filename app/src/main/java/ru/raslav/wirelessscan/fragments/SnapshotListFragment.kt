@@ -5,16 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.BuildConfig
 import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
-import ru.raslav.wirelessscan.canHandle
 import ru.raslav.wirelessscan.databinding.LayoutListBinding
-import androidx.core.net.toUri
+import ru.raslav.wirelessscan.tryStartActivity
 
 class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapshots) {
 
@@ -41,10 +40,6 @@ class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapsho
         val intent = Intent(Intent.ACTION_SEND)
             .putExtra(Intent.EXTRA_STREAM, "content://${BuildConfig.AUTHORITY}/$name".toUri())
             .setType("text/xml")
-
-        if (requireContext().canHandle(intent))
-            startActivity(intent)
-        else
-            Toast.makeText(activity, R.string.no_activity, Toast.LENGTH_SHORT).show()
+        requireContext().tryStartActivity(intent)
     }
 }

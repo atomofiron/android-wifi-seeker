@@ -10,7 +10,6 @@ import android.os.Build.VERSION_CODES.Q
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -26,9 +25,9 @@ import androidx.recyclerview.widget.RecyclerView
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.canHandle
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.sp
+import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.OuiManager
 
@@ -127,12 +126,9 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
     }
 
     private fun Intent.showChooser(title: Int) {
-        if (requireContext().canHandle(this)) {
-            val chooser = Intent.createChooser(this, getString(title))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(chooser)
-        } else
-            Toast.makeText(requireContext(), R.string.no_activity, Toast.LENGTH_SHORT).show()
+        val chooser = Intent.createChooser(this, getString(title))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        requireContext().tryStartActivity(chooser)
     }
 
     private fun backgroundLocationGranted() = SDK_INT < Q || requireContext().checkSelfPermission(ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
