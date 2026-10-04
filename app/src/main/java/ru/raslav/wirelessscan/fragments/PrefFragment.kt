@@ -83,6 +83,12 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         addOnChildAttachStateChangeListener(ChildAttachListener(ouiPreference))
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setDividerHeight(0)
+        setDivider(null)
+    }
+
     private fun setListeners(screen: PreferenceGroup) {
         (0 until screen.preferenceCount)
                 .map { screen.getPreference(it) }
