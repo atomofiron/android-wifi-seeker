@@ -44,7 +44,7 @@ import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.OuiManager
 
-class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
+class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
 
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 

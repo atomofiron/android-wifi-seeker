@@ -11,7 +11,7 @@ import lib.atomofiron.insets.InsetsProviderImpl
 import lib.atomofiron.insets.insetsPadding
 import lib.atomofiron.insets.setContentView
 import ru.raslav.wirelessscan.fragments.MainFragment
-import ru.raslav.wirelessscan.fragments.PrefFragment
+import ru.raslav.wirelessscan.fragments.PreferenceFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
 import ru.raslav.wirelessscan.fragments.SnapshotListFragment
 import ru.raslav.wirelessscan.fragments.Titled
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> supportFragmentManager.popBackStack()
-            R.id.settings -> setFragment(PrefFragment())
+            R.id.settings -> setFragment(PreferenceFragment())
             else -> return super.onOptionsItemSelected(item)
         }
         return true
