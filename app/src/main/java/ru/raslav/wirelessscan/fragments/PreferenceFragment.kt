@@ -168,6 +168,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
 
         private val headFrameWidth = preference.context.resources.getDimensionPixelSize(R.dimen.preference_head_frame_width)
         private var buttonBackground: Drawable? = null
+        private var button: View? = null
         private var tried = false
 
         override fun onChildViewAttachedToWindow(view: View) {
@@ -175,8 +176,11 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
                 minimumWidth = headFrameWidth
             }
             if (view.id == R.id.oui_source) {
-                WidgetRefreshAndOutsideBinding.bind(view.findViewById(R.id.widget))
-                    .bindOuiWidget()
+                val new = view.findViewById<View>(R.id.widget)
+                if (new !== button) {
+                    button = new
+                    WidgetRefreshAndOutsideBinding.bind(new).bindOuiWidget()
+                }
             }
         }
 
@@ -185,7 +189,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
             button.contentDescription = root.resources.getString(R.string.update_oui)
             if (SDK_INT >= O) button.tooltipText = button.contentDescription
             setClickListener()
-            root.scope().launch(Main) {
+            root.scope().launch {
                 OuiManager.self.ouiLoading.collect { loading ->
                     loading ?: return@collect
                     button.isVisible = !loading.progress
@@ -204,11 +208,9 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
                             button.setImageResource(R.drawable.ic_error)
                             root.context.showError(loading.message)
                         }
-                        is Loading.Error -> {
-                            setClickListener()
-                            button.setImageResource(R.drawable.ic_refresh)
-                        }
+                        is Loading.Error -> return@collect
                     }
+                    removeClickListener()
                 }
             }
         }
@@ -217,10 +219,14 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
             button.background = buttonBackground
             button.setOnClickListener {
                 tried = true
-                button.background = null
-                button.setOnClickListener(null)
+                removeClickListener()
                 OuiManager.self.update(it.context)
             }
+        }
+
+        private fun WidgetRefreshAndOutsideBinding.removeClickListener() {
+            button.background = null
+            button.setOnClickListener(null)
         }
 
         override fun onChildViewDetachedFromWindow(view: View) = Unit

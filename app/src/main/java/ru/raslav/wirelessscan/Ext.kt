@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import ru.raslav.wirelessscan.Const.InvisibleChars
 import ru.raslav.wirelessscan.data.Point
+import kotlin.coroutines.CoroutineContext
 import kotlin.text.CharCategory.UNASSIGNED
 
 
@@ -125,8 +126,8 @@ fun View.addOnAttachListener(
     addOnAttachStateChangeListener(listener)
 }
 
-fun View.scope(): CoroutineScope {
-    val scope = CoroutineScope(Dispatchers.Main)
+fun View.scope(context: CoroutineContext = Dispatchers.Main): CoroutineScope {
+    val scope = CoroutineScope(context)
     addOnAttachListener(onDetach = { scope.cancel() })
     return scope
 }
