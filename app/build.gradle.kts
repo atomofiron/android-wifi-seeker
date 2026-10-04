@@ -48,6 +48,7 @@ dependencies {
     compileOnly(libs.kotlin.gradle)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.fragment)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.preference)
     implementation(libs.androidx.recyclerview)

@@ -26,11 +26,10 @@ class SnapshotListFragment : Fragment(), Titled by Titled(R.string.title_snapsho
         adapter.onSnapshotShareListener = { name -> share(name) }
         binding.listView.adapter = adapter
         binding.listView.setOnItemClickListener { _, _, position, _ ->
-            requireContext().startActivity(
-                    Intent(activity, MainActivity::class.java)
-                            .setAction(MainActivity.ACTION_OPEN_SNAPSHOT)
-                            .putExtra(MainActivity.EXTRA_SNAPSHOT_NAME, adapter.getItem(position))
-            )
+            val intent = Intent(activity, MainActivity::class.java)
+                .setAction(MainActivity.ACTION_OPEN_SNAPSHOT)
+                .putExtra(MainActivity.EXTRA_SNAPSHOT_NAME, adapter.getItem(position))
+            startActivity(intent)
         }
         binding.listView.insetsPadding(start = true, end = true, bottom = true)
         return binding.root

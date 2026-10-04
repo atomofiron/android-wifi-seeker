@@ -7,7 +7,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import lib.atomofiron.insets.InsetsProviderImpl
 import lib.atomofiron.insets.insetsPadding
 import lib.atomofiron.insets.setContentView
@@ -36,22 +35,28 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.app_bar).insetsPadding(start = true, top = true, end = true)
 
         supportFragmentManager.addOnBackStackChangedListener {
-            updateTitle()
+            updateHeader()
         }
-        if (supportFragmentManager.fragments.isEmpty())
+        if (supportFragmentManager.fragments.isEmpty()) {
             supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, MainFragment())
-                    .commit()
+                .add(R.id.fragment_container, MainFragment())
+                .commit()
+        }
     }
 
     private fun setFragment(fragment: Fragment) {
         supportFragmentManager.run {
             val current = fragments.findLast { it.isVisible }
             beginTransaction()
+                .setCustomAnimations(
+                    R.animator.fragment_enter,
+                    R.animator.fragment_exit,
+                    R.animator.fragment_pop_enter,
+                    R.animator.fragment_pop_exit,
+                )
                 .addToBackStack(fragment.javaClass.name)
                 .apply { hide(current ?: return@apply) }
                 .add(R.id.fragment_container, fragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
                 .commit()
         }
     }
@@ -74,19 +79,12 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateTitle()
-    }
-
-    private fun updateTitle() {
-        supportActionBar?.setDisplayHomeAsUpEnabled(supportFragmentManager.backStackEntryCount > 0)
-        val current = supportFragmentManager.fragments.findLast { it.isVisible }
-        current ?: return
-        current as Titled
-        title = current.title
-            ?: resources.takeIf { current.titleId > 0 }
-                ?.getString(current.titleId)
-                    ?: ""
+    private fun updateHeader() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(supportFragmentManager.fragments.size > 1)
+        val current = supportFragmentManager.fragments
+            .findLast { it.isVisible } as? Titled
+            ?: return
+        title = current.title ?: resources.takeIf { current.titleId > 0 }
+            ?.getString(current.titleId) ?: ""
     }
 }

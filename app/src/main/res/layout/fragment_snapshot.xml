@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+    android:background="?colorSurface"
+    >
     <include
         android:id="@+id/layout_item"
         layout="@layout/layout_item"
         />
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -18,10 +18,5 @@
         android:divider="@null"
         android:clipToPadding="false"
         android:scrollbarThumbVertical="@drawable/scroll_vertical"
-        />
-    <include
-        android:id="@+id/description"
-        layout="@layout/layout_description"
-        android:visibility="gone"
         />
 </LinearLayout>

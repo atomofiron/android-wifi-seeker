@@ -15,10 +15,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
-    <!-- todo
-        android:enableOnBackInvokedCallback="true"
-        tools:targetApi="tiramisu"
-        -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -27,6 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".App"
+        android:enableOnBackInvokedCallback="true"
         >
         <meta-data
             android:name="android.max_aspect"

@@ -44,14 +44,10 @@ class SnapshotFragment : Fragment(), Titled {
         binding.listView.adapter = adapter
         adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 
-        binding.description.root.insetsPadding(start = true, end = true, bottom = true)
         binding.layoutItem.root.insetsPadding(start = true, end = true)
         binding.listView.insetsPadding(start = true, end = true, bottom = true)
         binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
         binding.listView.onItemClickListener = adapter
-        binding.description.cross.setOnClickListener {
-            adapter.resetFocus()
-        }
 
         return binding.root
     }

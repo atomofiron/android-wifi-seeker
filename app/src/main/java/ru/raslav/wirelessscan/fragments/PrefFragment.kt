@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.data.Loading
 import ru.raslav.wirelessscan.databinding.WidgetRefreshAndOutsideBinding
 import ru.raslav.wirelessscan.openPermissionSettings
@@ -40,6 +41,7 @@ import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.OuiManager
 
 class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
@@ -87,6 +89,7 @@ class PrefFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.setti
         super.onViewCreated(view, savedInstanceState)
         setDividerHeight(0)
         setDivider(null)
+        view.setBackgroundColor(requireContext().colorAttr(MaterialAttr.colorSurface))
     }
 
     private fun setListeners(screen: PreferenceGroup) {
