@@ -38,6 +38,8 @@ private const val COLUMN_DESC = "description"
 class OuiManager private constructor(context: Context) {
     companion object {
 
+        private const val BUILTIN_ENTRIES = 58417
+
         lateinit var self: OuiManager
 
         private val scope = CoroutineScope(Job())
@@ -56,12 +58,16 @@ class OuiManager private constructor(context: Context) {
         if (!file.exists()) {
             context.extractBuiltInFile()
         }
-        db = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
+        db = openDatabase()
+        if (entries() < BUILTIN_ENTRIES) {
+            db.close()
+            file.delete()
+            context.extractBuiltInFile()
+            db = openDatabase()
+        }
     }
 
-    private fun openDatabase() {
-        db = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
-    }
+    private fun openDatabase(): SQLiteDatabase = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
 
     fun entries(): Long = DatabaseUtils.queryNumEntries(db, TABLE)
 
@@ -115,7 +121,7 @@ class OuiManager private constructor(context: Context) {
                 db.close()
                 file.delete()
                 tmpFile.renameTo(file)
-                openDatabase()
+                db = openDatabase()
                 ouiLoading.emit(Loading.Finished(newEntries))
             } catch (e: Exception) {
                 elog(e.toString())
@@ -157,14 +163,14 @@ class OuiManager private constructor(context: Context) {
         // 08:45:D1         	Cisco       	Cisco Systems, Inc
         // 00:55:DA:90/28   	QuantumCommu	Quantum Communication Technology Co., Ltd.,Anhui
         // 00:1B:C5:0B:90/36	DenkiKogyo  	Denki Kogyo Company, Limited
-        val delimiter = Pattern.compile(" *\t")
         tmpFile.delete()
-        val step = entries / 100
 
         val db = SQLiteDatabase.openOrCreateDatabase(tmpFile.absolutePath, null)
         db.execSQL("create table $TABLE ($COLUMN_MAC TEXT NOT NULL, $COLUMN_LABEL TEXT NOT NULL, $COLUMN_DESC TEXT NOT NULL)")
 
+        val delimiter = Pattern.compile(" *\t")
         val statement = db.compileStatement("insert into $TABLE ($COLUMN_MAC, $COLUMN_LABEL, $COLUMN_DESC) values (?, ?, ?)")
+        val step = entries / 100
         var counter = 0L
         var totalCounter = 0L
         splitToSequence('\n').forEach { line ->
