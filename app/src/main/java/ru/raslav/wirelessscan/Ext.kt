@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.children
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.CoroutineScope
@@ -163,4 +164,17 @@ inline fun View.updateMarginLayoutParams(block: ViewGroup.MarginLayoutParams.(Re
     val params = layoutParams as ViewGroup.MarginLayoutParams
     params.block(resources)
     layoutParams = params
+}
+
+fun <V : View> ViewGroup.completeChildren(
+    count: Int,
+    factory: (Context) -> V,
+    init: V.(index: Int) -> Unit,
+) {
+    while (childCount > count) removeViewAt(0)
+    while (childCount < count) addView(factory(context))
+    children.forEachIndexed { index, view ->
+        @Suppress("UNCHECKED_CAST")
+        (view as V).init(index)
+    }
 }

@@ -21,6 +21,7 @@ import androidx.preference.PreferenceViewHolder
 import com.google.android.material.chip.Chip
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.colorAttr
+import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.updateMarginLayoutParams
 import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.LinearLayoutParams
@@ -138,17 +139,16 @@ class ChipPreference : ListPreference {
     private fun LinearLayout.completeChildren(
         entries: Array<out CharSequence>,
         entryValues: Array<out CharSequence>,
-    ) {
-        while (childCount > entries.size) removeViewAt(0)
-        while (childCount < entries.size) addView(Chip(context))
-        children.forEachIndexed { index, view ->
-            view as Chip
-            view.chipStrokeColor = ColorStateList.valueOf(context.colorAttr(MaterialAttr.colorOutlineVariant))
-            view.text = entries[index]
-            view.setOnClickListener { setValue(entryValues[index].toString()) }
-            view.updateMarginLayoutParams {
+    ) = completeChildren(
+        entries.size,
+        factory = { Chip(it) },
+        init = { index ->
+            chipStrokeColor = ColorStateList.valueOf(context.colorAttr(MaterialAttr.colorOutlineVariant))
+            text = entries[index]
+            setOnClickListener { setValue(entryValues[index].toString()) }
+            updateMarginLayoutParams {
                 marginStart = if (index == 0) 0 else chipMargin
             }
-        }
-    }
+        },
+    )
 }
