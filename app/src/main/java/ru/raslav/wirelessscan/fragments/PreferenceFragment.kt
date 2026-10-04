@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.Build.VERSION_CODES.Q
@@ -31,7 +30,6 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.TwoStatePreference
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
@@ -65,7 +63,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
 
-        findPreference<Preference>(Const.PREF_MAIL)!!.setOnPreferenceClickListener { mailToDeveloper(); true }
         ouiPreference = findPreference<Preference>(Const.PREF_OUI_SOURCE)!!.apply {
             setViewId(R.id.oui_source)
             setOnPreferenceClickListener { openOuiSource(); true }
@@ -130,13 +127,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
             }
         }
         return true
-    }
-
-    private fun mailToDeveloper() {
-        Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "atomofiron@gmail.com", null))
-            .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
-            .putExtra(Intent.EXTRA_TEXT, getString(R.string.dear_dev))
-            .showChooser(R.string.send_email)
     }
 
     private fun openPrivacyPolicy() {

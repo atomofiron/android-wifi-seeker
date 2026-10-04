@@ -7,7 +7,6 @@ import android.os.Build.VERSION_CODES.Q
 object Const {
     const val SNAPSHOT_FORMAT = ".xml"
 
-    const val PREF_MAIL = "mail_to_dev"
     const val PREF_OUI_SOURCE = "oui_source"
     const val PREF_PRIVACY_POLICY = "privacy_policy"
     const val PREF_SOURCE_CODE = "source_code"

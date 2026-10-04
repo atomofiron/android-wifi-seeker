@@ -53,12 +53,5 @@
             android:icon="@drawable/ic_privacy"
             android:widgetLayout="@layout/widget_outside"
             />
-        <PreferenceScreen
-            android:key="mail_to_dev"
-            android:id="@+id/mail_to_dev"
-            android:title="@string/email_dev"
-            android:icon="@drawable/ic_email"
-            android:widgetLayout="@layout/widget_outside"
-            />
     </PreferenceCategory>
 </PreferenceScreen>
