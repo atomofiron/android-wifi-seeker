@@ -26,7 +26,7 @@
             android:layout_alignTop="@+id/list_title"
             android:layout_alignParentEnd="true"
             android:text="0/0"
-            android:paddingEnd="4dp"
+            android:paddingEnd="@dimen/padding_mini"
             android:textColor="@color/color_label"
             />
         <ListView
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:padding="16dp"
+            android:padding="@dimen/padding_common"
             android:orientation="vertical"
             android:visibility="gone"
             android:background="@drawable/disclaimer"
@@ -70,7 +70,7 @@
                 android:id="@+id/btn_grant"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/padding_half"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:text="@string/grant"
                 />

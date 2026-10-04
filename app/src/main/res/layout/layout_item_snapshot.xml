@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:descendantFocusability="blocksDescendants"
-    android:paddingHorizontal="@dimen/padding_common"
+    android:paddingStart="@dimen/padding_common"
+    android:paddingEnd="@dimen/padding_half"
     >
-
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
