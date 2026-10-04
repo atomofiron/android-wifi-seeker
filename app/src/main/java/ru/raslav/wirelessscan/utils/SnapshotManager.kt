@@ -7,6 +7,7 @@ import org.simpleframework.xml.Root
 import org.simpleframework.xml.core.Persister
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.elog
 import java.io.File
 import java.io.StringWriter

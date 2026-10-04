@@ -1,4 +1,4 @@
-package ru.raslav.wirelessscan.utils
+package ru.raslav.wirelessscan.data
 
 import android.content.Context
 import android.net.wifi.ScanResult

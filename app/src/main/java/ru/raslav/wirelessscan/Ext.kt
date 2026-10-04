@@ -25,7 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import ru.raslav.wirelessscan.Const.InvisibleChars
-import ru.raslav.wirelessscan.utils.Point
+import ru.raslav.wirelessscan.data.Point
 import kotlin.text.CharCategory.UNASSIGNED
 
 

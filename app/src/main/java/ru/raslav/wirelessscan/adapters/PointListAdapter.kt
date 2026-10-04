@@ -30,7 +30,7 @@ import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
-import ru.raslav.wirelessscan.utils.Point
+import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.max
 import kotlin.math.min

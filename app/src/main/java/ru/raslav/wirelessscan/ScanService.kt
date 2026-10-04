@@ -25,7 +25,7 @@ import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.utils.OuiManager
-import ru.raslav.wirelessscan.utils.Point
+import ru.raslav.wirelessscan.data.Point
 
 private const val ONLY_APP_IS_BOUND = 1
 
