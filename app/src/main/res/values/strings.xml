@@ -24,7 +24,7 @@
     <string name="oui_source">OUI base source</string>
     <string name="update_oui">Download the new base</string>
     <string name="oui_lookup_tool" translatable="false">OUI Lookup Tool</string>
-    <string name="x_entries">%d entries</string>
+    <string name="x_entries">%d&#x00A0;entries</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="source_code">Source code</string>
 
@@ -33,6 +33,7 @@
     <string name="essid_empty">empty</string>
     <string name="essid_hex_format" translatable="false">SSID HEX: %s</string>
     <string name="bssid_format" translatable="false">BSSID: %s</string>
+    <string name="ip_format" translatable="false">IP: %s</string>
     <string name="capab_format">Capabilities: %s</string>
     <string name="frequ_format">Frequency: %1$d, chanel: %2$d, pwr: %3$d</string>
     <string name="manuf_format">Manufacturer: %s</string>

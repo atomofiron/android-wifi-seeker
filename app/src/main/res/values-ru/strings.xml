@@ -23,7 +23,7 @@
     <string name="email_dev">Написать разработчику</string>
     <string name="oui_source">Источник OUI базы</string>
     <string name="update_oui">Загрузить актуальную базу</string>
-    <string name="x_entries">%d записей</string>
+    <string name="x_entries">%d&#x00A0;записей</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="source_code">Исходный код</string>
 

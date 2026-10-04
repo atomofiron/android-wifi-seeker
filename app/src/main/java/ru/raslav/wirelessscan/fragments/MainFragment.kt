@@ -72,6 +72,7 @@ import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
+import ru.raslav.wirelessscan.data.CurrentPoint
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
@@ -126,7 +127,7 @@ class MainFragment : Fragment(), Titled {
 
     private lateinit var binding: FragmentMainBinding
 
-    override val title: String get() = getString(R.string.app_name) + "   " + wifiIpAddress()
+    override val title: String get() = getString(R.string.app_name)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -464,14 +465,9 @@ class MainFragment : Fragment(), Titled {
     }
 
     private fun updateConnectionInfo() {
-        adapter.connectionInfo = currentWifiInfo()
-        if (isResumed) {
-            // trigger the back stack listeners
-            parentFragmentManager.beginTransaction()
-                .addToBackStack(null)
-                .commit()
-            parentFragmentManager.popBackStack()
-        }
+        currentWifiInfo()
+            ?.run { CurrentPoint(bssid, wifiIpAddress()) }
+            .let { adapter.setCurrent(it) }
     }
 
     private inner class FlashAnimationListener : Animation.AnimationListener {
