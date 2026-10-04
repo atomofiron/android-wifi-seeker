@@ -14,9 +14,12 @@ object Const {
     const val PREF_DEFAULT_PERIOD = "default_period"
     const val PREF_SCAN_DURATION = "scan_duration"
     const val PREF_WORK_IN_BG = "work_in_bg"
+    const val PREF_OUI_TEXT_LENGTH = "oui_text_length"
 
     const val DEFAULT_PERIOD = 5
     const val DEFAULT_DURATION = 2
+
+    const val OUI_TEXT_LENGTH = 3165976L
 
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f

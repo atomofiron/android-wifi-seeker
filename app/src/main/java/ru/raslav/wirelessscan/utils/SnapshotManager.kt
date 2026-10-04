@@ -48,7 +48,7 @@ class SnapshotManager(private val co: Context) {
             Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false)
                 .points?.apply {
                     for (point in this) {
-                        val manuf = OuiManager.find(point.bssid)
+                        val manuf = OuiManager.self.find(point.bssid)
                         point.bssidHex = manuf.digits
                         point.manufacturer = manuf.label
                         point.manufacturerDesc = manuf.description

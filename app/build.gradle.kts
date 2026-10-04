@@ -45,6 +45,7 @@ android { // key alias raslav_2016
 }
 
 dependencies {
+    compileOnly(libs.kotlin.gradle)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)

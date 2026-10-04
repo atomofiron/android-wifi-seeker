@@ -1,5 +1,6 @@
 [versions]
 agp = "9.3.3"
+kotlin = "2.4.20"
 coreKtx = "1.19.0"
 appcompat = "1.8.0"
 material = "1.14.0"
@@ -16,6 +17,7 @@ androidx-preference = { group = "androidx.preference", name = "preference-ktx", 
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 insets = { group = "io.github.atomofiron", name = "extended-insets", version.ref = "insets" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -26,7 +26,6 @@ import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.utils.Point
-import kotlin.math.max
 
 private const val ONLY_APP_IS_BOUND = 1
 
@@ -189,7 +188,7 @@ class ScanService : Service() {
                     new.manufacturer = it.manufacturer
                     new.manufacturerDesc = it.manufacturerDesc
                 }
-                ?: OuiManager.find(new.bssid).let {
+                ?: OuiManager.self.find(new.bssid).let {
                     new.bssidHex = it.digits
                     new.manufacturer = it.label
                     new.manufacturerDesc = it.description

@@ -43,7 +43,7 @@
             android:title="@string/oui_source"
             android:summary="@string/oui_lookup_tool"
             android:icon="@drawable/ic_shark"
-            android:widgetLayout="@layout/widget_outside"
+            android:widgetLayout="@layout/widget_refresh_and_outside"
             />
         <PreferenceScreen
             android:key="privacy_policy"

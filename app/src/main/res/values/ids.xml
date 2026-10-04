@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="period_3s" type="id" />
-    <item name="period_5s" type="id" />
-    <item name="period_10s" type="id" />
-    <item name="period_30s" type="id" />
-    <item name="period_1m" type="id" />
-    <item name="period_3m" type="id" />
-    <item name="period_5m" type="id" />
+    <item type="id" name="period_3s" />
+    <item type="id" name="period_5s" />
+    <item type="id" name="period_10s" />
+    <item type="id" name="period_30s" />
+    <item type="id" name="period_1m" />
+    <item type="id" name="period_3m" />
+    <item type="id" name="period_5m" />
+
+    <item type="id" name="oui_source" />
 </resources>

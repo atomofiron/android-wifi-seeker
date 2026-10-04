@@ -17,6 +17,9 @@ import androidx.annotation.AttrRes
 import androidx.core.graphics.ColorUtils
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import ru.raslav.wirelessscan.Const.InvisibleChars
 import ru.raslav.wirelessscan.utils.Point
 import kotlin.text.CharCategory.UNASSIGNED
@@ -86,3 +89,38 @@ fun String.isVisible() = any { it.isVisible() }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Char.isVisible() = this !in InvisibleChars
+
+fun View.addOnAttachListener(
+    oneTime: Boolean = false,
+    onAttach: (() -> Unit)? = null,
+    onDetach: (() -> Unit)? = null,
+) {
+    if (onAttach == null && onDetach == null) {
+        return
+    }
+    if (onAttach != null && isAttachedToWindow) {
+        onAttach()
+        if (oneTime) return
+    }
+    val listener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            onAttach?.invoke()
+            if (oneTime && onAttach != null) {
+                removeOnAttachStateChangeListener(this)
+            }
+        }
+        override fun onViewDetachedFromWindow(v: View) {
+            onDetach?.invoke()
+            if (oneTime && onDetach != null) {
+                removeOnAttachStateChangeListener(this)
+            }
+        }
+    }
+    addOnAttachStateChangeListener(listener)
+}
+
+fun View.scope(): CoroutineScope {
+    val scope = CoroutineScope(Dispatchers.Main)
+    addOnAttachListener(onDetach = { scope.cancel() })
+    return scope
+}
