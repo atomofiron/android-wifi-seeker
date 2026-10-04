@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
@@ -166,6 +167,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
     ) : RecyclerView.OnChildAttachStateChangeListener {
 
         private val headFrameWidth = preference.context.resources.getDimensionPixelSize(R.dimen.preference_head_frame_width)
+        private var buttonBackground: Drawable? = null
         private var tried = false
 
         override fun onChildViewAttachedToWindow(view: View) {
@@ -179,12 +181,13 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
         }
 
         private fun WidgetRefreshAndOutsideBinding.bindOuiWidget() {
+            buttonBackground = buttonBackground ?: button.background
             button.contentDescription = root.resources.getString(R.string.update_oui)
             if (SDK_INT >= O) button.tooltipText = button.contentDescription
+            setClickListener()
             root.scope().launch(Main) {
-            OuiManager.self.ouiLoading.collect { loading ->
-                loading ?: return@collect
-                    button.isEnabled = false
+                OuiManager.self.ouiLoading.collect { loading ->
+                    loading ?: return@collect
                     button.isVisible = !loading.progress
                     progress.isVisible = loading.progress
                     when (loading) {
@@ -195,8 +198,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
                         is Loading.Finished<Long> -> {
                             button.setImageResource(R.drawable.ic_circle_check)
                             preference.setOuiEntries(root.resources, loading.data)
-                            button.setOnClickListener(null)
-                            button.background = null
                         }
                         is Loading.Error if (tried) -> {
                             tried = false
@@ -204,15 +205,20 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
                             root.context.showError(loading.message)
                         }
                         is Loading.Error -> {
+                            setClickListener()
                             button.setImageResource(R.drawable.ic_refresh)
-                            button.isEnabled = true
                         }
                     }
                 }
             }
+        }
+
+        private fun WidgetRefreshAndOutsideBinding.setClickListener() {
+            button.background = buttonBackground
             button.setOnClickListener {
                 tried = true
-                it.isEnabled = false
+                button.background = null
+                button.setOnClickListener(null)
                 OuiManager.self.update(it.context)
             }
         }
