@@ -2,30 +2,24 @@ package ru.raslav.wirelessscan.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
+import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.databinding.LayoutItemSnapshotBinding
 import java.io.File
 
-class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
+class SnapshotHolder(val binding: LayoutItemSnapshotBinding) : RecyclerView.ViewHolder(binding.root)
+
+class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<SnapshotHolder>() {
+
     private val list = mutableListOf<String>()
     private val dbDir = File(co.applicationInfo.dataDir + "/files/")
 
     var onSnapshotShareListener: (name: String) -> Unit = {}
+    var onSnapshotClickListener: (name: String) -> Unit = {}
 
     init {
-        update()
-    }
-
-    // todo why unused?
-    fun clear() {
-        dbDir.listFiles()
-            .filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
-            .forEach { it.delete() }
-
         update()
     }
 
@@ -33,36 +27,38 @@ class SnapshotsListAdapter(private val co: Context) : BaseAdapter() {
         list.clear()
 
         dbDir.listFiles()
-                ?.filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
-                ?.forEach { list.add(it.name) }
-                ?: return
+            ?.filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
+            ?.forEach { list.add(it.name) }
+            ?: return
 
         notifyDataSetChanged()
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val binding = if (convertView == null) {
-            LayoutItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false).apply {
-                share.setOnClickListener {
-                    onSnapshotShareListener(title.text.toString())
-                }
-                delete.setOnClickListener(DoubleClickMaster {
-                    File(dbDir.absolutePath, title.text.toString()).delete()
-                    update()
-                })
-                root.tag = this
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnapshotHolder {
+        val binding = LayoutItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false)
+        val holder = SnapshotHolder(binding)
+
+        binding.root.setOnClickListener {
+            positionOf(holder)?.let { onSnapshotClickListener(list[it]) }
+        }
+        binding.share.setOnClickListener {
+            positionOf(holder)?.let { onSnapshotShareListener(list[it]) }
+        }
+        binding.delete.setOnClickListener(DoubleClickMaster {
+            positionOf(holder)?.let {
+                File(dbDir.absolutePath, list[it]).delete()
+                update()
             }
-        } else
-            convertView.tag as LayoutItemSnapshotBinding
-
-        binding.title.text = list[position]
-
-        return binding.root
+        })
+        return holder
     }
 
-    override fun getItem(position: Int): String = list[position]
+    override fun onBindViewHolder(holder: SnapshotHolder, position: Int) {
+        holder.binding.title.text = list[position]
+    }
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemCount(): Int = list.size
 
-    override fun getCount(): Int = list.size
+    private fun positionOf(holder: SnapshotHolder): Int? = holder.bindingAdapterPosition
+        .takeIf { it != RecyclerView.NO_POSITION }
 }

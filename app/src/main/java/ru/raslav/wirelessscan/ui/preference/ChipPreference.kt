@@ -141,7 +141,7 @@ class ChipPreference : ListPreference {
         entryValues: Array<out CharSequence>,
     ) = completeChildren(
         entries.size,
-        factory = { Chip(it) },
+        factory = { Chip(context) },
         init = { index ->
             chipStrokeColor = ColorStateList.valueOf(context.colorAttr(MaterialAttr.colorOutlineVariant))
             text = entries[index]

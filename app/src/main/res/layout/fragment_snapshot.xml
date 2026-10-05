@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,16 +12,17 @@
         layout="@layout/app_bar"
         />
     <include
-        android:id="@+id/layout_item"
+        android:id="@+id/list_title"
         layout="@layout/layout_item"
         />
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:id="@+id/list_view"
-        android:divider="@null"
+        android:scrollbars="vertical"
         android:clipToPadding="false"
         android:scrollbarThumbVertical="@drawable/scroll_vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         />
 </LinearLayout>

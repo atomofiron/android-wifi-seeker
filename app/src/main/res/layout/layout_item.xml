@@ -3,9 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/layout_item"
-    android:background="@color/black_lite"
     android:orientation="vertical"
+    android:background="?selectableItemBackground"
     >
     <LinearLayout
         android:id="@+id/item_columns"

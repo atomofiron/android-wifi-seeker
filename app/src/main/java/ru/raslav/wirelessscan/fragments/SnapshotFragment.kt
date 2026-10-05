@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
+import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.RowBackgroundDecoration
 import ru.raslav.wirelessscan.utils.SnapshotManager
 
 class SnapshotFragment : Fragment() {
@@ -41,19 +43,20 @@ class SnapshotFragment : Fragment() {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
         binding.appBar.init(this, requireArguments().getString(EXTRA_NAME).toString())
-        binding.listView.adapter = adapter
+        binding.listTitle.root.setBackgroundResource(R.color.black_lite)
+        binding.list.adapter = adapter
+        binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
         adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 
-        binding.layoutItem.root.insetsPadding(start = true, end = true)
-        binding.listView.insetsPadding(start = true, end = true, bottom = true)
-        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
-        binding.listView.onItemClickListener = adapter
+        binding.listTitle.root.insetsPadding(start = true, end = true)
+        binding.list.insetsPadding(start = true, end = true, bottom = true)
+        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
 
         return binding.root
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        binding.layoutItem.bssid.isVisible = resources.configuration.isWide()
+        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
     }
 }

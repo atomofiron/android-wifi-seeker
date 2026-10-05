@@ -26,10 +26,8 @@ class SnapshotListFragment : Fragment() {
 
         val adapter = SnapshotsListAdapter(requireContext())
         adapter.onSnapshotShareListener = { name -> share(name) }
+        adapter.onSnapshotClickListener = { name -> requireActivity().asMain().showSnapshot(name) }
         binding.listView.adapter = adapter
-        binding.listView.setOnItemClickListener { _, _, position, _ ->
-            requireActivity().asMain().showSnapshot(adapter.getItem(position))
-        }
         binding.listView.insetsPadding(start = true, end = true, bottom = true)
         return binding.root
     }

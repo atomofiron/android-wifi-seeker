@@ -169,15 +169,17 @@ inline fun View.updateMarginLayoutParams(block: ViewGroup.MarginLayoutParams.(Re
     layoutParams = params
 }
 
-fun <V : View> ViewGroup.completeChildren(
+fun <V : View, L : ViewGroup> L.completeChildren(
     count: Int,
-    factory: (Context) -> V,
+    factory: L.() -> V,
     init: V.(index: Int) -> Unit,
 ) {
     while (childCount > count) removeViewAt(0)
-    while (childCount < count) addView(factory(context))
+    while (childCount < count) addView(factory())
     children.forEachIndexed { index, view ->
         @Suppress("UNCHECKED_CAST")
         (view as V).init(index)
     }
 }
+
+fun View.x() = top + translationY

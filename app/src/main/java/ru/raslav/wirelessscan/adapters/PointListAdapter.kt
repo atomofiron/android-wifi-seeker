@@ -12,49 +12,43 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.copy
 import ru.raslav.wirelessscan.data.CurrentPoint
+import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
-import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-enum class AnimType {
+private enum class AnimType {
     None, ScanStart, ScanEnd
 }
 
-private class Holder(
-    var index: Int = -1,
-    val binding: LayoutItemBinding,
-) {
-    override fun equals(other: Any?): Boolean = other is Holder && other.binding === binding
-    override fun hashCode(): Int = binding.hashCode()
-}
+class PointLHolder(val binding: LayoutItemBinding) : RecyclerView.ViewHolder(binding.root)
 
-class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChangeListener,
-    ValueAnimator.AnimatorUpdateListener, AdapterView.OnItemClickListener {
+class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
+    ValueAnimator.AnimatorUpdateListener {
     companion object {
         const val FILTER_DEFAULT = 0
         const val FILTER_INCLUDE = 1
         const val FILTER_EXCLUDE = 2
     }
+
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
     val allPoints = mutableListOf<Point>()
@@ -66,7 +60,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         ContextCompat.getColor(context, R.color.gray),
         context.resources.getDimension(R.dimen.one),
     )
-    private val holders = mutableListOf<Holder>()
+    private val holders = mutableListOf<PointLHolder>()
     private var current: CurrentPoint? = null
 
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
@@ -74,60 +68,64 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
     private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val holder: Holder = if (convertView == null) {
-            //android.view.InflateException: Binary XML file line #64: addView(View, LayoutParams) is not supported in AdapterView
-            //Caused by: java.lang.UnsupportedOperationException: addView(View, LayoutParams) is not supported in AdapterView
-            val itemView = LayoutInflater.from(parent.context).inflate(R.layout.layout_item, parent, false)
-            itemView.addOnAttachStateChangeListener(this)
-            val binding = LayoutItemBinding.bind(itemView)
-            val holder = Holder(binding = binding)
-            itemView.tag = holder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointLHolder {
+        val binding = LayoutItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val holder = PointLHolder(binding)
 
-            binding.pwr.text = Const.Dot
-            binding.pwr.gravity = Gravity.END
-            holder
-        } else
-            convertView.tag as Holder
-
-        holder.index = position
-        fillView(holder.binding, points[position], position)
-
-        return holder.binding.root
+        binding.pwr.text = Const.Dot
+        binding.pwr.gravity = Gravity.END
+        binding.root.setOnClickListener {
+            val position = holder.bindingAdapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                onClick(position)
+            }
+        }
+        return holder
     }
 
-    private fun fillView(holder: LayoutItemBinding, point: Point, position: Int) {
-        drawItemRoot(holder.itemColumns, point)
+    override fun onBindViewHolder(holder: PointLHolder, position: Int) {
+        holder.binding.fillView(points[position])
+    }
+
+    override fun getItemCount(): Int = points.size
+
+    /** Row background for RowBackgroundDecoration: alternating shades plus the out-of-range state. */
+    fun backgroundAt(position: Int): Int {
+        val point = points[position]
+        val even = position % 2 == 0
+        return when {
+            point.outOfRange -> if (even) Point.red_lite else Point.red_dark_lite
+            even -> Point.transparent
+            else -> Point.black_lite
+        }
+    }
+
+    private fun LayoutItemBinding.fillView(point: Point) {
+        drawItemRoot(itemColumns, point)
         val connected = point.bssid == current?.bssid
-        holder.updateDescription(
+        updateDescription(
             point.takeIf { it.bssid == focused?.bssid },
             current?.takeIf { connected },
         )
-        holder.root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
-        focusedDrawable.setRtl(holder.root.isRtl())
-        val even = position % 2 == 0
-        holder.root.setBackgroundColor(when {
-            point.level <= Point.MIN_LEVEL -> if (even) Point.red_lite else Point.red_dark_lite
-            even -> Point.transparent
-            else -> Point.black_lite
-        })
+        root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
+        focusedDrawable.setRtl(root.isRtl())
 
         // point.level == -1 experiment
-        holder.pwr.setTextColor(if (point.level == -1) -65281 else point.pwColor)
+        pwr.setTextColor(if (point.level == -1) -65281 else point.pwColor)
 
-        holder.ch.text = point.ch.toString()
-        holder.ch.setTextColor(point.chColor)
+        ch.text = point.ch.toString()
+        ch.setTextColor(point.chColor)
 
-        holder.enc.text = point.enc
-        holder.enc.setTextColor(point.encColor)
+        enc.text = point.enc
+        enc.setTextColor(point.encColor)
 
-        holder.cip.text = point.cip
-        holder.cip.setTextColor(point.cipColor)
+        cip.text = point.cip
+        cip.setTextColor(point.cipColor)
 
-        holder.wps.text = point.wps
-        holder.wps.setTextColor(point.wpsColor)
+        wps.text = point.wps
+        wps.setTextColor(point.wpsColor)
 
-        holder.essid.text = when {
+        essid.text = when {
             point.essid.isEmpty() -> point.bssid
             point.essid.isVisible() -> point.essid
             else -> point.essidHex
@@ -137,10 +135,10 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
             point.essid.isEmpty() -> Point.yellow
             point.essid.isVisible() -> Point.gray
             else -> Point.yellow
-        }.let { holder.essid.setTextColor(it) }
-        holder.bssid.text = point.bssid
-        holder.bssid.setTextColor(if (connected) Point.green_light else Point.gray)
-        holder.bssid.isVisible = holder.root.resources.configuration.isWide()
+        }.let { essid.setTextColor(it) }
+        bssid.text = point.bssid
+        bssid.setTextColor(if (connected) Point.green_light else Point.gray)
+        bssid.isVisible = root.resources.configuration.isWide()
     }
 
     private fun drawItemRoot(layout: LinearLayout, point: Point) {
@@ -225,7 +223,7 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         }
     }
 
-    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+    private fun onClick(position: Int) {
         val point = points[position]
         when (point.bssid) {
             focused?.bssid -> resetFocus()
@@ -317,20 +315,13 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         return getCounters()
     }
 
-    override fun getItem(position: Int): Point = points[position]
-
-    override fun getItemId(position: Int): Long = position.toLong()
-
-    override fun getCount(): Int = points.size
-
-    override fun onViewAttachedToWindow(view: View) {
-        val holder = view.tag as Holder
+    override fun onViewAttachedToWindow(holder: PointLHolder) {
         holders.add(holder)
         holder.binding.pwr.alpha = Const.ALPHA_FULL
     }
 
-    override fun onViewDetachedFromWindow(view: View) {
-        holders.remove(view.tag as Holder)
+    override fun onViewDetachedFromWindow(holder: PointLHolder) {
+        holders.remove(holder)
     }
 
     fun animScanStart() {
@@ -373,18 +364,18 @@ class PointListAdapter(context: Context) : BaseAdapter(), View.OnAttachStateChan
         val value = animation.animatedValue as Float
         if (animType == AnimType.ScanStart) {
             for (holder in holders) {
-                holder.binding.pwr.alpha = if (holder.index % 2 == 0) value else (Const.ALPHA_FULL - value)
+                holder.binding.pwr.alpha = if (holder.bindingAdapterPosition % 2 == 0) value else (Const.ALPHA_FULL - value)
             }
         } else if (animType == AnimType.ScanEnd) {
             var min = Int.MAX_VALUE
             var max = Int.MIN_VALUE
             for (holder in holders) {
-                min = min(min, holder.index)
-                max = max(max, holder.index)
+                min = min(min, holder.bindingAdapterPosition)
+                max = max(max, holder.bindingAdapterPosition)
             }
             val threshold = (min + (max - min) * (Const.ALPHA_FULL - value)).roundToInt()
             for (holder in holders) {
-                holder.binding.pwr.alpha = if (holder.index >= threshold) Const.ALPHA_FULL else Const.ALPHA_ZERO
+                holder.binding.pwr.alpha = if (holder.bindingAdapterPosition >= threshold) Const.ALPHA_FULL else Const.ALPHA_ZERO
             }
             if (value == Const.ALPHA_FULL) {
                 animType = AnimType.None

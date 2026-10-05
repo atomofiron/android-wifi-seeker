@@ -56,6 +56,7 @@ import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.InsetsSource
 import lib.atomofiron.insets.ViewInsetsDelegate
@@ -103,6 +104,7 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
+import ru.raslav.wirelessscan.utils.RowBackgroundDecoration
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
@@ -188,21 +190,23 @@ class MainFragment : Fragment() {
 
         binding.appBar.init(this, getString(R.string.app_name), backButton = false)
         binding.appBar.toolbar.addMenuProvider(menuProvider)
+        binding.list.addOnScrollListener(ScrollListener(binding.periods))
 
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counter.insetsPadding(insets, horizontal = true)
         binding.listTitle.root.insetsPadding(insets, horizontal = true)
         val toolbarDelegate = binding.bottomToolbar.root.insetsDelegate()
-        binding.listView.insetsPadding(insets, start = true, end = true, bottom = true)
+        binding.list.insetsPadding(insets, start = true, end = true, bottom = true)
         binding.root.layoutChanges {
             binding.onLayoutChanged(it, toolbarDelegate)
         }
-        binding.listView.onItemClickListener = adapter
-        binding.listView.adapter = adapter
+        binding.list.adapter = adapter
+        binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
 
         binding.initPeriods()
         binding.bottomToolbar.filters.init()
         binding.initButtons(binding.counter)
+        binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
             color = requireContext().colorAttr(MaterialAttr.colorSurfaceContainer),
@@ -308,7 +312,7 @@ class MainFragment : Fragment() {
         }
         layout.completeChildren(
             PeriodIcons.size,
-            factory = { ChipPeriodBinding.inflate(it.inflater()).root },
+            factory = { ChipPeriodBinding.inflate(context.inflater()).root },
             init = { index ->
                 chipIcon = ContextCompat.getDrawable(root.context, PeriodIcons[index])
                 isSelected = index == selected
@@ -619,6 +623,15 @@ class MainFragment : Fragment() {
                     tryStartScanService()
                 }
                 !shouldShowRequestPermissionRationale(Const.LOCATION_PERMISSION) -> requireContext().openPermissionSettings()
+            }
+        }
+    }
+
+    private class ScrollListener(private val periods: HeaderDropdownLayout) : RecyclerView.OnScrollListener() {
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                periods.collapse()
             }
         }
     }
