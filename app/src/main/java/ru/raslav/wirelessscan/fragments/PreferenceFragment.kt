@@ -43,6 +43,7 @@ import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.init
+import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.LinearLayoutParams
 import ru.raslav.wirelessscan.utils.OuiManager
@@ -83,6 +84,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
     ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
         updatePaddingRelative(top = resources.getDimensionPixelSize(R.dimen.padding_half))
         insetsPadding(start = true, end = true, bottom = true)
+        setupSpringOverscroll()
         clipToPadding = false
         if (SDK_INT >= Q) {
             verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
@@ -110,25 +112,25 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
 
     private fun setListeners(screen: PreferenceGroup) {
         (0 until screen.preferenceCount)
-                .map { screen.getPreference(it) }
-                .forEach {
-                    when (it) {
-                        is PreferenceScreen,
-                        is PreferenceCategory -> setListeners(it)
-                        else -> {
-                            it.onPreferenceChangeListener = this
-                            updateSummary(it, null)
-                        }
+            .map { screen.getPreference(it) }
+            .forEach {
+                when (it) {
+                    is PreferenceScreen,
+                    is PreferenceCategory -> setListeners(it)
+                    else -> {
+                        it.onPreferenceChangeListener = this
+                        updateSummary(it, null)
                     }
                 }
+            }
     }
 
     private fun updateSummary(preference: Preference, value: Any?) {
-        if (preference is EditTextPreference)
-            preference.setSummary(value as String? ?: sp.getString(preference.key, ""))
-        else if (preference is ListPreference)
+        when (preference) {
+            is EditTextPreference -> preference.setSummary(value as String? ?: sp.getString(preference.key, ""))
             // preference.entry from entries, but newValue from entryValues
-            preference.summary = if (value is String) preference.entries[value.toInt()] else preference.entry
+            is ListPreference -> preference.summary = if (value is String) preference.entries[value.toInt()] else preference.entry
+        }
     }
 
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {

@@ -93,6 +93,7 @@ import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.ui.init
+import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
@@ -191,6 +192,7 @@ class MainFragment : Fragment() {
         binding.appBar.init(this, getString(R.string.app_name), backButton = false)
         binding.appBar.toolbar.addMenuProvider(menuProvider)
         binding.list.addOnScrollListener(ScrollListener(binding.periods))
+        binding.list.setupSpringOverscroll()
 
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counter.insetsPadding(insets, horizontal = true)
