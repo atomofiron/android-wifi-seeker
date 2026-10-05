@@ -8,6 +8,8 @@
     <dimen name="extended_width">640dp</dimen>
     <dimen name="preference_head_frame_width">44dp</dimen>
     <dimen name="one">1dp</dimen>
+    <dimen name="icon_size">24dp</dimen>
+    <dimen name="chip_min_size">40dp</dimen>
 
     <dimen name="padding_mini">4dp</dimen>
     <dimen name="padding_half">8dp</dimen>

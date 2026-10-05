@@ -7,10 +7,8 @@
         android:id="@+id/period"
         android:title="@string/period"
         android:icon="@drawable/ic_timer_pause"
-        app:showAsAction="ifRoom"
-        >
-        <menu />
-    </item>
+        app:showAsAction="always"
+        />
     <item
         android:id="@+id/settings"
         android:title="@string/settings"

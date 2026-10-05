@@ -35,19 +35,19 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.location.LocationManagerCompat
 import androidx.core.os.BundleCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.children
 import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
@@ -70,15 +70,19 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.colorAttr
+import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.data.CurrentPoint
+import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.granted
+import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.longToast
 import ru.raslav.wirelessscan.openPermissionSettings
@@ -87,17 +91,17 @@ import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
+import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.FileNameInputText
+import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
-import ru.raslav.wirelessscan.data.Point
-import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
-import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
@@ -115,7 +119,7 @@ class MainFragment : Fragment(), Titled {
     private val networkRequest by unsafeLazy { NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build() }
     private val scanConnection = ScanConnection(MessageHandler(), ::onServiceConnected)
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
-    private val menuProvider = MainMenuProvider()
+    private val menuProvider by unsafeLazy { MainMenuProvider(binding.periods) }
     private val networkCallback = if (SDK_INT >= S) NewNetworkCallback() else NetworkCallback()
     private val mainHandler by unsafeLazy { Handler(Looper.getMainLooper()) }
     private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission(), LocationPermissionCallback())
@@ -194,7 +198,8 @@ class MainFragment : Fragment(), Titled {
         binding.listView.onItemClickListener = adapter
         binding.listView.adapter = adapter
 
-        initFilters(binding.bottomToolbar.filters)
+        binding.initPeriods()
+        binding.bottomToolbar.filters.init()
         binding.initButtons(binding.counter)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
@@ -251,12 +256,16 @@ class MainFragment : Fragment(), Titled {
     }
 
     private fun updatePeriodIcon() {
-        val index = resources.getIntArray(R.array.period_arr_int)
-            .indexOf(scanPeriod)
+        val index = getPeriodIndex()
         periodItem.setIcon(PeriodIcons[index])
     }
 
-    private inner class MainMenuProvider : MenuProvider {
+    private fun getPeriodIndex() = resources.getIntArray(R.array.period_arr_int).indexOf(scanPeriod)
+
+    private inner class MainMenuProvider(
+        private val periods: HeaderDropdownLayout,
+    ) : MenuProvider {
+
         override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
             inflater.inflate(R.menu.main, menu)
             periodItem = menu.findItem(R.id.period)
@@ -268,19 +277,8 @@ class MainFragment : Fragment(), Titled {
         }
 
         override fun onMenuItemSelected(item: MenuItem): Boolean {
-            val periods = resources.getIntArray(R.array.period_arr_int)
             when (item.itemId) {
-                R.id.period_3s,
-                R.id.period_5s,
-                R.id.period_10s,
-                R.id.period_30s,
-                R.id.period_1m,
-                R.id.period_3m,
-                R.id.period_5m -> {
-                    scanPeriod = periods[PeriodIds.indexOf(item.itemId)]
-                    sendScanPeriod()
-                    updatePeriodIcon()
-                }
+                R.id.period -> periods.toggle()
                 else -> return false
             }
             return true
@@ -297,8 +295,37 @@ class MainFragment : Fragment(), Titled {
         binding.listTitle.bssid.isVisible = newConfig.isWide()
     }
 
-    private fun initFilters(binding: LayoutFiltersPaneBinding) {
-        val layout = binding.root
+    private fun FragmentMainBinding.initPeriods() {
+        val selected = getPeriodIndex()
+        val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
+        val seconds = resources.getIntArray(R.array.period_arr_int)
+        val layout = periods.withHorizontalLinearLayout(top = true, end = true, padding = padding)
+        periods.onAnim { offset ->
+            container.translationY = offset
+        }
+        layout.completeChildren(
+            PeriodIcons.size,
+            factory = { ChipPeriodBinding.inflate(it.inflater()).root },
+            init = { index ->
+                chipIcon = ContextCompat.getDrawable(root.context, PeriodIcons[index])
+                isSelected = index == selected
+                setOnClickListener { view ->
+                    periods.collapse()
+                    if (view.isSelected) {
+                        return@setOnClickListener
+                    }
+                    layout.children.forEach {
+                        it.isSelected = it === view
+                    }
+                    scanPeriod = seconds[index]
+                    sendScanPeriod()
+                    updatePeriodIcon()
+                }
+            },
+        )
+    }
+
+    private fun LayoutFiltersPaneBinding.init() {
         val listener = View.OnClickListener { view ->
             var state = PointListAdapter.FILTER_DEFAULT
             when {
@@ -313,10 +340,10 @@ class MainFragment : Fragment(), Titled {
                     state = PointListAdapter.FILTER_INCLUDE
                 }
             }
-            updateCounters(adapter.updateFilter(layout.indexOfChild(view), state))
+            updateCounters(adapter.updateFilter(root.indexOfChild(view), state))
         }
-        for (i in 0 until layout.childCount)
-            layout.getChildAt(i).setOnClickListener(listener)
+        for (i in 0 until root.childCount)
+            root.getChildAt(i).setOnClickListener(listener)
     }
 
     private fun FragmentMainBinding.initButtons(label: TextView) {

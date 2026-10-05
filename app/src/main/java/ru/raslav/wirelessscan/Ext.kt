@@ -15,6 +15,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.TIRAMISU
 import android.provider.Settings
 import android.util.LayoutDirection
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -47,6 +48,8 @@ fun Context.canHandle(intent: Intent): Boolean = when {
     SDK_INT >= TIRAMISU -> packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
     else -> packageManager.queryIntentActivities(intent, 0)
 }.isNotEmpty()
+
+fun Context.inflater() = LayoutInflater.from(this)
 
 fun <T> unsafeLazy(provider: () -> T) = lazy(LazyThreadSafetyMode.NONE, provider)
 
