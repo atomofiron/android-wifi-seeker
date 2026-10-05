@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -34,19 +35,20 @@ import kotlinx.coroutines.launch
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.data.Loading
+import ru.raslav.wirelessscan.databinding.FragmentPreferencesBinding
 import ru.raslav.wirelessscan.databinding.WidgetRefreshAndOutsideBinding
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.tryStartActivity
+import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.unsafeLazy
-import ru.raslav.wirelessscan.utils.MaterialAttr
+import ru.raslav.wirelessscan.utils.LinearLayoutParams
 import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.utils.PreferenceId
 
-class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string.settings), Preference.OnPreferenceChangeListener {
+class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
 
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
 
@@ -88,11 +90,22 @@ class PreferenceFragment : PreferenceFragmentCompat(), Titled by Titled(R.string
         addOnChildAttachStateChangeListener(ChildAttachListener(ouiPreference))
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+        val binding = FragmentPreferencesBinding.inflate(inflater)
+        binding.appBar.init(this, R.string.settings)
+        binding.root.addView(view)
+        view.updateLayoutParams<LinearLayoutParams> {
+            height = 0
+            weight = 1f
+        }
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setDividerHeight(0)
         setDivider(null)
-        view.setBackgroundColor(requireContext().colorAttr(MaterialAttr.colorSurface))
     }
 
     private fun setListeners(screen: PreferenceGroup) {

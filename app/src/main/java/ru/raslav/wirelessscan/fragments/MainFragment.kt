@@ -65,10 +65,10 @@ import lib.atomofiron.insets.insetsSource
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_DEFAULT_PERIOD
-import ru.raslav.wirelessscan.MainActivity
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.adapters.PointListAdapter
+import ru.raslav.wirelessscan.asMain
 import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.connection.Connection.Event
@@ -91,6 +91,7 @@ import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.toBoolean
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
+import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
@@ -108,7 +109,7 @@ import java.io.File
 import java.net.Inet4Address
 import android.os.Build.VERSION_CODES.TIRAMISU as T
 
-class MainFragment : Fragment(), Titled {
+class MainFragment : Fragment() {
     companion object {
         private const val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
         private const val EXTRA_POINTS = "EXTRA_POINTS"
@@ -132,8 +133,6 @@ class MainFragment : Fragment(), Titled {
     private val flashAnim: Animation by unsafeLazy { AnimationUtils.loadAnimation(requireContext(), R.anim.flash) }
 
     private lateinit var binding: FragmentMainBinding
-
-    override val title: String get() = getString(R.string.app_name)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -186,6 +185,9 @@ class MainFragment : Fragment(), Titled {
 
         binding = FragmentMainBinding.inflate(inflater, container, false)
         adapter.initAnim()
+
+        binding.appBar.init(this, getString(R.string.app_name), backButton = false)
+        binding.appBar.toolbar.addMenuProvider(menuProvider)
 
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counter.insetsPadding(insets, horizontal = true)
@@ -279,6 +281,7 @@ class MainFragment : Fragment(), Titled {
         override fun onMenuItemSelected(item: MenuItem): Boolean {
             when (item.itemId) {
                 R.id.period -> periods.toggle()
+                R.id.preferences -> requireActivity().asMain().showPreference()
                 else -> return false
             }
             return true
@@ -374,8 +377,7 @@ class MainFragment : Fragment(), Titled {
             label.text = adapter.clearOutOfRange()
         })
         bottomToolbar.buttonList.setOnClickListener {
-            val intent = Intent(activity, MainActivity::class.java).setAction(MainActivity.ACTION_OPEN_SNAPSHOTS_LIST)
-            requireContext().startActivity(intent)
+            requireActivity().asMain().showSnapshots()
         }
     }
 

@@ -1,92 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?colorSurface"
+    android:orientation="vertical"
     >
-    <RelativeLayout
-        android:id="@+id/container"
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar"
+        />
+    <FrameLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="?colorSurface"
         >
-        <include
-            android:id="@+id/list_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            layout="@layout/layout_item"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/counter"
-            android:layout_below="@+id/list_title"
-            android:layout_alignTop="@+id/list_title"
-            android:layout_alignParentEnd="true"
-            android:text="0/0"
-            android:paddingEnd="@dimen/padding_mini"
-            android:textColor="@color/color_label"
-            />
-        <ListView
+        <RelativeLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/list_view"
-            android:overScrollMode="never"
-            android:divider="@null"
-            android:layout_below="@+id/list_title"
-            android:clipToPadding="false"
-            android:scrollbarThumbVertical="@drawable/scroll_vertical"
-            />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/flash"
-            android:background="@color/colorFlash"
-            android:visibility="gone"
-            />
-        <LinearLayout
-            android:id="@+id/permission_disclaimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:padding="@dimen/padding_common"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:background="@drawable/disclaimer"
-            tools:visibility="visible"
             >
+            <include
+                android:id="@+id/list_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                layout="@layout/layout_item"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/need_location_permission"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:maxWidth="240sp"
+                android:id="@+id/counter"
+                android:layout_below="@+id/list_title"
+                android:layout_alignTop="@+id/list_title"
+                android:layout_alignParentEnd="true"
+                android:text="0/0"
+                android:paddingEnd="@dimen/padding_mini"
+                android:textColor="@color/color_label"
                 />
-            <Button
-                android:id="@+id/btn_grant"
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/list_view"
+                android:overScrollMode="never"
+                android:divider="@null"
+                android:layout_below="@+id/list_title"
+                android:clipToPadding="false"
+                android:scrollbarThumbVertical="@drawable/scroll_vertical"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/flash"
+                android:background="@color/colorFlash"
+                android:visibility="gone"
+                />
+            <LinearLayout
+                android:id="@+id/permission_disclaimer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_half"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:text="@string/grant"
-                />
-        </LinearLayout>
-    </RelativeLayout>
-    <include
-        android:id="@+id/bottom_toolbar"
-        layout="@layout/layout_buttons_pane"
-        />
-    <ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
-        android:id="@+id/periods"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?colorSurfaceContainer"
-        android:paddingBottom="@dimen/padding_half"
-        tools:layout_height="wrap_content"
-        tools:layout_marginTop="128dp"
-        />
-</FrameLayout>
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:padding="@dimen/padding_common"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:background="@drawable/disclaimer"
+                tools:visibility="visible"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/need_location_permission"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:maxWidth="240sp"
+                    />
+                <Button
+                    android:id="@+id/btn_grant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_half"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:text="@string/grant"
+                    />
+            </LinearLayout>
+        </RelativeLayout>
+        <include
+            android:id="@+id/bottom_toolbar"
+            layout="@layout/layout_buttons_pane"
+            />
+        <ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
+            android:id="@+id/periods"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?colorSurfaceContainer"
+            android:paddingBottom="@dimen/padding_half"
+            tools:layout_height="wrap_content"
+            tools:layout_marginTop="128dp"
+            />
+    </FrameLayout>
+</LinearLayout>

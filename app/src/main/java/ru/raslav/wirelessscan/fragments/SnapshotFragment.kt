@@ -11,10 +11,11 @@ import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.SnapshotManager
 
-class SnapshotFragment : Fragment(), Titled {
+class SnapshotFragment : Fragment() {
     companion object {
         private const val EXTRA_NAME = "EXTRA_NAME"
 
@@ -26,8 +27,6 @@ class SnapshotFragment : Fragment(), Titled {
             return fragment
         }
     }
-
-    override val title: String get() = requireArguments().getString(EXTRA_NAME).toString()
 
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
@@ -41,6 +40,7 @@ class SnapshotFragment : Fragment(), Titled {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
+        binding.appBar.init(this, requireArguments().getString(EXTRA_NAME).toString())
         binding.listView.adapter = adapter
         adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 

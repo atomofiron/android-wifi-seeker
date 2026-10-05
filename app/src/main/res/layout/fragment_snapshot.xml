@@ -7,6 +7,10 @@
     android:background="?colorSurface"
     >
     <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar"
+        />
+    <include
         android:id="@+id/layout_item"
         layout="@layout/layout_item"
         />

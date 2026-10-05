@@ -10,7 +10,7 @@
         app:showAsAction="always"
         />
     <item
-        android:id="@+id/settings"
+        android:id="@+id/preferences"
         android:title="@string/settings"
         android:icon="@drawable/ic_settings"
         app:showAsAction="always"
