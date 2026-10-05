@@ -82,7 +82,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         parent: ViewGroup,
         savedInstanceState: Bundle?,
     ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).apply {
-        updatePaddingRelative(top = resources.getDimensionPixelSize(R.dimen.padding_half))
+        updatePaddingRelative(top = resources.getDimensionPixelSize(R.dimen.padding_common))
         insetsPadding(start = true, end = true, bottom = true)
         setupSpringOverscroll()
         clipToPadding = false

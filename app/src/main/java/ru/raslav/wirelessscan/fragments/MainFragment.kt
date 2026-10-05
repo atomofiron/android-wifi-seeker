@@ -55,7 +55,6 @@ import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.InsetsSource
@@ -245,21 +244,9 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (!isHidden) {
-            requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        }
         when {
             savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) == false -> Unit
             locationGranted() -> binding.bottomToolbar.tryStartScanServiceIfWifiEnabled()
-        }
-    }
-
-    /** A hidden fragment keeps the RESUMED state, so its view is not destroyed and the menu is handled manually */
-    override fun onHiddenChanged(hidden: Boolean) {
-        super.onHiddenChanged(hidden)
-        when {
-            hidden -> activity?.removeMenuProvider(menuProvider)
-            else -> activity?.addMenuProvider(menuProvider)
         }
     }
 
