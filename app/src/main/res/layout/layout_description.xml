@@ -37,6 +37,11 @@
             />
         <TextView
             style="@style/Description"
+            android:id="@+id/tv_gateway"
+            android:background="?selectableItemBackground"
+            />
+        <TextView
+            style="@style/Description"
             android:id="@+id/tv_capab"
             />
         <TextView

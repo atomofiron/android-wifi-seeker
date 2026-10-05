@@ -22,7 +22,7 @@ import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.copy
-import ru.raslav.wirelessscan.data.CurrentPoint
+import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
@@ -61,7 +61,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         context.resources.getDimension(R.dimen.one),
     )
     private val holders = mutableListOf<PointLHolder>()
-    private var current: CurrentPoint? = null
+    private var current: CurrentConnection? = null
 
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     private var animType = AnimType.None
@@ -159,7 +159,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         }
     }
 
-    private fun LayoutItemBinding.updateDescription(point: Point?, current: CurrentPoint?) {
+    private fun LayoutItemBinding.updateDescription(point: Point?, current: CurrentConnection?) {
         val description = root.findViewById<View>(R.id.layout_description)
             ?.let { LayoutDescriptionBinding.bind(it) }
         when {
@@ -178,7 +178,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         copy.setBounds(0, 0, size, size)
         copy.alpha = ALPHA_INT_HALF
         copy.setTintList(tvEssid.textColors)
-        arrayOf(tvEssid, tvEssidHex, tvBssid, tvIp).forEach { tv ->
+        arrayOf(tvEssid, tvEssidHex, tvBssid, tvIp, tvGateway).forEach { tv ->
             tv.setCompoundDrawablesRelative(null, null, copy, null)
             tv.compoundDrawablePadding = size / 2
             tv.setOnClickListener { tv.onCopiableClick() }
@@ -194,7 +194,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         clipboard.copy(context, label, data)
     }
 
-    private fun LayoutDescriptionBinding.bind(point: Point, current: CurrentPoint?) {
+    private fun LayoutDescriptionBinding.bind(point: Point, current: CurrentConnection?) {
         val resources = root.resources
         tvEssid.text = when {
             point.essid.isEmpty() -> resources.yellow("")
@@ -202,12 +202,14 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         }
         tvEssidHex.text = point.essidHex.takeIf { it.isNotEmpty() }
             ?.let { resources.getString(R.string.essid_hex_format, it) }
-        tvEssidHex.isVisible = tvEssidHex.text.isNotEmpty()
+        tvEssidHex.isVisible = point.essidHex.isNotEmpty()
         tvBssid.text = resources.getString(R.string.bssid_format, point.bssid)
-        tvIp.text = current?.ip?.let {
-            resources.getString(R.string.ip_format, it)
-        }
-        tvIp.isVisible = !current?.ip.isNullOrBlank()
+        tvIp.text = current?.address?.takeIf { it.isNotEmpty() }
+            ?.let { resources.getString(R.string.ip_format, it) }
+        tvIp.isVisible = !current?.address.isNullOrEmpty()
+        tvGateway.text = current?.gateway?.takeIf { it.isNotEmpty() }
+            ?.let { resources.getString(R.string.gateway_format, it) }
+        tvGateway.isVisible = !current?.gateway.isNullOrEmpty()
         tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
         tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.ch, point.level)
         tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
@@ -272,7 +274,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         return getCounters()
     }
 
-    fun setCurrent(current: CurrentPoint?) {
+    fun setCurrent(current: CurrentConnection?) {
         this.current = current
         notifyDataSetChanged()
     }

@@ -73,7 +73,7 @@ import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
-import ru.raslav.wirelessscan.data.CurrentPoint
+import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
@@ -489,9 +489,8 @@ class MainFragment : Fragment() {
     }
 
     private fun updateConnectionInfo() {
-        currentWifiInfo()
-            ?.run { CurrentPoint(bssid, wifiIpAddress()) }
-            .let { adapter.setCurrent(it) }
+        val current = currentWifiInfo()?.withLocalIp()
+        adapter.setCurrent(current)
     }
 
     private inner class FlashAnimationListener : Animation.AnimationListener {
@@ -568,18 +567,25 @@ class MainFragment : Fragment() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun wifiIpAddress(): String {
-        val network = connectivityManager.activeNetwork ?: return ""
+    private fun WifiInfo.withLocalIp(): CurrentConnection {
+        val network = connectivityManager.activeNetwork
+            ?: return CurrentConnection(bssid)
         connectivityManager.getNetworkCapabilities(network)
             ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
             ?.takeIf { it }
-            ?: return ""
-        return connectivityManager.getLinkProperties(network)
-            ?.linkAddresses
+            ?: return CurrentConnection(bssid)
+        val properties = connectivityManager.getLinkProperties(network)
+        val local = properties?.linkAddresses
             ?.firstOrNull { it.address is Inet4Address }
             ?.address
             ?.hostAddress
             .orEmpty()
+        val gateway = properties?.routes
+            ?.firstOrNull { it.isDefaultRoute && it.gateway is Inet4Address }
+            ?.gateway
+            ?.hostAddress
+            .orEmpty()
+        return CurrentConnection(bssid, address = local, gateway = gateway)
     }
 
     @RequiresApi(S)

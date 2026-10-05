@@ -33,6 +33,7 @@
     <string name="essid_hex_format" translatable="false">SSID HEX: %s</string>
     <string name="bssid_format" translatable="false">BSSID: %s</string>
     <string name="ip_format" translatable="false">IP: %s</string>
+    <string name="gateway_format" translatable="false">GATEWAY: %s</string>
     <string name="capab_format">Capabilities: %s</string>
     <string name="frequ_format">Frequency: %1$d, chanel: %2$d, pwr: %3$d</string>
     <string name="manuf_format">Manufacturer: %s</string>
