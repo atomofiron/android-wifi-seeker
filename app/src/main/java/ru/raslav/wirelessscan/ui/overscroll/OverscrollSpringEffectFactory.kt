@@ -22,6 +22,7 @@ fun RecyclerView.setupSpringOverscroll(callback: (() -> Unit)? = null) {
     val factory = OverscrollSpringEffectFactory(callback)
     addOnChildAttachStateChangeListener(factory.attachChildListener)
     addOnItemTouchListener(factory.touchListener)
+    addOnLayoutChangeListener(factory.layoutListener)
     edgeEffectFactory = factory
 }
 
@@ -36,12 +37,24 @@ private class OverscrollSpringEffectFactory(
     private var startY = 0f
     private var pullY = 0f
     private var resetOnPull = false
+    private var effects = mutableListOf<SpringEffect>()
 
     override fun createEdgeEffect(view: RecyclerView, direction: Int): EdgeEffect {
         return when (direction) {
             DIRECTION_TOP -> SpringEffect(view, Direction.Down)
             DIRECTION_BOTTOM -> SpringEffect(view, Direction.Up)
-            else -> super.createEdgeEffect(view, direction)
+            else -> return super.createEdgeEffect(view, direction)
+        }.also { effects.add(it) }
+    }
+
+    /**
+     * A dataset change rebuilds the rows, and their translationY goes to zero with them, while the
+     * effect itself re-applies offsets only on a pull or on an animation frame. Here every row is laid
+     * out already and the frame is not drawn yet, so the current offsets can be restored silently.
+     */
+    val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+        for (effect in effects) {
+            effect.reapply()
         }
     }
 
@@ -196,12 +209,23 @@ private class OverscrollSpringEffectFactory(
             applyEffect(delta = new - distance)
         }
 
+        /** Restores the offsets of the current rows, e.g. after a dataset change rebuilt them. */
+        fun reapply() {
+            if (distance > zeroDistance) {
+                applyTranslations()
+            }
+        }
+
         private fun applyEffect(delta: Float) {
             callback?.invoke()
             distance += delta
+            applyTranslations()
+            view.parent?.requestDisallowInterceptTouchEvent(true)
+        }
+
+        private fun applyTranslations() {
             val offset = distance * view.height / 3
             view.applyEffect(offset, direction)
-            view.parent?.requestDisallowInterceptTouchEvent(true)
         }
 
         private fun reset() {
