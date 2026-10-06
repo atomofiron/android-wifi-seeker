@@ -575,7 +575,7 @@ class MainFragment : Fragment() {
             endToStart = if (orientation.start) NO_ID else R.id.buttons
         }
         scanDrawable.showOrientation(orientation)
-        adapter.notifyDataSetChanged()
+        adapter.notifyChanged()
     }
 
     private fun WifiInfo.withLocalIp(): CurrentConnection? {

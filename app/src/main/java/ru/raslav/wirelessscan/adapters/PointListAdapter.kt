@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
@@ -237,12 +238,12 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
 
     private fun setFocused(point: Point) {
         focused = point
-        notifyDataSetChanged()
+        notifyChanged()
     }
 
     fun resetFocus() {
         focused = null
-        notifyDataSetChanged()
+        notifyChanged()
     }
 
     /** @return counters like '15 / 22' or '5 / 15 / 22' */
@@ -260,7 +261,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
             allPoints.addAll(list)
 
         applyFilter()
-        notifyDataSetChanged()
+        notifyChanged()
         return getCounters()
     }
 
@@ -278,8 +279,11 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
 
     fun setCurrent(current: CurrentConnection?) {
         this.current = current
-        notifyDataSetChanged()
+        notifyChanged()
     }
+
+    @SuppressLint("NotifyDataSetChanged") // todo make Point's fields immutable
+    fun notifyChanged() = notifyDataSetChanged()
 
     private fun applyFilter() {
         val prevPoints = points.toMutableList()
@@ -300,14 +304,14 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         }
 
         if (prevPoints != points)
-            notifyDataSetChanged()
+            notifyChanged()
     }
 
     fun clear(): String {
         allPoints.clear()
         points.clear()
 
-        notifyDataSetChanged()
+        notifyChanged()
         return getCounters()
     }
 
@@ -315,7 +319,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         allPoints.clearOutOfRange()
         points.clearOutOfRange()
 
-        notifyDataSetChanged()
+        notifyChanged()
         return getCounters()
     }
 
