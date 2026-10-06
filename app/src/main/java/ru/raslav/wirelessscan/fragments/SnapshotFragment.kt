@@ -7,6 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.PointListAdapter
@@ -33,11 +39,23 @@ class SnapshotFragment : Fragment() {
 
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
+    private var viewJob = Job()
+    private var loaded = false
 
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        requireActivity().title = requireArguments().getString(EXTRA_NAME)
+        lifecycleScope.launch(IO) {
+            val manager = SnapshotManager(requireContext())
+            val list = requireArguments().getString(EXTRA_NAME)
+                ?.let { manager.get(it) }
+            withContext(Main) {
+                adapter.updateList(list)
+                loaded = true
+                viewJob.join()
+                binding.updateProgressVisibility()
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -48,13 +66,20 @@ class SnapshotFragment : Fragment() {
         binding.list.adapter = adapter
         binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
         binding.list.setupSpringOverscroll()
-        adapter.updateList(SnapshotManager(requireContext()).get(requireArguments().getString(EXTRA_NAME)!!))
 
         binding.listTitle.root.insetsPadding(start = true, end = true)
         binding.list.insetsPadding(start = true, end = true, bottom = true)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
 
+        viewJob.cancel()
+        binding.updateProgressVisibility()
+
         return binding.root
+    }
+
+    private fun FragmentSnapshotBinding.updateProgressVisibility() {
+        list.isVisible = loaded
+        progress.isVisible = !loaded
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
