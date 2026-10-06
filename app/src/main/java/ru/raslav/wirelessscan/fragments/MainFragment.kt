@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.fragments
 
 import android.Manifest
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.annotation.SuppressLint
 import android.app.BackgroundServiceStartNotAllowedException
 import android.content.Context
@@ -77,7 +78,6 @@ import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
-import ru.raslav.wirelessscan.databinding.LayoutButtonsPaneBinding
 import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
@@ -159,8 +159,9 @@ class MainFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         connectivityManager.unregisterNetworkCallback(networkCallback)
-        if (!sp.getBoolean(Const.PREF_WORK_IN_BG, false))
+        if (!sp.getBoolean(Const.PREF_WORK_IN_BG, false)) {
             stopScanService()
+        }
     }
 
     override fun onDestroy() {
@@ -203,6 +204,7 @@ class MainFragment : Fragment() {
         }
         binding.list.adapter = adapter
         binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
+        binding.updateSaveButtonState()
 
         binding.initPeriods()
         binding.bottomToolbar.filters.init()
@@ -246,7 +248,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         when {
             savedInstanceState?.getBoolean(EXTRA_SERVICE_WAS_STARTED, true) == false -> Unit
-            locationGranted() -> binding.bottomToolbar.tryStartScanServiceIfWifiEnabled()
+            locationGranted() && wifiManager.isWifiEnabled -> tryStartScanService()
         }
     }
 
@@ -365,34 +367,30 @@ class MainFragment : Fragment() {
         bottomToolbar.buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
+            updateSaveButtonState()
         }.onClickListener {
             scanConnection.clearOutOfRangePoints()
             label.text = adapter.clearOutOfRange()
+            updateSaveButtonState()
         })
         bottomToolbar.buttonList.setOnClickListener {
             requireActivity().asMain().showSnapshots()
         }
     }
 
+    private fun FragmentMainBinding.updateSaveButtonState() {
+        bottomToolbar.buttonSave.isEnabled = adapter.isNotEmpty()
+    }
+
     private fun locationGranted() = requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
 
-    private fun notificationsGranted() = SDK_INT < T || requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    private fun notificationsGranted() = SDK_INT < T || requireContext().checkSelfPermission(POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     private fun checkPermissionAndStartScan() {
         when {
             !locationGranted() -> locationPermissionLauncher.launch(Const.LOCATION_PERMISSION)
             !requireContext().granted(Manifest.permission.ACCESS_WIFI_STATE) -> requireContext().shortToast(R.string.no_perm)
             else -> startScanService()
-        }
-    }
-
-    private fun LayoutButtonsPaneBinding.tryStartScanServiceIfWifiEnabled() {
-        if (wifiManager.isWifiEnabled) {
-            if (!notificationsGranted()) {
-                notificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-            buttonResume.isActivated = true
-            tryStartScanService()
         }
     }
 
@@ -407,25 +405,35 @@ class MainFragment : Fragment() {
     }
 
     private fun startScanService() {
-        if (!wifiManager.isWifiEnabled) {
-            requestWifiEnabled()
+        if (!wifiManager.isWifiEnabled && !requestWifiEnabled()) {
+            return
         }
-        requireContext().startService(Intent(requireContext(), ScanService::class.java))
-
         val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (!LocationManagerCompat.isLocationEnabled(locationManager))
+        if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(R.string.geolocation_need)
                 .setPositiveButton(R.string.got_it, null)
                 .setCancelable(false)
                 .create().show()
+        } else {
+            requireContext().startService(Intent(requireContext(), ScanService::class.java))
+            binding.bottomToolbar.buttonResume.isActivated = true
+            if (!notificationsGranted()) {
+                notificationsPermissionLauncher.launch(POST_NOTIFICATIONS)
+            }
+        }
     }
 
     /** Wi-Fi cannot be enabled programmatically starting with Android 10, the system panel is shown instead */
     @Suppress("DEPRECATION")
-    private fun requestWifiEnabled() = when {
-        SDK_INT >= Q -> requireContext().tryStartActivity(Intent(Settings.Panel.ACTION_WIFI))
-        else -> wifiManager.isWifiEnabled = true
+    private fun requestWifiEnabled() = if (SDK_INT >= Q) {
+        requireContext().tryStartActivity(Intent(Settings.Panel.ACTION_WIFI))
+        false
+    } else {
+        wifiManager.isWifiEnabled = true
+        wifiManager.isWifiEnabled.also {
+            if (!it) startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+        }
     }
 
     private fun stopScanService() = scanConnection.stopScanService()
@@ -450,10 +458,13 @@ class MainFragment : Fragment() {
 
     private fun updateList(msg: Message) {
         if (msg.obj.javaClass == ArrayList<Point>().javaClass) {
-            binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
             @Suppress("UNCHECKED_CAST")
-            updateCounters(adapter.updateList(msg.obj as ArrayList<Point>))
+            val list = msg.obj as ArrayList<Point>
+            binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
+            updateCounters(adapter.updateList(list))
             adapter.animScanEnd()
+            binding.bottomToolbar.buttonSave.isEnabled = list.isNotEmpty()
+            binding.updateSaveButtonState()
         }
     }
 
@@ -567,7 +578,8 @@ class MainFragment : Fragment() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun WifiInfo.withLocalIp(): CurrentConnection {
+    private fun WifiInfo.withLocalIp(): CurrentConnection? {
+        val bssid = bssid ?: return null
         val network = connectivityManager.activeNetwork
             ?: return CurrentConnection(bssid)
         connectivityManager.getNetworkCapabilities(network)

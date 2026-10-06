@@ -68,6 +68,8 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
     private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
+    fun isNotEmpty() = allPoints.isNotEmpty()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointLHolder {
         val binding = LayoutItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val holder = PointLHolder(binding)
