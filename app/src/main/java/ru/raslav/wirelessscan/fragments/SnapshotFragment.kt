@@ -21,7 +21,7 @@ import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.unsafeLazy
-import ru.raslav.wirelessscan.utils.RowBackgroundDecoration
+import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.SnapshotManager
 
 class SnapshotFragment : Fragment() {
@@ -64,7 +64,7 @@ class SnapshotFragment : Fragment() {
         binding.appBar.init(this, requireArguments().getString(EXTRA_NAME).toString())
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.list.adapter = adapter
-        binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
+        binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.list.setupSpringOverscroll()
 
         binding.listTitle.root.insetsPadding(start = true, end = true)

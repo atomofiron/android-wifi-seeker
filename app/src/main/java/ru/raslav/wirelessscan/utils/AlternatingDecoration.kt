@@ -14,7 +14,7 @@ import ru.raslav.wirelessscan.y
  * (out of range) without each holder touching its own background. Fully transparent colors
  * are skipped, which is how an even row stays unpainted.
  */
-class RowBackgroundDecoration(
+class AlternatingDecoration(
     private val backgroundAt: (position: Int) -> Colors,
 ) : RecyclerView.ItemDecoration() {
 

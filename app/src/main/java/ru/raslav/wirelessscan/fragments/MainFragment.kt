@@ -104,7 +104,7 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
-import ru.raslav.wirelessscan.utils.RowBackgroundDecoration
+import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
@@ -203,7 +203,7 @@ class MainFragment : Fragment() {
             binding.onLayoutChanged(it, toolbarDelegate)
         }
         binding.list.adapter = adapter
-        binding.list.addItemDecoration(RowBackgroundDecoration(adapter::backgroundAt))
+        binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.updateSaveButtonState()
 
         binding.initPeriods()
