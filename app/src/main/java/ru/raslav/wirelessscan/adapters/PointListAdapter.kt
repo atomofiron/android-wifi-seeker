@@ -31,6 +31,7 @@ import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
+import ru.raslav.wirelessscan.utils.RowBackgroundDecoration.Colors
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.max
 import kotlin.math.min
@@ -93,14 +94,9 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
     override fun getItemCount(): Int = points.size
 
     /** Row background for RowBackgroundDecoration: alternating shades plus the out-of-range state. */
-    fun backgroundAt(position: Int): Int {
-        val point = points[position]
-        val even = position % 2 == 0
-        return when {
-            point.outOfRange -> if (even) Point.red_lite else Point.red_dark_lite
-            even -> Point.transparent
-            else -> Point.black_lite
-        }
+    fun backgroundAt(position: Int): Colors = when {
+        points[position].outOfRange -> Colors(Point.black_lite, Point.red_dark_lite)
+        else -> Colors(Point.black_lite)
     }
 
     private fun LayoutItemBinding.fillView(point: Point) {

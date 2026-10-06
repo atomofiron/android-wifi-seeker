@@ -160,8 +160,6 @@ class Point private constructor(): Parcelable {
             private set
         var black_lite = 0
             private set
-        var red_lite= 0
-            private set
         var red_dark_lite = 0
             private set
 
@@ -183,7 +181,6 @@ class Point private constructor(): Parcelable {
         fun initColors(co: Context) {
             transparent = ContextCompat.getColor(co, R.color.transparent)
             black_lite = ContextCompat.getColor(co, R.color.black_lite)
-            red_lite = ContextCompat.getColor(co, R.color.red_lite)
             red_dark_lite = ContextCompat.getColor(co, R.color.red_dark_lite)
             red_middle = ContextCompat.getColor(co, R.color.red_middle)
             gray = ContextCompat.getColor(co, R.color.gray)
