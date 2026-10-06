@@ -14,24 +14,16 @@ class SnapshotHolder(val binding: LayoutItemSnapshotBinding) : RecyclerView.View
 class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<SnapshotHolder>() {
 
     private val list = mutableListOf<String>()
-    private val dbDir = File(co.applicationInfo.dataDir + "/files/")
+    private val dir = File(co.applicationInfo.dataDir, "files")
 
     var onSnapshotShareListener: (name: String) -> Unit = {}
     var onSnapshotClickListener: (name: String) -> Unit = {}
 
     init {
-        update()
-    }
-
-    private fun update() {
-        list.clear()
-
-        dbDir.listFiles()
+        dir.listFiles()
+            ?.sortedBy { it.name }
             ?.filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
             ?.forEach { list.add(it.name) }
-            ?: return
-
-        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnapshotHolder {
@@ -45,9 +37,10 @@ class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<Snaps
             positionOf(holder)?.let { onSnapshotShareListener(list[it]) }
         }
         binding.delete.setOnClickListener(DoubleClickMaster {
-            positionOf(holder)?.let {
-                File(dbDir.absolutePath, list[it]).delete()
-                update()
+            positionOf(holder)?.let { index ->
+                File(dir.absolutePath, list[index]).delete()
+                list.removeAt(index)
+                notifyItemRemoved(index)
             }
         })
         return holder
