@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.net.wifi.WifiManager
@@ -54,12 +53,12 @@ class ScanService : Service() {
     }
     private lateinit var scanThread: HandlerThread
     private lateinit var scanHandler: Handler
-    private val wifiManager by unsafeLazy { getSystemService(Context.WIFI_SERVICE) as WifiManager }
+    private val wifiManager by unsafeLazy { getSystemService(WIFI_SERVICE) as WifiManager }
     @SuppressLint("HandlerLeak")
     private val commandMessenger: Messenger = Messenger(object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) = this@ScanService.handleMessage(msg)
     })
-    private val notificationManager by unsafeLazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val notificationManager by unsafeLazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
     private val durations by unsafeLazy { resources.getIntArray(R.array.duration_arr_int) }
     private val sp by unsafeLazy { sp() }
     private var resultMessenger: Messenger? = null
@@ -86,6 +85,7 @@ class ScanService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         dlog("ScanService: onDestroy()")
+        process = false
         scanThread.quitSafely()
     }
 
