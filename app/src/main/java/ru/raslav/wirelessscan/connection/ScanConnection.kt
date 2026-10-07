@@ -4,8 +4,8 @@ import android.os.Handler
 
 class ScanConnection(
     handler: Handler,
-    onServiceConnectedListener: () -> Unit,
-) : Connection(onServiceConnectedListener) {
+    onServiceConnected: () -> Unit,
+) : Connection(onServiceConnected = onServiceConnected) {
 
     init {
         setDuplex(handler)

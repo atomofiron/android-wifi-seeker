@@ -18,7 +18,7 @@ class App : Application() {
         super.onCreate()
 
         OuiManager.init(this)
-        Connection().bindService(baseContext)
+        Connection(silent = true).bindService(baseContext)
         FragmentManager.enablePredictiveBack(true)
     }
 }

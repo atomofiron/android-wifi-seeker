@@ -25,8 +25,7 @@ import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.utils.OuiManager.Companion.javaOui
-
-private const val ONLY_APP_IS_BOUND = 1
+import java.lang.ref.WeakReference
 
 class ScanService : Service() {
     companion object {
@@ -61,7 +60,7 @@ class ScanService : Service() {
     private val notificationManager by unsafeLazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
     private val durations by unsafeLazy { resources.getIntArray(R.array.duration_arr_int) }
     private val sp by unsafeLazy { sp() }
-    private var resultMessenger: Messenger? = null
+    private var resultMessenger = WeakReference<Messenger>(null)
     private val points = mutableListOf<Point>()
     private var period = DEFAULT_PERIOD
     private var process = false
@@ -142,7 +141,7 @@ class ScanService : Service() {
             updatePoints()
             sendResults()
         }
-        while (process && (seconds++ < period || scanningIsNotRequired())) {
+        while (process && (seconds++ < period || !needScan())) {
             Thread.sleep(SECOND)
         }
     }
@@ -152,7 +151,7 @@ class ScanService : Service() {
         ?.let { durations.getOrNull(it) }
         ?: DEFAULT_DURATION
 
-    private fun scanningIsNotRequired(): Boolean = boundCount <= ONLY_APP_IS_BOUND
+    private fun needScan(): Boolean = boundCount > 0
 
     /** Deprecated since API 28, but there is no replacement for triggering a scan request and the ability to do it is not removed yet */
     @Suppress("DEPRECATION")
@@ -162,7 +161,7 @@ class ScanService : Service() {
 
     /** @return process */
     private fun waitForWifi(): Boolean {
-        while (!wifiManager.isWifiEnabled || scanningIsNotRequired()) {
+        while (!wifiManager.isWifiEnabled || !needScan()) {
             Thread.sleep(WIFI_WAITING_PERIOD)
             if (!process)
                 return false
@@ -209,22 +208,22 @@ class ScanService : Service() {
         return message
     }
 
-    private fun sendStartScan() = resultMessenger?.send(newMessage(Event.START_SCAN.ordinal))
+    private fun sendStartScan() = resultMessenger.get()?.send(newMessage(Event.START_SCAN.ordinal))
 
-    private fun sendStarted() = resultMessenger?.send(newMessage(Event.STARTED.ordinal))
+    private fun sendStarted() = resultMessenger.get()?.send(newMessage(Event.STARTED.ordinal))
 
-    private fun sendStopped() = resultMessenger?.send(newMessage(Event.STOPPED.ordinal))
+    private fun sendStopped() = resultMessenger.get()?.send(newMessage(Event.STOPPED.ordinal))
 
     private fun sendResults() {
         val message = newMessage(Event.RESULTS.ordinal)
         message.arg1 = process.toInt()
         message.obj = points
-        resultMessenger?.send(message)
+        resultMessenger.get()?.send(message)
     }
 
     fun handleMessage(message: Message) {
         dlog("<- ${message.run { Event.entries[what] }}")
-        resultMessenger = message.replyTo ?: resultMessenger
+        resultMessenger = WeakReference(message.replyTo ?: resultMessenger.get())
 
         when (message.what) {
             Event.GET.ordinal -> if (scanned) sendResults()

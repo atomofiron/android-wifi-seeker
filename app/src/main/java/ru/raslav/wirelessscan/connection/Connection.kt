@@ -12,7 +12,8 @@ import ru.raslav.wirelessscan.ScanService
 import ru.raslav.wirelessscan.dlog
 
 open class Connection(
-    private val onServiceConnectedListener: () -> Unit = {},
+    private val silent: Boolean = false,
+    private val onServiceConnected: () -> Unit = {},
 ) : ServiceConnection {
     enum class Event { GET, CLEAR, CLEAR_OUT_OF_RANGE, STOP, START_SCAN, PERIOD, RESULTS, STOPPED, STARTED }
 
@@ -21,8 +22,11 @@ open class Connection(
     private var bound = false
     private var released = false
 
-    fun bindService(context: Context) = Intent(context, ScanService::class.java)
-        .let { bound = context.bindService(it, this, Context.BIND_AUTO_CREATE) }
+    fun bindService(context: Context) {
+        released = false
+        val intent = Intent(context, ScanService::class.java)
+        bound = context.bindService(intent, this, Context.BIND_AUTO_CREATE)
+    }
 
     /* onServiceDisconnected() is only called in extreme situations (unbindService() is not) */
     fun unbindService(context: Context) {
@@ -38,11 +42,11 @@ open class Connection(
     }
 
     final override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        if (released) return
+        if (released || silent) return
         dlog("onServiceConnected()")
         commandMessenger = Messenger(service)
         ScanService.connected()
-        onServiceConnectedListener()
+        onServiceConnected()
     }
 
     final override fun onServiceDisconnected(name: ComponentName?) = Unit
