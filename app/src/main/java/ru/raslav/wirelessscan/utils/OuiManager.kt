@@ -10,11 +10,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import ru.raslav.wirelessscan.Const.OUI_TEXT_LENGTH
 import ru.raslav.wirelessscan.Const.PREF_OUI_TEXT_LENGTH
 import ru.raslav.wirelessscan.data.Loading
 import ru.raslav.wirelessscan.elog
@@ -25,7 +23,6 @@ import java.io.FileOutputStream
 import java.net.URL
 import java.util.regex.Pattern
 import kotlin.math.min
-import kotlin.time.Duration.Companion.milliseconds
 
 private const val DB_NAME = "oui.db"
 private val DIGITS = arrayOf(6, 7, 9)
@@ -38,7 +35,8 @@ private const val COLUMN_DESC = "description"
 class OuiManager private constructor(context: Context) {
     companion object {
 
-        private const val BUILTIN_ENTRIES = 58417
+        private const val OUI_TEXT_LENGTH = 3169791L
+        private const val BUILTIN_ENTRIES = 58482L
 
         lateinit var self: OuiManager
 
@@ -84,7 +82,6 @@ class OuiManager private constructor(context: Context) {
         val sp = context.sp()
         val fallbackTotal = sp.getLong(PREF_OUI_TEXT_LENGTH, OUI_TEXT_LENGTH)
         scope.launch(IO) {
-            delay(5000.milliseconds) // user interaction debounce
             try {
                 val entries = entries()
                 val connection = URL("https://www.wireshark.org/download/automated/data/manuf") // alternative https://www.wireshark.org/json/manuf.json

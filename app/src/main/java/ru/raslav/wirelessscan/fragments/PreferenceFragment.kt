@@ -11,12 +11,14 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.Build.VERSION_CODES.Q
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -34,6 +36,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.Const
+import ru.raslav.wirelessscan.Const.ONE_DAY
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.data.Loading
 import ru.raslav.wirelessscan.databinding.FragmentPreferencesBinding
@@ -89,7 +92,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         if (SDK_INT >= Q) {
             verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
         }
-        addOnChildAttachStateChangeListener(ChildAttachListener(ouiPreference))
+        addOnChildAttachStateChangeListener(ChildAttachListener(sp, ouiPreference))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -168,6 +171,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
     private fun backgroundLocationGranted() = SDK_INT < Q || requireContext().checkSelfPermission(ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     private class ChildAttachListener(
+        private val sp: SharedPreferences,
         private val preference: Preference,
     ) : RecyclerView.OnChildAttachStateChangeListener {
 
@@ -190,6 +194,11 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         }
 
         private fun WidgetRefreshAndOutsideBinding.bindOuiWidget() {
+            val now = SystemClock.elapsedRealtime()
+            if (now < ONE_DAY + sp.getLong(Const.PREF_LAST_OUI_REFRESH, 0)) {
+                button.isEnabled = false
+                return
+            }
             buttonBackground = buttonBackground ?: button.background
             button.contentDescription = root.resources.getString(R.string.update_oui)
             if (SDK_INT >= O) button.tooltipText = button.contentDescription
@@ -207,6 +216,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
                         is Loading.Finished<Long> -> {
                             button.setImageResource(R.drawable.ic_circle_check)
                             preference.setOuiEntries(root.resources, loading.data)
+                            sp.edit { putLong(Const.PREF_LAST_OUI_REFRESH, now) }
                         }
                         is Loading.Error if (tried) -> {
                             tried = false

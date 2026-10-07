@@ -14,11 +14,12 @@ object Const {
     const val PREF_SCAN_DURATION = "scan_duration"
     const val PREF_WORK_IN_BG = "work_in_bg"
     const val PREF_OUI_TEXT_LENGTH = "oui_text_length"
+    const val PREF_LAST_OUI_REFRESH = "last_oui_refresh"
 
     const val DEFAULT_PERIOD = 5
     const val DEFAULT_DURATION = 2
 
-    const val OUI_TEXT_LENGTH = 3165976L
+    const val ONE_DAY = 1000L * 60 * 60 * 24
 
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f
