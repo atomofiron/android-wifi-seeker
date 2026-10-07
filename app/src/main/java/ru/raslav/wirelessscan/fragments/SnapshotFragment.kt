@@ -71,7 +71,7 @@ class SnapshotFragment : Fragment() {
         binding.list.insetsPadding(start = true, end = true, bottom = true)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
 
-        viewJob.cancel()
+        viewJob.complete()
         binding.updateProgressVisibility()
 
         return binding.root

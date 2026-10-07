@@ -95,6 +95,7 @@ import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
+import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.ExtType
@@ -104,7 +105,6 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
-import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
