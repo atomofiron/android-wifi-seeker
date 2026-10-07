@@ -18,25 +18,34 @@ open class Connection(
 
     private var commandMessenger: Messenger? = null
     private var replyMessenger: Messenger? = null
+    private var bound = false
+    private var released = false
 
     fun bindService(context: Context) = Intent(context, ScanService::class.java)
-        .let { context.bindService(it, this, Context.BIND_AUTO_CREATE) }
+        .let { bound = context.bindService(it, this, Context.BIND_AUTO_CREATE) }
 
     /* onServiceDisconnected() is only called in extreme situations (unbindService() is not) */
     fun unbindService(context: Context) {
-        context.unbindService(this)
-        commandMessenger = null
-        ScanService.disconnected()
+        released = true
+        if (bound) {
+            bound = false
+            context.unbindService(this)
+        }
+        if (commandMessenger != null) {
+            commandMessenger = null
+            ScanService.disconnected()
+        }
     }
 
     final override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        if (released) return
         dlog("onServiceConnected()")
         commandMessenger = Messenger(service)
-        onServiceConnectedListener()
         ScanService.connected()
+        onServiceConnectedListener()
     }
 
-    final override fun onServiceDisconnected(name: ComponentName?) {}
+    final override fun onServiceDisconnected(name: ComponentName?) = Unit
 
     protected fun setDuplex(handler: Handler) {
         replyMessenger = Messenger(handler)
