@@ -17,13 +17,22 @@ import android.os.Message
 import android.os.Messenger
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import ru.raslav.wirelessscan.Const.DEFAULT_DURATION
 import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.data.Point
-import ru.raslav.wirelessscan.utils.OuiManager.Companion.javaOui
+import ru.raslav.wirelessscan.utils.MutexLocker
+import ru.raslav.wirelessscan.utils.OuiManager.Companion.oui
 import java.lang.ref.WeakReference
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION") // I don't care
 class ScanService : IntentService("ScanService") {
@@ -37,6 +46,10 @@ class ScanService : IntentService("ScanService") {
         private const val FOREGROUND_NOTIFICATION_ID = 1
         private const val NOTIFICATION_CHANNEL_ID = "channel_id"
 
+        private const val ACTION_CODE_SHOW = 2
+        private const val ACTION_CODE_PAUSE = 3
+        private const val ACTION_CODE_RESUME = 4
+
         private var boundCount = 0
         fun connected() = boundCount++
         fun disconnected() = boundCount--
@@ -44,7 +57,7 @@ class ScanService : IntentService("ScanService") {
     private val mainPendingIntent: PendingIntent by unsafeLazy {
         PendingIntent.getActivity(
             this,
-            code++,
+            ACTION_CODE_SHOW,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -58,14 +71,14 @@ class ScanService : IntentService("ScanService") {
 
     private val durations by unsafeLazy { resources.getIntArray(R.array.duration_arr_int) }
     private val sp by unsafeLazy { sp() }
-    private val points = mutableListOf<Point>()
+    private val points = MutexLocker(mutableListOf<Point>())
     private var period = DEFAULT_PERIOD
     private var process = false
     private var scanned = false
-    private var code = 1
+    private var job: Job = SupervisorJob()
+    private val scope = CoroutineScope(job)
 
     override fun onCreate() {
-        dlog("ScanService: onCreate()")
         super.onCreate()
 
         if (SDK_INT >= O) {
@@ -75,8 +88,13 @@ class ScanService : IntentService("ScanService") {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = when {
-        isNotificationAction(intent) || process -> START_NOT_STICKY
+        asNotificationAction(intent) || process -> START_NOT_STICKY
         else -> super.onStartCommand(intent, flags, startId)
     }
 
@@ -84,16 +102,25 @@ class ScanService : IntentService("ScanService") {
         dlog("ScanService: onHandleIntent()")
         showNotification(true)
 
-        // wait for the connection to the service to be established
-        Thread.sleep(100)
-        sendStarted()
         process = true
-        while (process) scan()
+        sendStarted()
+        try {
+            runBlocking(job) {
+                delay(100.milliseconds)
+                while (process) scan()
+            }
+        } catch (e: CancellationException) {
+            // cancelled with the service: nothing to unwind here
+        } catch (e: Exception) {
+            elog(e.toString())
+        } finally {
+            process = false
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder = commandMessenger.binder
 
-    private fun isNotificationAction(intent: Intent?): Boolean {
+    private fun asNotificationAction(intent: Intent?): Boolean {
         when (intent?.action) {
             ACTION_PAUSE -> stop()
             ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
@@ -102,7 +129,7 @@ class ScanService : IntentService("ScanService") {
         return true
     }
 
-    private fun scan() {
+    private suspend fun scan() {
         dlog("scan...")
 
         if (!waitForWifi()) {
@@ -113,7 +140,7 @@ class ScanService : IntentService("ScanService") {
         wifiManager.startScan()
         var seconds = 0
         while (process) {
-            Thread.sleep(SECOND)
+            delay(SECOND.milliseconds)
             if (++seconds >= getDuration()) {
                 break
             }
@@ -124,7 +151,7 @@ class ScanService : IntentService("ScanService") {
             sendResults()
         }
         while (process && (seconds++ < period || !needScan())) {
-            Thread.sleep(SECOND)
+            delay(SECOND.milliseconds)
         }
     }
 
@@ -152,29 +179,30 @@ class ScanService : IntentService("ScanService") {
     }
 
     @SuppressLint("MissingPermission") // ask permission before, on button click
-    private fun updatePoints() {
+    private suspend fun updatePoints() {
         val currentPoints = wifiManager.scanResults.map { Point(it) }
 
-        javaOui {
+        points {
             currentPoints.forEach { new ->
-                points.find { it.bssid == new.bssid }
-                    ?.let {
-                        new.bssidHex = it.bssidHex
-                        new.manufacturer = it.manufacturer
-                        new.manufacturerDesc = it.manufacturerDesc
-                    } ?: find(new.bssid).let {
+                find { it.bssid == new.bssid }?.let {
+                    new.bssidHex = it.bssidHex
+                    new.manufacturer = it.manufacturer
+                    new.manufacturerDesc = it.manufacturerDesc
+                } ?: oui {
+                    find(new.bssid).let {
                         new.bssidHex = it.digits
                         new.manufacturer = it.label
                         new.manufacturerDesc = it.description
                     }
                 }
+            }
+
+            removeAll(currentPoints)
+            forEach { it.level = Point.MIN_LEVEL }
+
+            addAll(currentPoints)
+            sortWith { o1, o2 -> o2.level - o1.level }
         }
-
-        points.removeAll(currentPoints)
-        points.forEach { it.level = Point.MIN_LEVEL }
-
-        points.addAll(currentPoints)
-        points.sortWith { o1, o2 -> o2.level - o1.level }
     }
 
     private fun newMessage(what: Int): Message {
@@ -189,23 +217,29 @@ class ScanService : IntentService("ScanService") {
 
     private fun sendStopped() = resultMessenger.get()?.send(newMessage(Event.STOPPED.ordinal))
 
-    private fun sendResults() {
+    private suspend fun sendResults() {
         val message = newMessage(Event.RESULTS.ordinal)
         message.arg1 = process.toInt()
-        message.obj = points
+        message.obj = points { toMutableList() }
         resultMessenger.get()?.send(message)
     }
 
     fun handleMessage(message: Message) {
-        dlog("<- ${message.run { Event.entries[what] }}")
+        val command = Event.entries[message.what]
+        dlog("<- $command")
         resultMessenger = WeakReference(message.replyTo ?: resultMessenger.get())
-
-        when (message.what) {
-            Event.GET.ordinal -> if (scanned) sendResults()
-            Event.CLEAR.ordinal-> points.clear()
-            Event.CLEAR_OUT_OF_RANGE.ordinal-> points.clearOutOfRange()
-            Event.STOP.ordinal -> stop()
-            Event.PERIOD.ordinal -> period = message.arg1
+        val arg1 = message.arg1
+        when (command) {
+            Event.STOP -> stop()
+            Event.PERIOD -> period = arg1
+            else -> scope.launch {
+                when (command) {
+                    Event.GET -> if (scanned) sendResults()
+                    Event.CLEAR -> points { clear() }
+                    Event.CLEAR_OUT_OF_RANGE -> points { clearOutOfRange() }
+                    else -> Unit
+                }
+            }
         }
     }
 
@@ -245,15 +279,15 @@ class ScanService : IntentService("ScanService") {
         val co = applicationContext
         val builder = NotificationCompat.Builder(co, NOTIFICATION_CHANNEL_ID)
         builder.setContentText(getString(R.string.touch_to_look))
-                .setContentIntent(mainPendingIntent)
-                .setSmallIcon(R.drawable.ws)
-                .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
+            .setContentIntent(mainPendingIntent)
+            .setSmallIcon(R.drawable.ws)
+            .setContentTitle(getString(if (foreground) R.string.scanning else R.string.scanning_was_paused))
 
         if (foreground || sp.getBoolean(Const.PREF_WORK_IN_BG, false)) builder.addAction(
             if (foreground) R.drawable.ic_pause else R.drawable.ic_resume,
             getString(if (foreground) R.string.pause else R.string.resume),
             PendingIntent.getService(
-                co, code++,
+                co, if (foreground) ACTION_CODE_PAUSE else ACTION_CODE_RESUME,
                 Intent(co, ScanService::class.java).setAction(if (foreground) ACTION_PAUSE else ACTION_RESUME),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
