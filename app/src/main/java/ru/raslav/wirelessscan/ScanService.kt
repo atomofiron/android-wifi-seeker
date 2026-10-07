@@ -8,7 +8,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
@@ -24,8 +24,8 @@ import ru.raslav.wirelessscan.Const.DEFAULT_DURATION
 import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
-import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.utils.OuiManager.Companion.javaOui
 
 private const val ONLY_APP_IS_BOUND = 1
 
@@ -181,17 +181,18 @@ class ScanService : Service() {
     private fun updatePoints() {
         val currentPoints = wifiManager.scanResults.map { Point(it) }
 
-        currentPoints.forEach { new ->
-            points.find { it.bssid == new.bssid }
-                ?.let {
-                    new.bssidHex = it.bssidHex
-                    new.manufacturer = it.manufacturer
-                    new.manufacturerDesc = it.manufacturerDesc
-                }
-                ?: OuiManager.self.find(new.bssid).let {
-                    new.bssidHex = it.digits
-                    new.manufacturer = it.label
-                    new.manufacturerDesc = it.description
+        javaOui {
+            currentPoints.forEach { new ->
+                points.find { it.bssid == new.bssid }
+                    ?.let {
+                        new.bssidHex = it.bssidHex
+                        new.manufacturer = it.manufacturer
+                        new.manufacturerDesc = it.manufacturerDesc
+                    } ?: find(new.bssid).let {
+                        new.bssidHex = it.digits
+                        new.manufacturer = it.label
+                        new.manufacturerDesc = it.description
+                    }
                 }
         }
 
@@ -284,10 +285,10 @@ class ScanService : Service() {
             )
         )
         val notification = builder.build()
-        if (foreground)
-            ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        else
-            notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
+        when {
+            foreground -> ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            else -> notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
+        }
     }
 
     /*private fun warning(point: Point) {

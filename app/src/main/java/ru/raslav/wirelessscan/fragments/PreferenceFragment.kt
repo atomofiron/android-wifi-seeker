@@ -11,7 +11,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.Build.VERSION_CODES.Q
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,8 +32,11 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.TwoStatePreference
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import lib.atomofiron.insets.insetsPadding
+import ru.raslav.wirelessscan.App
 import ru.raslav.wirelessscan.Const.ONE_DAY
 import ru.raslav.wirelessscan.Const.PREF_LAST_OUI_REFRESH
 import ru.raslav.wirelessscan.Const.PREF_OUI_SOURCE
@@ -50,6 +52,7 @@ import ru.raslav.wirelessscan.databinding.WidgetRefreshAndOutsideBinding
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
+import ru.raslav.wirelessscan.systemTime
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
@@ -57,6 +60,7 @@ import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.LinearLayoutParams
 import ru.raslav.wirelessscan.utils.OuiManager
 import ru.raslav.wirelessscan.utils.OuiManager.Companion.BUILTIN_OUI_TEXT_LENGTH
+import ru.raslav.wirelessscan.utils.OuiManager.Companion.javaOui
 import ru.raslav.wirelessscan.utils.PreferenceId
 
 class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
@@ -79,7 +83,8 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         ouiPreference = findPreference<Preference>(PREF_OUI_SOURCE)!!.apply {
             setViewId(R.id.oui_source)
             setOnPreferenceClickListener { openOuiSource(); true }
-            setOuiEntries(resources, OuiManager.self.entries())
+            val entries = javaOui { entries() }
+            setOuiEntries(resources, entries)
         }
         findPreference<Preference>(PREF_PRIVACY_POLICY)!!.setOnPreferenceClickListener { openPrivacyPolicy(); true }
         findPreference<Preference>(PREF_SOURCE_CODE)!!.setOnPreferenceClickListener { openSourceCode(); true }
@@ -201,8 +206,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         }
 
         private fun WidgetRefreshAndOutsideBinding.bindOuiWidget() {
-            val now = SystemClock.elapsedRealtime()
-            if (now < ONE_DAY + sp.getLong(PREF_LAST_OUI_REFRESH, 0)) {
+            if (systemTime() < ONE_DAY + sp.getLong(PREF_LAST_OUI_REFRESH, 0)) {
                 button.isEnabled = false
                 return
             }
@@ -211,7 +215,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
             if (SDK_INT >= O) button.tooltipText = button.contentDescription
             setClickListener()
             root.scope().launch {
-                OuiManager.self.ouiLoading.collect { loading ->
+                OuiManager.ouiLoading.collect { loading ->
                     loading ?: return@collect
                     button.isVisible = !loading.progress
                     progress.isVisible = loading.progress
@@ -223,10 +227,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
                         is Loading.Finished<OuiMeta> -> {
                             button.setImageResource(R.drawable.ic_circle_check)
                             preference.setOuiEntries(root.resources, loading.data.entries)
-                            sp.edit {
-                                putLong(PREF_LAST_OUI_REFRESH, now)
-                                putLong(PREF_OUI_TEXT_LENGTH, loading.data.length)
-                            }
                         }
                         is Loading.Error if (tried) -> {
                             tried = false
@@ -246,7 +246,15 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
                 tried = true
                 removeClickListener()
                 val length = sp.getLong(PREF_OUI_TEXT_LENGTH, BUILTIN_OUI_TEXT_LENGTH)
-                OuiManager.self.update(length)
+                App.scope.launch {
+                    val meta = OuiManager.update(length)
+                    if (meta != null) withContext(Main) {
+                        sp.edit {
+                            putLong(PREF_LAST_OUI_REFRESH, systemTime())
+                            putLong(PREF_OUI_TEXT_LENGTH, meta.length)
+                        }
+                    }
+                }
             }
         }
 

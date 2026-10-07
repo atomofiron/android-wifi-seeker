@@ -13,6 +13,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.TIRAMISU
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.LayoutDirection
 import android.view.LayoutInflater
@@ -183,3 +184,8 @@ fun <V : View, L : ViewGroup> L.completeChildren(
 }
 
 fun View.y() = top + translationY
+
+fun systemTime() = when {
+    SDK_INT >= TIRAMISU -> SystemClock.currentNetworkTimeClock().millis()
+    else -> System.currentTimeMillis()
+}

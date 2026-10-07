@@ -9,6 +9,7 @@ import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.elog
+import ru.raslav.wirelessscan.utils.OuiManager.Companion.oui
 import java.io.File
 import java.io.StringWriter
 import java.text.SimpleDateFormat
@@ -43,18 +44,20 @@ class SnapshotManager(private val co: Context) {
         return name
     }
 
-    fun get(name: String): List<Point>? {
+    suspend fun get(name: String): List<Point>? {
         val file = File(co.filesDir, name)
         return try {
-            Persister().read(Snapshot::class.java, file.readText(Charsets.UTF_8), false)
-                .points?.apply {
-                    for (point in this) {
-                        val manuf = OuiManager.self.find(point.bssid)
-                        point.bssidHex = manuf.digits
-                        point.manufacturer = manuf.label
-                        point.manufacturerDesc = manuf.description
-                    }
-                }
+            val points = Persister()
+                .read(Snapshot::class.java, file.readText(Charsets.UTF_8), false)
+                .points
+                ?: return null
+            points.forEach { point ->
+                val manuf = oui { find(point.bssid) }
+                point.bssidHex = manuf.digits
+                point.manufacturer = manuf.label
+                point.manufacturerDesc = manuf.description
+            }
+            points
         } catch (e: Exception) {
             elog(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
