@@ -1,20 +1,18 @@
 package ru.raslav.wirelessscan
 
 import android.annotation.SuppressLint
+import android.app.IntentService
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.net.wifi.WifiManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.IBinder
-import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import androidx.core.app.NotificationCompat
@@ -27,7 +25,8 @@ import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.utils.OuiManager.Companion.javaOui
 import java.lang.ref.WeakReference
 
-class ScanService : Service() {
+@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION") // I don't care
+class ScanService : IntentService("ScanService") {
     companion object {
         private const val ACTION_PAUSE = "ACTION_PAUSE"
         private const val ACTION_RESUME = "ACTION_RESUME"
@@ -50,17 +49,15 @@ class ScanService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
-    private lateinit var scanThread: HandlerThread
-    private lateinit var scanHandler: Handler
+
+    private val commandMessenger: Messenger = Messenger(MessageHandler(this))
+    private var resultMessenger = WeakReference<Messenger>(null)
+
     private val wifiManager by unsafeLazy { getSystemService(WIFI_SERVICE) as WifiManager }
-    @SuppressLint("HandlerLeak")
-    private val commandMessenger: Messenger = Messenger(object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) = this@ScanService.handleMessage(msg)
-    })
     private val notificationManager by unsafeLazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
+
     private val durations by unsafeLazy { resources.getIntArray(R.array.duration_arr_int) }
     private val sp by unsafeLazy { sp() }
-    private var resultMessenger = WeakReference<Messenger>(null)
     private val points = mutableListOf<Point>()
     private var period = DEFAULT_PERIOD
     private var process = false
@@ -71,9 +68,6 @@ class ScanService : Service() {
         dlog("ScanService: onCreate()")
         super.onCreate()
 
-        scanThread = HandlerThread("ScanService").apply { start() }
-        scanHandler = Handler(scanThread.looper)
-
         if (SDK_INT >= O) {
             val name = getString(R.string.channel_name)
             val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, IMPORTANCE_LOW)
@@ -81,25 +75,13 @@ class ScanService : Service() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        dlog("ScanService: onDestroy()")
-        process = false
-        scanThread.quitSafely()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = when {
+        isNotificationAction(intent) || process -> START_NOT_STICKY
+        else -> super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!isNotificationAction(intent) && !process) {
-            scanHandler.post {
-                startScanning()
-                stopSelf(startId)
-            }
-        }
-        return START_NOT_STICKY
-    }
-
-    private fun startScanning() {
-        dlog("ScanService: startScanning()")
+    override fun onHandleIntent(intent: Intent?) {
+        dlog("ScanService: onHandleIntent()")
         showNotification(true)
 
         // wait for the connection to the service to be established
@@ -113,7 +95,7 @@ class ScanService : Service() {
 
     private fun isNotificationAction(intent: Intent?): Boolean {
         when (intent?.action) {
-            ACTION_PAUSE -> stop() // немного не соответствует, но так надо, потому что сервис не знает что такое пауза и как продолжить
+            ACTION_PAUSE -> stop()
             ACTION_RESUME -> startService(Intent(applicationContext, ScanService::class.java))
             else -> return false
         }
@@ -128,7 +110,7 @@ class ScanService : Service() {
         }
         showNotification(true)
         sendStartScan()
-        startScan()
+        wifiManager.startScan()
         var seconds = 0
         while (process) {
             Thread.sleep(SECOND)
@@ -153,13 +135,6 @@ class ScanService : Service() {
 
     private fun needScan(): Boolean = boundCount > 0
 
-    /** Deprecated since API 28, but there is no replacement for triggering a scan request and the ability to do it is not removed yet */
-    @Suppress("DEPRECATION")
-    private fun startScan() {
-        wifiManager.startScan()
-    }
-
-    /** @return process */
     private fun waitForWifi(): Boolean {
         while (!wifiManager.isWifiEnabled || !needScan()) {
             Thread.sleep(WIFI_WAITING_PERIOD)
@@ -287,6 +262,15 @@ class ScanService : Service() {
         when {
             foreground -> ServiceCompat.startForeground(this, FOREGROUND_NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
             else -> notificationManager.notify(FOREGROUND_NOTIFICATION_ID, notification)
+        }
+    }
+
+    private class MessageHandler(service: ScanService) : Handler() {
+
+        private val service = WeakReference(service)
+
+        override fun handleMessage(msg: Message) {
+            service.get()?.handleMessage(msg)
         }
     }
 
