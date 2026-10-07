@@ -144,8 +144,9 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         val focused = focused
         val associating =  when {
             focused == null -> false
-            focused.bssidHex.isEmpty() && point.bssidHex.isEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, 8))
-            else -> focused.bssidHex == point.bssidHex
+            focused.bssidHex.isNotEmpty() && point.bssidHex.isNotEmpty() -> focused.bssidHex == point.bssidHex
+            focused.bssid.isNotEmpty() && point.bssid.isNotEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, min(8, point.bssid.length)))
+            else -> false
         }
         when {
             !associating -> layout.background = null
