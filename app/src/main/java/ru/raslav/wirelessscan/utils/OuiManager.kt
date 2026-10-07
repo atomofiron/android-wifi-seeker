@@ -5,18 +5,15 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.N
-import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import ru.raslav.wirelessscan.Const.PREF_OUI_TEXT_LENGTH
 import ru.raslav.wirelessscan.data.Loading
+import ru.raslav.wirelessscan.data.OuiMeta
 import ru.raslav.wirelessscan.elog
-import ru.raslav.wirelessscan.sp
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -35,7 +32,7 @@ private const val COLUMN_DESC = "description"
 class OuiManager private constructor(context: Context) {
     companion object {
 
-        private const val OUI_TEXT_LENGTH = 3169791L
+        const val BUILTIN_OUI_TEXT_LENGTH = 3169791L
         private const val BUILTIN_ENTRIES = 58482L
 
         lateinit var self: OuiManager
@@ -49,7 +46,7 @@ class OuiManager private constructor(context: Context) {
     private var db: SQLiteDatabase
     private val tmpFile = File(context.filesDir, "tmp.db")
     private val file = File(context.filesDir, DB_NAME)
-    val ouiLoading: StateFlow<Loading<Long>?>
+    val ouiLoading: StateFlow<Loading<OuiMeta>?>
         field = MutableStateFlow(null)
 
     init {
@@ -77,18 +74,16 @@ class OuiManager private constructor(context: Context) {
         return Manufacturer.Unknown
     }
 
-    fun update(context: Context) {
+    fun update(length: Long) {
         ouiLoading.value = Loading()
-        val sp = context.sp()
-        val fallbackTotal = sp.getLong(PREF_OUI_TEXT_LENGTH, OUI_TEXT_LENGTH)
         scope.launch(IO) {
             try {
                 val entries = entries()
                 val connection = URL("https://www.wireshark.org/download/automated/data/manuf") // alternative https://www.wireshark.org/json/manuf.json
                     .openConnection()
                 val total = when {
-                    SDK_INT >= N -> connection.contentLengthLong
-                    else -> fallbackTotal
+                    SDK_INT >= N && connection.contentLengthLong > 0 -> connection.contentLengthLong
+                    else -> length
                 }.toFloat()
                 val bytes = ByteArrayOutputStream()
                 val step = total / 50
@@ -108,9 +103,6 @@ class OuiManager private constructor(context: Context) {
                         }
                     }
                 }
-                if (downloaded > total) scope.launch(Main) {
-                    sp.edit { putLong(PREF_OUI_TEXT_LENGTH, downloaded) }
-                }
                 val newEntries = bytes.toString(Charsets.UTF_8.name()).parse(entries) {
                     ouiLoading.emit(Loading(0.5f + it / 2))
                 }
@@ -119,7 +111,7 @@ class OuiManager private constructor(context: Context) {
                 file.delete()
                 tmpFile.renameTo(file)
                 db = openDatabase()
-                ouiLoading.emit(Loading.Finished(newEntries))
+                ouiLoading.emit(Loading.Finished(OuiMeta(entries = newEntries, length = downloaded)))
             } catch (e: Exception) {
                 elog(e.toString())
                 ouiLoading.emit(Loading(e.toString()))
