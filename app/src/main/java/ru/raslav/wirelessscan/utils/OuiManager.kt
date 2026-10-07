@@ -3,6 +3,8 @@ package ru.raslav.wirelessscan.utils
 import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteDatabase.OPEN_READONLY
+import android.database.sqlite.SQLiteDatabase.OPEN_READWRITE
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.N
 import kotlinx.coroutines.Dispatchers.IO
@@ -32,6 +34,7 @@ private const val TABLE = "OUI"
 private const val COLUMN_MAC = "MAC"
 private const val COLUMN_LABEL = "label"
 private const val COLUMN_DESC = "description"
+private const val INDEX_MAC = "idx_oui_mac"
 
 private val MockRefreshing = BuildConfig.DEBUG
 
@@ -84,15 +87,30 @@ class OuiManager private constructor(context: Context) {
         }
     }
 
-    private fun openDatabase(): SQLiteDatabase = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
+    private fun openDatabase(): SQLiteDatabase {
+        val db = SQLiteDatabase.openDatabase(file.absolutePath, null, OPEN_READONLY)
+
+        val cursor = db.rawQuery("select count(*) from sqlite_master where type='index' and name=?;", arrayOf(INDEX_MAC))
+        val exists = cursor.moveToFirst() && cursor.getInt(0) > 0
+        cursor.close()
+        if (exists) {
+            return db
+        }
+        db.close()
+        SQLiteDatabase.openDatabase(file.absolutePath, null, OPEN_READWRITE).use { db ->
+            db.execSQL("create index if not exists $INDEX_MAC on $TABLE($COLUMN_MAC);")
+        }
+
+        return SQLiteDatabase.openDatabase(file.absolutePath, null, OPEN_READONLY)
+    }
 
     fun entries(): Long = DatabaseUtils.queryNumEntries(db, TABLE)
 
     fun find(bssid: String): Manufacturer {
         val mac = bssid.replace(":", "").uppercase()
-        DIGITS.map { mac.take(it) }.forEach { digits ->
-            db.find(digits)?.let { return it }
-        }
+        val candidates = DIGITS.map { mac.take(it) }
+        val found = db.find(candidates)
+        candidates.forEach { candidate -> found[candidate]?.let { return it } }
         return Manufacturer.Unknown
     }
 
@@ -146,22 +164,26 @@ class OuiManager private constructor(context: Context) {
         }
     }
 
-    private fun SQLiteDatabase.find(digits: String): Manufacturer? {
-        val cursor = rawQuery("select * from $TABLE where $COLUMN_MAC=?;", arrayOf(digits))
-        val manufacturer = cursor.takeIf { it.moveToFirst() }?.run {
-            val label = cursor.getColumnIndex(COLUMN_LABEL)
-                .takeIf { it >= 0 }
-                ?.let { getString(it) }
-            val description = cursor.getColumnIndex(COLUMN_DESC)
-                .takeIf { it >= 0 }
-                ?.let { getString(it) }
+    private fun SQLiteDatabase.find(digits: List<String>): Map<String, Manufacturer> {
+        val cursor = rawQuery(
+            "select * from $TABLE where $COLUMN_MAC in (${digits.joinToString { "?" }});",
+            digits.toTypedArray(),
+        )
+        val found = mutableMapOf<String, Manufacturer>()
+        val macColumn = cursor.getColumnIndex(COLUMN_MAC)
+        val labelColumn = cursor.getColumnIndex(COLUMN_LABEL)
+        val descColumn = cursor.getColumnIndex(COLUMN_DESC)
+        while (cursor.moveToNext()) {
+            val label = labelColumn.takeIf { it >= 0 }?.let { cursor.getString(it) }
+            val description = descColumn.takeIf { it >= 0 }?.let { cursor.getString(it) }
             if (label == null && description == null) {
-                return@run null
+                continue
             }
-            Manufacturer(digits, label = label ?: "", description = description ?: "")
+            val mac = cursor.getString(macColumn)
+            found[mac] = Manufacturer(mac, label = label ?: "", description = description ?: "")
         }
         cursor.close()
-        return manufacturer
+        return found
     }
 
     private fun Context.extractBuiltInFile() {
