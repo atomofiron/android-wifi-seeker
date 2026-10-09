@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.serialization)
 }
 
 android { // key alias raslav_2016
@@ -54,9 +55,10 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.material)
     implementation(libs.insets)
-    implementation("org.simpleframework:simple-xml:2.7.1") {
-        exclude("stax", "stax")
-        exclude("stax-api", "stax-api")
-        exclude("xpp3", "xpp3")
+    implementation(libs.serialization) {
+        exclude(
+            group = "io.github.pdvrieze.xmlutil",
+            module = "core-android"
+        )
     }
 }

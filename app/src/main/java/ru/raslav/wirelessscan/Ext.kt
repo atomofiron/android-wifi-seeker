@@ -19,6 +19,7 @@ import android.util.LayoutDirection
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
@@ -189,3 +190,7 @@ fun systemTime() = when {
     SDK_INT >= TIRAMISU -> SystemClock.currentNetworkTimeClock().millis()
     else -> System.currentTimeMillis()
 }
+
+var TextView.textColor: Int
+    get() = textColors.defaultColor
+    set(value) { setTextColor(value) }

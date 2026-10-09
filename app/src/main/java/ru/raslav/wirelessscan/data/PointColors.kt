@@ -1,0 +1,23 @@
+package ru.raslav.wirelessscan.data
+
+import android.content.Context
+import androidx.core.content.ContextCompat
+import ru.raslav.wirelessscan.R
+
+class PointColors(co: Context) {
+    val blackLite = ContextCompat.getColor(co, R.color.black_lite)
+    val redDarkLite = ContextCompat.getColor(co, R.color.red_dark_lite)
+    val gray = ContextCompat.getColor(co, R.color.gray)
+    val blueLight = ContextCompat.getColor(co, R.color.blue_light)
+    val green = ContextCompat.getColor(co, R.color.green)
+    val yellowMiddle = ContextCompat.getColor(co, R.color.yellow_middle)
+    val jinx = ContextCompat.getColor(co, R.color.jinxs_eyes)
+    val skyLight = ContextCompat.getColor(co, R.color.sky_light)
+    val redLight = ContextCompat.getColor(co, R.color.red_light)
+    val sky = ContextCompat.getColor(co, R.color.sky)
+    val skyWhite = ContextCompat.getColor(co, R.color.sky_white)
+    val greenHigh = ContextCompat.getColor(co, R.color.green_high)
+    val redHigh = ContextCompat.getColor(co, R.color.red_high)
+    val yellow = ContextCompat.getColor(co, R.color.yellow)
+    val greenLight = ContextCompat.getColor(co, R.color.green_light)
+}

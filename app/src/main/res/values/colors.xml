@@ -14,8 +14,7 @@
 
     <color name="transparent">#00000000</color>
     <color name="black_lite">#33000000</color>
-    <color name="red_dark_lite">#11550000</color>
-    <color name="red_middle">#ff880000</color>
+    <color name="red_dark_lite">#33550000</color>
     <color name="gray">#ffcccccc</color>
     <color name="normal">#ccffffff</color>
     <color name="blue_light">#ff8888ff</color>

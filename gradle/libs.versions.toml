@@ -9,6 +9,7 @@ activity = "1.13.0"
 preference = "1.2.1"
 recyclerview = "1.4.0"
 insets = "2.0.0"
+serialization = "1.0.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -20,6 +21,8 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 insets = { group = "io.github.atomofiron", name = "extended-insets", version.ref = "insets" }
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "serialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -106,12 +106,14 @@ class OuiManager private constructor(context: Context) {
 
     fun entries(): Long = DatabaseUtils.queryNumEntries(db, TABLE)
 
-    fun find(bssid: String): Manufacturer {
+    fun find(bssid: String): Manufacturer? {
         val mac = bssid.replace(":", "").uppercase()
         val candidates = DIGITS.map { mac.take(it) }
         val found = db.find(candidates)
-        candidates.forEach { candidate -> found[candidate]?.let { return it } }
-        return Manufacturer.Unknown
+        candidates.forEach {
+            candidate -> found[candidate]?.let { return it }
+        }
+        return null
     }
 
     private suspend fun update(length: Long): OuiMeta? = withContext(IO) {

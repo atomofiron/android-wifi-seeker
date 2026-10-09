@@ -46,7 +46,6 @@ import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.location.LocationManagerCompat
-import androidx.core.os.BundleCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.children
 import androidx.core.view.isNotEmpty
@@ -114,7 +113,6 @@ import android.os.Build.VERSION_CODES.TIRAMISU as T
 class MainFragment : Fragment() {
     companion object {
         private const val EXTRA_SERVICE_WAS_STARTED = "EXTRA_SERVICE_WAS_STARTED"
-        private const val EXTRA_POINTS = "EXTRA_POINTS"
     }
     private val sp: SharedPreferences by unsafeLazy { requireContext().sp() }
     private val wifiManager by unsafeLazy { requireContext().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
@@ -147,8 +145,6 @@ class MainFragment : Fragment() {
             ?.toIntOrNull()
             ?.let { resources.getIntArray(R.array.period_arr_int)[it] }
             ?: DEFAULT_PERIOD
-
-        Point.initColors(requireContext())
     }
 
     private fun onServiceConnected() {
@@ -173,7 +169,6 @@ class MainFragment : Fragment() {
         super.onSaveInstanceState(outState)
 
         outState.putBoolean(EXTRA_SERVICE_WAS_STARTED, binding.bottomToolbar.buttonResume.isActivated)
-        outState.putParcelableArrayList(EXTRA_POINTS, ArrayList(adapter.allPoints))
     }
 
     override fun onStart() {
@@ -224,9 +219,6 @@ class MainFragment : Fragment() {
         binding.permissionDisclaimer.isVisible = !locationGranted()
         binding.btnGrant.setOnClickListener { requireContext().openPermissionSettings() }
 
-        if (savedInstanceState != null) {
-            adapter.updateList(BundleCompat.getParcelableArrayList(savedInstanceState, EXTRA_POINTS, Point::class.java))
-        }
         val layoutOrientation = binding.root.layoutOrientation()
         binding.bottomToolbar.root.insetsSource {
             val orientation = layoutOrientation.orientation()

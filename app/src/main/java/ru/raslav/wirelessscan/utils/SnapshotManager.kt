@@ -2,20 +2,31 @@ package ru.raslav.wirelessscan.utils
 
 import android.content.Context
 import android.widget.Toast
-import org.simpleframework.xml.ElementList
-import org.simpleframework.xml.Root
-import org.simpleframework.xml.core.Persister
+import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.QName
+import nl.adaptivity.xmlutil.newGenericWriter
+import nl.adaptivity.xmlutil.serialization.OutputKind
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.decodeFromStream
+import nl.adaptivity.xmlutil.xmlStreaming
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.utils.OuiManager.Companion.oui
 import java.io.File
-import java.io.StringWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 
 class SnapshotManager(private val co: Context) {
+
+    private val xml = XML.v1 {
+        policy {
+            defaultPrimitiveOutputKind = OutputKind.Element
+            ignoreUnknownChildren()
+        }
+    }
 
     /** @return snapshot file name*/
     fun put(points: List<Point>): String? {
@@ -28,12 +39,11 @@ class SnapshotManager(private val co: Context) {
         }
 
         try {
-            val writer = StringWriter()
-            Persister().write(Snapshot(points), writer)
-            val stream = file.outputStream()
-            stream.write(writer.toString().toByteArray(Charsets.UTF_8))
-            stream.flush()
-            stream.close()
+            file.outputStream().bufferedWriter(Charsets.UTF_8).use { output ->
+                xmlStreaming.newGenericWriter(output as Appendable).use { writer ->
+                    xml.encodeToWriter(writer, Snapshot(points))
+                }
+            }
         } catch (e: Exception) {
             elog(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
@@ -47,27 +57,28 @@ class SnapshotManager(private val co: Context) {
     suspend fun get(name: String): List<Point>? {
         val file = File(co.filesDir, name)
         return try {
-            val points = Persister()
-                .read(Snapshot::class.java, file.readText(Charsets.UTF_8), false)
-                .points
-                ?: return null
-            points.forEach { point ->
-                val manuf = oui { find(point.bssid) }
-                point.bssidHex = manuf.digits
-                point.manufacturer = manuf.label
-                point.manufacturerDesc = manuf.description
+            val snapshot = file.inputStream().use {
+                xml.decodeFromStream<Snapshot>(it, QName("snapshot"))
             }
-            points
+            snapshot.points.map { point ->
+                val manuf = oui { find(point.bssid) }
+                    ?: return@map point
+                point.copy(
+                    bssidHex = manuf.digits,
+                    manufacturer = manuf.label,
+                    manufacturerDesc = manuf.description,
+                )
+            }
         } catch (e: Exception) {
             elog(e.toString())
             Toast.makeText(co, e.message, Toast.LENGTH_LONG).show()
-            null
+            return null
         }
     }
 
-    @Root(name = "snapshot")
-    private class Snapshot(
-        @field:ElementList(inline = true, name = "points")
-        var points: List<Point>? = null,
+    @Serializable
+    @XmlSerialName("snapshot", "", "")
+    data class Snapshot(
+        val points: List<Point>,
     )
 }

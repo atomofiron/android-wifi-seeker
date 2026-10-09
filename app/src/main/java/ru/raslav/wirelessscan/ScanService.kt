@@ -29,6 +29,7 @@ import ru.raslav.wirelessscan.Const.DEFAULT_PERIOD
 import ru.raslav.wirelessscan.Const.PREF_SCAN_DURATION
 import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.data.Point.Companion.toPoint
 import ru.raslav.wirelessscan.utils.MutexLocker
 import ru.raslav.wirelessscan.utils.OuiManager.Companion.oui
 import java.lang.ref.WeakReference
@@ -180,28 +181,40 @@ class ScanService : IntentService("ScanService") {
 
     @SuppressLint("MissingPermission") // ask permission before, on button click
     private suspend fun updatePoints() {
-        val currentPoints = wifiManager.scanResults.map { Point(it) }
+        val results = wifiManager.scanResults
+            .map { it.toPoint() }
+            .distinctBy { it.keyHash() }
 
         points {
-            currentPoints.forEach { new ->
-                find { it.bssid == new.bssid }?.let {
-                    new.bssidHex = it.bssidHex
-                    new.manufacturer = it.manufacturer
-                    new.manufacturerDesc = it.manufacturerDesc
-                } ?: oui {
-                    find(new.bssid).let {
-                        new.bssidHex = it.digits
-                        new.manufacturer = it.label
-                        new.manufacturerDesc = it.description
+            for (r in results) {
+               val index = indexOfFirst { r.theSame(it) }
+                if (index < 0) {
+                    val info = oui { find(r.bssid) } ?: run {
+                        add(0, r)
+                        continue
                     }
+                    val new = r.copy(
+                        bssidHex = info.digits,
+                        manufacturer = info.label,
+                        manufacturerDesc = info.description,
+                    )
+                    add(0, new)
+                    continue
                 }
+                val old = get(index)
+                val new = r.copy(
+                    bssidHex = old.bssidHex,
+                    manufacturer = old.manufacturer,
+                    manufacturerDesc = old.manufacturerDesc,
+                )
+                removeAt(index)
+                add(0, new)
             }
-
-            removeAll(currentPoints)
-            forEach { it.level = Point.MIN_LEVEL }
-
-            addAll(currentPoints)
-            sortWith { o1, o2 -> o2.level - o1.level }
+            for (i in results.size..<size) {
+                val copy = get(i).copy(level = Point.MIN_LEVEL)
+                set(i, copy)
+            }
+            sortBy { -it.level }
         }
     }
 

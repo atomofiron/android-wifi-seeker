@@ -4,35 +4,19 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.res.Resources
 import android.provider.Settings
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const
-import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
-import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.clearOutOfRange
-import ru.raslav.wirelessscan.copy
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
-import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
+import ru.raslav.wirelessscan.data.PointColors
 import ru.raslav.wirelessscan.databinding.LayoutItemBinding
-import ru.raslav.wirelessscan.elog
-import ru.raslav.wirelessscan.isRtl
-import ru.raslav.wirelessscan.isVisible
-import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.utils.AlternatingDecoration.Colors
-import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -41,9 +25,7 @@ private enum class AnimType {
     None, ScanStart, ScanEnd
 }
 
-class PointLHolder(val binding: LayoutItemBinding) : RecyclerView.ViewHolder(binding.root)
-
-class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
+class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     ValueAnimator.AnimatorUpdateListener {
     companion object {
         const val FILTER_DEFAULT = 0
@@ -51,18 +33,15 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         const val FILTER_EXCLUDE = 2
     }
 
+    private val colors = PointColors(context)
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
     val allPoints = mutableListOf<Point>()
     private val points = mutableListOf<Point>()
     private var focused: Point? = null
-    private val closeDescription: (View) -> Unit = { resetFocus() }
     private var filtering = false
-    private val focusedDrawable = SideDrawable(
-        ContextCompat.getColor(context, R.color.gray),
-        context.resources.getDimension(R.dimen.one),
-    )
-    private val holders = mutableListOf<PointLHolder>()
+    private val closeDescription: (View) -> Unit = { resetFocus() }
+    private val holders = mutableListOf<PointHolder>()
     private var current: CurrentConnection? = null
 
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
@@ -72,9 +51,9 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
 
     fun isNotEmpty() = allPoints.isNotEmpty()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointLHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointHolder {
         val binding = LayoutItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val holder = PointLHolder(binding)
+        val holder = PointHolder(binding, colors, clipboard, closeDescription)
 
         binding.pwr.text = Const.Dot
         binding.pwr.gravity = Gravity.END
@@ -87,142 +66,14 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         return holder
     }
 
-    override fun onBindViewHolder(holder: PointLHolder, position: Int) {
-        holder.binding.fillView(points[position])
-    }
+    override fun onBindViewHolder(holder: PointHolder, position: Int) = holder.bind(points[position], focused, current)
 
     override fun getItemCount(): Int = points.size
 
     /** Row background for RowBackgroundDecoration: alternating shades plus the out-of-range state. */
     fun backgroundAt(position: Int): Colors = when {
-        points[position].outOfRange -> Colors(Point.black_lite, Point.red_dark_lite)
-        else -> Colors(Point.black_lite)
-    }
-
-    private fun LayoutItemBinding.fillView(point: Point) {
-        drawItemRoot(itemColumns, point)
-        val connected = point.bssid == current?.bssid
-        updateDescription(
-            point.takeIf { it.bssid == focused?.bssid },
-            current?.takeIf { connected },
-        )
-        root.foreground = if (point.bssid == focused?.bssid) focusedDrawable else null
-        focusedDrawable.setRtl(root.isRtl())
-
-        // point.level == -1 experiment
-        pwr.setTextColor(if (point.level == -1) -65281 else point.pwColor)
-
-        ch.text = point.ch.toString()
-        ch.setTextColor(point.chColor)
-
-        enc.text = point.enc
-        enc.setTextColor(point.encColor)
-
-        cip.text = point.cip
-        cip.setTextColor(point.cipColor)
-
-        wps.text = point.wps
-        wps.setTextColor(point.wpsColor)
-
-        essid.text = when {
-            point.essid.isEmpty() -> point.bssid
-            point.essid.isVisible() -> point.essid
-            else -> point.essidHex
-        }
-        when {
-            connected -> Point.green_light
-            point.essid.isEmpty() -> Point.yellow
-            point.essid.isVisible() -> Point.gray
-            else -> Point.yellow
-        }.let { essid.setTextColor(it) }
-        bssid.text = point.bssid
-        bssid.setTextColor(if (connected) Point.green_light else Point.gray)
-        bssid.isVisible = root.resources.configuration.isWide()
-    }
-
-    private fun drawItemRoot(layout: LinearLayout, point: Point) {
-        val focused = focused
-        val associating =  when {
-            focused == null -> false
-            focused.bssidHex.isNotEmpty() && point.bssidHex.isNotEmpty() -> focused.bssidHex == point.bssidHex
-            focused.bssid.isNotEmpty() && point.bssid.isNotEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, min(8, point.bssid.length)))
-            else -> false
-        }
-        when {
-            !associating -> layout.background = null
-            point.level <= Point.MIN_LEVEL -> layout.setBackgroundResource(R.drawable.grille_red)
-            else -> layout.setBackgroundResource(R.drawable.grille)
-        }
-
-        if (point.level == -1) {
-            elog("WOW: point.level == -1")
-        }
-    }
-
-    private fun LayoutItemBinding.updateDescription(point: Point?, current: CurrentConnection?) {
-        val description = root.findViewById<View>(R.id.layout_description)
-            ?.let { LayoutDescriptionBinding.bind(it) }
-        when {
-            point != null && description != null -> description.bind(point, current)
-            point == null && description != null -> root.removeView(description.root)
-            point != null && description == null -> LayoutInflater.from(root.context)
-                .let { LayoutDescriptionBinding.inflate(it, root, true) }
-                .init()
-                .bind(point, current)
-        }
-    }
-
-    private fun LayoutDescriptionBinding.init(): LayoutDescriptionBinding {
-        val copy = ContextCompat.getDrawable(root.context, R.drawable.ic_copy)!!
-        val size = tvEssid.textSize.toInt()
-        copy.setBounds(0, 0, size, size)
-        copy.alpha = ALPHA_INT_HALF
-        copy.setTintList(tvEssid.textColors)
-        arrayOf(tvEssid, tvEssidHex, tvBssid, tvIp, tvGateway).forEach { tv ->
-            tv.setCompoundDrawablesRelative(null, null, copy, null)
-            tv.compoundDrawablePadding = size / 2
-            tv.setOnClickListener { tv.onCopiableClick() }
-        }
-        return this
-    }
-
-    private fun TextView.onCopiableClick() {
-        val parts = text.toString()
-            .split(": ")
-        val data = parts.getOrNull(1) ?: return
-        val label = parts.first()
-        clipboard.copy(context, label, data)
-    }
-
-    private fun LayoutDescriptionBinding.bind(point: Point, current: CurrentConnection?) {
-        val resources = root.resources
-        tvEssid.text = when {
-            point.essid.isEmpty() -> resources.yellow("")
-            else -> resources.getString(R.string.essid_format, point.essid)
-        }
-        tvEssidHex.text = point.essidHex.takeIf { it.isNotEmpty() }
-            ?.let { resources.getString(R.string.essid_hex_format, it) }
-        tvEssidHex.isVisible = point.essidHex.isNotEmpty()
-        tvBssid.text = resources.getString(R.string.bssid_format, point.bssid)
-        tvIp.text = current?.address?.takeIf { it.isNotEmpty() }
-            ?.let { resources.getString(R.string.ip_format, it) }
-        tvIp.isVisible = !current?.address.isNullOrEmpty()
-        tvGateway.text = current?.gateway?.takeIf { it.isNotEmpty() }
-            ?.let { resources.getString(R.string.gateway_format, it) }
-        tvGateway.isVisible = !current?.gateway.isNullOrEmpty()
-        tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
-        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.ch, point.level)
-        tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
-        tvManufDesc.text = point.manufacturerDesc
-        tvManufDesc.isVisible = point.manufacturerDesc.isNotBlank()
-        cross.setOnClickListener(closeDescription)
-    }
-
-    private fun Resources.yellow(text: String): CharSequence {
-        val text = text.takeIf { it.isNotEmpty() } ?: getString(R.string.essid_empty)
-        return SpannableStringBuilder(getString(R.string.essid_format, text)).apply {
-            setSpan(ForegroundColorSpan(Point.yellow), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
+        points[position].outOfRange -> Colors(colors.blackLite, colors.redDarkLite)
+        else -> Colors(colors.blackLite)
     }
 
     private fun onClick(position: Int) {
@@ -320,12 +171,12 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointLHolder>(),
         return getCounters()
     }
 
-    override fun onViewAttachedToWindow(holder: PointLHolder) {
+    override fun onViewAttachedToWindow(holder: PointHolder) {
         holders.add(holder)
         holder.binding.pwr.alpha = Const.ALPHA_FULL
     }
 
-    override fun onViewDetachedFromWindow(holder: PointLHolder) {
+    override fun onViewDetachedFromWindow(holder: PointHolder) {
         holders.remove(holder)
     }
 
