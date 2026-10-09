@@ -24,6 +24,8 @@ object Const {
     const val ALPHA_ZERO = 0f
     const val ALPHA_FULL = 1f
 
+    const val MIME_TYPE_XML = "text/xml"
+
     const val ALPHA_INT_HALF = 128
 
     const val Dot = "\u25CF " // ●
