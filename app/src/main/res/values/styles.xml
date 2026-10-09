@@ -25,6 +25,14 @@
         <item name="android:background">@drawable/toolbar_button</item>
         <item name="android:padding">0dp</item>
     </style>
+    <style name="ToolbarButtonShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/toolbar_button_corner</item>
+    </style>
+    <style name="ToolbarButtonShapePressed" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/toolbar_button_corner_pressed</item>
+    </style>
     <style name="Description">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

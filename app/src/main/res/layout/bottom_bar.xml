@@ -79,15 +79,26 @@
             android:background="@drawable/toolbar_button"
             app:tint="@color/clear_btn"
             />
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_resume"
             android:layout_width="@dimen/toolbar_button_size"
             android:layout_height="@dimen/toolbar_button_size"
             android:layout_margin="@dimen/toolbar_button_margin"
             android:layout_weight="1"
-            android:src="@drawable/ic_state"
-            android:background="@drawable/toolbar_action_button"
-            app:tint="?colorPrimaryInverse"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="@dimen/padding_semi"
+            android:clipToOutline="true"
+            app:backgroundTint="?colorPrimary"
+            app:icon="@drawable/ic_state"
+            app:iconSize="@dimen/icon_size"
+            app:iconTint="?colorPrimaryInverse"
+            app:rippleColor="?colorControlNormal"
+            app:shapeAppearance="@xml/toolbar_button_shape"
             />
         <ImageButton
             android:id="@+id/button_save"
