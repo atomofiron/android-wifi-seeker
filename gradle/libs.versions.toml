@@ -1,7 +1,7 @@
 [versions]
 agp = "9.3.3"
 kotlin = "2.4.20"
-coreKtx = "1.19.0"
+coreKtx = "1.19.1"
 appcompat = "1.8.0"
 fragment = "1.9.1"
 material = "1.14.0"
