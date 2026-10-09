@@ -92,6 +92,7 @@ import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
+import ru.raslav.wirelessscan.ui.showError
 import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AlternatingDecoration
@@ -104,6 +105,7 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
 import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
+import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
@@ -125,6 +127,7 @@ class MainFragment : Fragment() {
     private val mainHandler by unsafeLazy { Handler(Looper.getMainLooper()) }
     private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission(), LocationPermissionCallback())
     private val notificationsPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    private val snapshots by unsafeLazy { SnapshotManager(requireContext()) }
     private lateinit var scanDrawable: ScanDrawable
     private var scanPeriod = 0
     private var wifiInfo: WifiInfo? = null
@@ -347,7 +350,13 @@ class MainFragment : Fragment() {
         bottomToolbar.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (adapter.allPoints.isNotEmpty()) {
                 binding.flash.startAnimation(flashAnim)
-                snapshotFileName = SnapshotManager(requireContext()).put(adapter.allPoints)
+                when (val rslt = snapshots.put(adapter.allPoints)) {
+                    is Rslt.Err -> requireContext().showError(rslt.message)
+                    is Rslt.Ok -> {
+                        Toast.makeText(requireContext(), R.string.snapshot_saved, Toast.LENGTH_LONG).show()
+                        snapshotFileName = rslt.value
+                    }
+                }
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
         bottomToolbar.buttonResume.setOnClickListener { view ->

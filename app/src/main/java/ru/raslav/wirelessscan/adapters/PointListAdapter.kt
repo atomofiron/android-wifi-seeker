@@ -2,7 +2,6 @@ package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.ClipboardManager
 import android.content.Context
 import android.provider.Settings
 import android.view.Gravity
@@ -12,6 +11,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.clearOutOfRange
+import ru.raslav.wirelessscan.clipboardManager
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
@@ -47,7 +47,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     private val animScale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     private var animType = AnimType.None
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
-    private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    private val clipboard = context.clipboardManager()
 
     fun isNotEmpty() = allPoints.isNotEmpty()
 

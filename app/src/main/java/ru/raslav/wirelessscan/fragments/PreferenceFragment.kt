@@ -56,6 +56,7 @@ import ru.raslav.wirelessscan.systemTime
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
+import ru.raslav.wirelessscan.ui.showError
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.LinearLayoutParams
 import ru.raslav.wirelessscan.utils.OuiManager
@@ -270,10 +271,3 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
 private fun Preference.setOuiEntries(resources: Resources, entries: Long) {
     summary = "${resources.getString(R.string.oui_lookup_tool)} (${resources.getString(R.string.x_entries, entries)})"
 }
-
-private fun Context.showError(message: String) = MaterialAlertDialogBuilder(this)
-    .setTitle(R.string.error)
-    .setMessage(message)
-    .setCancelable(false)
-    .setPositiveButton(R.string.ok, null)
-    .show()

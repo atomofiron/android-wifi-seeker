@@ -194,3 +194,5 @@ fun systemTime() = when {
 var TextView.textColor: Int
     get() = textColors.defaultColor
     set(value) { setTextColor(value) }
+
+fun Context.clipboardManager() = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

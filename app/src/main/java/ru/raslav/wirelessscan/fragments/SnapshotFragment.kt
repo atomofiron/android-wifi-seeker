@@ -16,12 +16,15 @@ import kotlinx.coroutines.withContext
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.PointListAdapter
+import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
+import ru.raslav.wirelessscan.ui.showError
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AlternatingDecoration
+import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
 
 class SnapshotFragment : Fragment() {
@@ -47,8 +50,16 @@ class SnapshotFragment : Fragment() {
 
         lifecycleScope.launch(IO) {
             val manager = SnapshotManager(requireContext())
-            val list = requireArguments().getString(EXTRA_NAME)
-                ?.let { manager.get(it) }
+            val list = requireArguments().getString(EXTRA_NAME)?.let {
+                when (val rslt = manager.get(it)) {
+                    is Rslt.Ok -> rslt.value
+                    is Rslt.Err -> emptyList<Point>().also {
+                        withContext(Main) {
+                            context?.showError(rslt.message)
+                        }
+                    }
+                }
+            }
             withContext(Main) {
                 adapter.updateList(list)
                 loaded = true
