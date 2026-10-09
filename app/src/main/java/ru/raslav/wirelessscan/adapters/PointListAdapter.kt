@@ -15,7 +15,7 @@ import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
-import ru.raslav.wirelessscan.databinding.LayoutItemBinding
+import ru.raslav.wirelessscan.databinding.ItemPointBinding
 import ru.raslav.wirelessscan.utils.AlternatingDecoration.Colors
 import kotlin.math.max
 import kotlin.math.min
@@ -52,7 +52,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     fun isNotEmpty() = allPoints.isNotEmpty()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointHolder {
-        val binding = LayoutItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemPointBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val holder = PointHolder(binding, colors, clipboard, closeDescription)
 
         binding.pwr.text = Const.Dot

@@ -22,8 +22,8 @@ import ru.raslav.wirelessscan.copy
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
-import ru.raslav.wirelessscan.databinding.LayoutDescriptionBinding
-import ru.raslav.wirelessscan.databinding.LayoutItemBinding
+import ru.raslav.wirelessscan.databinding.PointDescriptionBinding
+import ru.raslav.wirelessscan.databinding.ItemPointBinding
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
@@ -37,7 +37,7 @@ import kotlin.text.isEmpty
 private const val MAX_INDICATOR_LEVEL = 512
 
 class PointHolder(
-    val binding: LayoutItemBinding,
+    val binding: ItemPointBinding,
     private val colors: PointColors,
     private val clip: ClipboardManager,
     private val closeDescription: (View) -> Unit,
@@ -50,7 +50,7 @@ class PointHolder(
 
     fun bind(point: Point, focused: Point?, current: CurrentConnection?) = binding.bind(point, focused, current)
 
-    fun LayoutItemBinding.bind(
+    fun ItemPointBinding.bind(
         point: Point,
         focused: Point?,
         current: CurrentConnection?,
@@ -149,20 +149,20 @@ class PointHolder(
         }
     }
 
-    private fun LayoutItemBinding.updateDescription(point: Point?, current: CurrentConnection?) {
+    private fun ItemPointBinding.updateDescription(point: Point?, current: CurrentConnection?) {
         val description = root.findViewById<View>(R.id.layout_description)
-            ?.let { LayoutDescriptionBinding.bind(it) }
+            ?.let { PointDescriptionBinding.bind(it) }
         when {
             point != null && description != null -> description.bind(point, current, colors)
             point == null && description != null -> root.removeView(description.root)
             point != null && description == null -> LayoutInflater.from(root.context)
-                .let { LayoutDescriptionBinding.inflate(it, root, true) }
+                .let { PointDescriptionBinding.inflate(it, root, true) }
                 .init()
                 .bind(point, current, colors)
         }
     }
 
-    private fun LayoutDescriptionBinding.init(): LayoutDescriptionBinding {
+    private fun PointDescriptionBinding.init(): PointDescriptionBinding {
         val copy = ContextCompat.getDrawable(root.context, R.drawable.ic_copy)!!
         val size = tvEssid.textSize.toInt()
         copy.setBounds(0, 0, size, size)
@@ -184,7 +184,7 @@ class PointHolder(
         clip.copy(context, label, data)
     }
 
-    private fun LayoutDescriptionBinding.bind(
+    private fun PointDescriptionBinding.bind(
         point: Point,
         current: CurrentConnection?,
         colors: PointColors,

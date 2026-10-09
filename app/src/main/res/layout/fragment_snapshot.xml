@@ -13,7 +13,7 @@
         />
     <include
         android:id="@+id/list_title"
-        layout="@layout/layout_item"
+        layout="@layout/item_point"
         />
     <FrameLayout
         android:layout_width="match_parent"

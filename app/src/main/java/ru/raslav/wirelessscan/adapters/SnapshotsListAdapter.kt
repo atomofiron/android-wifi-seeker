@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.Const
-import ru.raslav.wirelessscan.databinding.LayoutItemSnapshotBinding
+import ru.raslav.wirelessscan.databinding.ItemSnapshotBinding
 import java.io.File
 
-class SnapshotHolder(val binding: LayoutItemSnapshotBinding) : RecyclerView.ViewHolder(binding.root)
+class SnapshotHolder(val binding: ItemSnapshotBinding) : RecyclerView.ViewHolder(binding.root)
 
 class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<SnapshotHolder>() {
 
@@ -27,7 +27,7 @@ class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<Snaps
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnapshotHolder {
-        val binding = LayoutItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false)
+        val binding = ItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false)
         val holder = SnapshotHolder(binding)
 
         binding.root.setOnClickListener {

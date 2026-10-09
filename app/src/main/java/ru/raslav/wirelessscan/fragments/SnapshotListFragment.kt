@@ -12,17 +12,17 @@ import ru.raslav.wirelessscan.BuildConfig
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.SnapshotsListAdapter
 import ru.raslav.wirelessscan.asMain
-import ru.raslav.wirelessscan.databinding.LayoutListBinding
+import ru.raslav.wirelessscan.databinding.ListBinding
 import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 
 class SnapshotListFragment : Fragment() {
 
-    private lateinit var binding: LayoutListBinding
+    private lateinit var binding: ListBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = LayoutListBinding.inflate(inflater, container, false)
+        binding = ListBinding.inflate(inflater, container, false)
         binding.appBar.init(this, R.string.title_snapshots)
 
         val adapter = SnapshotsListAdapter(requireContext())

@@ -91,7 +91,6 @@ class ChipPreference : ListPreference {
                 return@addOnLayoutChangeListener
             }
             vertical = new
-            //body.updatePaddingRelative(top = if (vertical) defaultPadding else defaultPadding / 2)
             iconFrame.updateLayoutParams<LinearLayoutParams> {
                 gravity = if (vertical) Gravity.TOP else Gravity.CENTER_VERTICAL
             }

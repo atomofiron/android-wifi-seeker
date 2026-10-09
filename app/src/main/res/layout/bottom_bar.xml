@@ -31,7 +31,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttons"
         >
         <include
-            layout="@layout/layout_filters_pane"
+            layout="@layout/filters"
             android:id="@+id/filters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

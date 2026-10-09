@@ -77,7 +77,7 @@ import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
-import ru.raslav.wirelessscan.databinding.LayoutFiltersPaneBinding
+import ru.raslav.wirelessscan.databinding.FiltersBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.granted
@@ -315,7 +315,7 @@ class MainFragment : Fragment() {
         )
     }
 
-    private fun LayoutFiltersPaneBinding.init() {
+    private fun FiltersBinding.init() {
         val listener = View.OnClickListener { view ->
             var state = PointListAdapter.FILTER_DEFAULT
             when {
