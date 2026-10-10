@@ -193,10 +193,12 @@ class MainFragment : Fragment() {
         binding.appBar.toolbar.addMenuProvider(menuProvider)
         binding.list.addOnScrollListener(ScrollListener(binding.periods))
         binding.list.setupSpringOverscroll()
+        val periods = binding.initPeriods()
 
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counter.insetsPadding(insets, horizontal = true)
         binding.listTitle.root.insetsPadding(insets, horizontal = true)
+        periods.insetsPadding(insets, horizontal = true)
         val toolbarDelegate = binding.bottomToolbar.root.insetsDelegate()
         binding.list.insetsPadding(insets, start = true, end = true, bottom = true)
         binding.root.layoutChanges {
@@ -206,7 +208,6 @@ class MainFragment : Fragment() {
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.updateSaveButtonState()
 
-        binding.initPeriods()
         binding.bottomToolbar.initFilters()
         binding.initButtons(binding.counter)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
@@ -286,7 +287,7 @@ class MainFragment : Fragment() {
         binding.listTitle.bssid.isVisible = newConfig.isWide()
     }
 
-    private fun FragmentMainBinding.initPeriods() {
+    private fun FragmentMainBinding.initPeriods(): ViewGroup {
         val selected = getPeriodIndex()
         val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
         val seconds = resources.getIntArray(R.array.period_arr_int)
@@ -314,6 +315,7 @@ class MainFragment : Fragment() {
                 }
             },
         )
+        return layout
     }
 
     private fun onFilterClick(view: View, label: String) {
@@ -589,6 +591,8 @@ class MainFragment : Fragment() {
             endToStart = if (orientation.start) NO_ID else R.id.buttons
         }
         scanDrawable.showOrientation(orientation)
+        @SuppressLint("NotifyDataSetChanged")
+        adapter.notifyDataSetChanged() // wide item layout
     }
 
     private fun WifiInfo.withLocalIp(): CurrentConnection? {
