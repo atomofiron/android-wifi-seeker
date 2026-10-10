@@ -1,13 +1,13 @@
 package ru.raslav.wirelessscan.adapters
 
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.clearOutOfRange
@@ -25,7 +25,7 @@ private enum class AnimType {
     None, ScanStart, ScanEnd
 }
 
-class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
+class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(PointItemCallback),
     ValueAnimator.AnimatorUpdateListener {
     companion object {
         const val FILTER_DEFAULT = 0
@@ -36,8 +36,7 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     private val colors = PointColors(context)
     private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
     private val filter: IntArray = IntArray(filterValues.size)
-    val allPoints = mutableListOf<Point>()
-    private val points = mutableListOf<Point>()
+    val points = mutableListOf<Point>()
     private var focused: Point? = null
     private var filtering = false
     private val closeDescription: (View) -> Unit = { resetFocus() }
@@ -49,7 +48,13 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
     private val clipboard = context.clipboardManager()
 
-    fun isNotEmpty() = allPoints.isNotEmpty()
+    init {
+        setHasStableIds(true)
+    }
+
+    fun isNotEmpty() = points.isNotEmpty()
+
+    override fun getItemId(position: Int): Long = currentList[position].keyHash()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointHolder {
         val binding = ItemPointBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -66,18 +71,16 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
         return holder
     }
 
-    override fun onBindViewHolder(holder: PointHolder, position: Int) = holder.bind(points[position], focused, current)
-
-    override fun getItemCount(): Int = points.size
+    override fun onBindViewHolder(holder: PointHolder, position: Int) = holder.bind(currentList[position], focused, current)
 
     /** Row background for RowBackgroundDecoration: alternating shades plus the out-of-range state. */
     fun backgroundAt(position: Int): Colors = when {
-        points[position].outOfRange -> Colors(colors.blackLite, colors.redDarkLite)
+        currentList[position].outOfRange -> Colors(colors.blackLite, colors.redDarkLite)
         else -> Colors(colors.blackLite)
     }
 
     private fun onClick(position: Int) {
-        val point = points[position]
+        val point = currentList[position]
         when (point.bssid) {
             focused?.bssid -> resetFocus()
             else -> setFocused(point)
@@ -85,90 +88,87 @@ class PointListAdapter(context: Context) : RecyclerView.Adapter<PointHolder>(),
     }
 
     private fun setFocused(point: Point) {
+        notifyChanged(keyHash = focused?.keyHash())
         focused = point
-        notifyChanged()
+        notifyChanged(keyHash = point.keyHash())
     }
 
     fun resetFocus() {
+        notifyChanged(keyHash = focused?.keyHash())
         focused = null
-        notifyChanged()
     }
 
     /** @return counters like '15 / 22' or '5 / 15 / 22' */
-    private fun getCounters(): String {
-        var count = allPoints.size
-        allPoints.forEach { if (it.level == Point.MIN_LEVEL) count-- }
-        return "${if (filtering) "${points.size} / " else ""}$count / ${allPoints.size}"
+    private fun getCounters(filtered: Int): String {
+        val count = points.count { it.level > Point.MIN_LEVEL }
+        return "${if (filtering) "$filtered / " else ""}$count / ${points.size}"
     }
 
     fun updateList(list: List<Point>?) : String {
-        allPoints.clear()
         points.clear()
-
-        if (list != null)
-            allPoints.addAll(list)
-
-        applyFilter()
-        notifyChanged()
-        return getCounters()
+        if (list != null) {
+            points.addAll(list)
+        }
+        return getCounters(applyFilter())
     }
 
     fun filter(enable: Boolean) : String {
         filtering = enable
-        applyFilter()
-        return getCounters()
+        return getCounters(applyFilter())
     }
 
     fun updateFilter(which: Int, state: Int) : String {
         filter[which] = state
-        applyFilter()
-        return getCounters()
+        return getCounters(applyFilter())
     }
 
     fun setCurrent(current: CurrentConnection?) {
+        notifyChanged(bssid = this.current?.bssid)
         this.current = current
-        notifyChanged()
+        notifyChanged(bssid = current?.bssid)
     }
 
-    @SuppressLint("NotifyDataSetChanged") // todo make Point's fields immutable
-    fun notifyChanged() = notifyDataSetChanged()
+    private fun notifyChanged(
+        bssid: String? = null,
+        keyHash: Long? = null,
+    ) {
+        currentList.forEachIndexed { index, point ->
+            when {
+                bssid != null && point.bssid == bssid -> Unit
+                keyHash != null && point.keyHash() == keyHash -> Unit
+                else -> return@forEachIndexed
+            }
+            notifyItemChanged(index)
+        }
+    }
 
-    private fun applyFilter() {
-        val prevPoints = points.toMutableList()
-        points.clear()
-        points.addAll(allPoints)
-
+    private fun applyFilter(): Int {
+        val new = points.toMutableList()
         if (filtering) {
             var n = 0
-            loop@ while (n < points.size) {
+            loop@ while (n < new.size) {
                 for (i in filter.indices)
-                    if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != points[n].essid.isEmpty() ||
-                            filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != points[n].capabilities.contains(filterValues[i])) {
-                        points.removeAt(n)
+                    if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != new[n].essid.isEmpty() ||
+                            filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != new[n].capabilities.contains(filterValues[i])) {
+                        new.removeAt(n)
                         continue@loop
                     }
                 n++
             }
         }
-
-        if (prevPoints != points)
-            notifyChanged()
+        submitList(new)
+        return new.size
     }
 
     fun clear(): String {
-        allPoints.clear()
         points.clear()
-
-        notifyChanged()
-        return getCounters()
+        submitList(emptyList())
+        return getCounters(0)
     }
 
     fun clearOutOfRange(): String {
-        allPoints.clearOutOfRange()
         points.clearOutOfRange()
-
-        notifyChanged()
-        return getCounters()
+        return getCounters(applyFilter())
     }
 
     override fun onViewAttachedToWindow(holder: PointHolder) {

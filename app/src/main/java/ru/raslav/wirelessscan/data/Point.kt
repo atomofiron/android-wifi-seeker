@@ -55,7 +55,8 @@ data class Point(
 
     fun withCip(): Boolean = cip.isNotEmpty()
 
-    fun theSame(other: Point): Boolean = when {
+    fun theSame(other: Point?): Boolean = when {
+        other == null -> false
         other.bssid != bssid -> false
         other.essidHex.isEmpty() && essidHex.isEmpty() -> other.essid == essid
         else -> other.essidHex == essidHex

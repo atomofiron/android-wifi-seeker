@@ -70,13 +70,14 @@ fun Context.openPermissionSettings() {
 
 fun View.isRtl() = layoutDirection == LayoutDirection.RTL
 
-fun MutableList<Point>.clearOutOfRange() {
+fun MutableList<Point>.clearOutOfRange(): MutableList<Point> {
     val it = listIterator()
     while (it.hasNext()) {
         if (it.next().outOfRange) {
             it.remove()
         }
     }
+    return this
 }
 
 fun Int.half() = this / 2

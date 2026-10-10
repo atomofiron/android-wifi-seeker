@@ -348,9 +348,9 @@ class MainFragment : Fragment() {
         }
         var snapshotFileName: String? = null
         bottomToolbar.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
-            if (adapter.allPoints.isNotEmpty()) {
+            if (adapter.isNotEmpty()) {
                 binding.flash.startAnimation(flashAnim)
-                when (val rslt = snapshots.put(adapter.allPoints)) {
+                when (val rslt = snapshots.put(adapter.points)) {
                     is Rslt.Err -> requireContext().showError(rslt.message)
                     is Rslt.Ok -> {
                         Toast.makeText(requireContext(), R.string.snapshot_saved, Toast.LENGTH_LONG).show()
@@ -576,7 +576,6 @@ class MainFragment : Fragment() {
             endToStart = if (orientation.start) NO_ID else R.id.buttons
         }
         scanDrawable.showOrientation(orientation)
-        adapter.notifyChanged()
     }
 
     private fun WifiInfo.withLocalIp(): CurrentConnection? {

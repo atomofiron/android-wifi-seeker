@@ -57,11 +57,12 @@ class PointHolder(
     ) {
         itemColumns.bindBackground(point, focused)
         val connected = point.bssid == current?.bssid
+        val focused = point.theSame(focused)
         binding.updateDescription(
-            point.takeIf { it.bssid == focused?.bssid },
+            point.takeIf { focused },
             current?.takeIf { connected },
         )
-        root.foreground = focusedDrawable.takeIf { point.bssid == focused?.bssid }
+        root.foreground = focusedDrawable.takeIf { focused }
         focusedDrawable.setRtl(root.isRtl())
 
         if (point.level == -1) {
