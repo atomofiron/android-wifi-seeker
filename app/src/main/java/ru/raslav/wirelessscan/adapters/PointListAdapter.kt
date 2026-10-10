@@ -116,7 +116,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     fun updateFilter(filter: PointFilter): String {
         val index = filters.indexOfFirst { it.label == filter.label }
         when {
-            !filter.isEmpty && index == -1 -> filters.add(filter)
+            !filter.isEmpty && index < 0 -> filters.add(filter)
             !filter.isEmpty && index >= 0 -> filters[index] = filter
             filter.isEmpty && index >= 0 -> filters.removeAt(index)
         }
@@ -124,9 +124,11 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     fun setCurrent(current: CurrentConnection?) {
-        notifyChanged(bssid = this.current?.bssid)
-        this.current = current
-        notifyChanged(bssid = current?.bssid)
+        if (current != this.current) {
+            notifyChanged(bssid = this.current?.bssid)
+            this.current = current
+            notifyChanged(bssid = current?.bssid)
+        }
     }
 
     private fun notifyChanged(
@@ -144,17 +146,14 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     private fun applyFilter(): Int {
-        val new = when {
-            !filtering || filters.isEmpty() -> points
-            else -> points.filter { point ->
-                filters.all {
-                    when {
-                        it.hidden && it.exclude && point.isHidden() -> false
-                        it.capabilities && it.exclude && point.capabilities.contains(it.label) -> false
-                        it.hidden && it.include -> point.isHidden()
-                        it.capabilities && it.include -> point.capabilities.contains(it.label)
-                        else -> true
-                    }
+        val new = points.filter { point ->
+            filters.all {
+                when {
+                    it.hidden && it.exclude && point.isHidden() -> false
+                    it.capabilities && it.exclude && point.capabilities.contains(it.label) -> false
+                    it.hidden && it.include -> point.isHidden()
+                    it.capabilities && it.include -> point.capabilities.contains(it.label)
+                    else -> true
                 }
             }
         }
