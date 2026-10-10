@@ -49,7 +49,7 @@ data class Point(
     val bssidHex: String = "",
 ) {
 
-    val outOfRange get() = level <= MIN_LEVEL
+    val outOfRange get() = level <= range.first
 
     fun is5Ghz(): Boolean = frequency >= 4915
 
@@ -71,48 +71,7 @@ data class Point(
 
     companion object {
 
-        const val MIN_LEVEL = -100 // WifiManager.MIN_LEVEL
-
-        /*operator fun invoke(
-            level: Int,
-            frequency: Int,
-            capabilities: String,
-            essid: String,
-            essidHex: String,
-            bssid: String,
-            ch: Int,
-            bssidHex: String = "",
-            manufacturer: String = "",
-            manufacturerDesc: String = "",
-        ): Point {
-            val cip = if (capabilities.contains("CCMP")) "CCMP" else ""
-            var enc = if (cip.isNotEmpty()) "?" else "OPN"
-            if (capabilities.contains("SAE-")) {
-                enc = if (capabilities.contains("WPA2")) "WPA2/3" else "WPA3"
-            } else if (capabilities.contains("WPA")) {
-                enc = if (capabilities.contains("WPA2")) "WPA2" else "WPA"
-            } else if (capabilities.contains("WEP")) {
-                enc = "WEP"
-            }
-            val wps = capabilities.contains("WPS")
-            return Point(
-                level = level,
-                frequency = frequency,
-                capabilities = capabilities,
-                essid = essid,
-                essidHex = essidHex,
-                bssid = bssid,
-                ch = ch,
-
-                enc = enc,
-                cip = cip,
-                wps = wps,
-
-                bssidHex = bssidHex,
-                manufacturer = manufacturer,
-                manufacturerDesc = manufacturerDesc,
-            )
-        }*/
+        val range = -100..0
 
         fun ScanResult.toPoint(): Point {
             val essid = getSsid()

@@ -211,7 +211,7 @@ class ScanService : IntentService("ScanService") {
                 add(0, new)
             }
             for (i in results.size..<size) {
-                val copy = get(i).copy(level = Point.MIN_LEVEL)
+                val copy = get(i).copy(level = Point.range.first)
                 set(i, copy)
             }
             sortBy { -it.level }

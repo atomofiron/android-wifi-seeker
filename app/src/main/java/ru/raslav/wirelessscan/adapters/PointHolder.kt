@@ -68,8 +68,8 @@ class PointHolder(
         if (point.level == -1) {
             elog("WOW: point.level == -1")
         }
-        // point.level == -1 experiment
-        pwr.textColor = if (point.level == -1) Color.MAGENTA else getPowerColor(point.level)
+        // point.level >= -1 experiment
+        pwr.textColor = if (point.level >= -1) Color.MAGENTA else getPowerColor(point.level)
 
         ch.text = point.ch.toString()
         ch.textColor = if (point.is5Ghz()) colors.blueLight else colors.gray
@@ -116,7 +116,8 @@ class PointHolder(
 
     @Suppress("DEPRECATION")
     private fun getPowerColor(level: Int): Int {
-        /* starting Android 8 WifiManager.calculateSignalLevel(int, int) returns something looks erong */
+        val level = level.coerceIn(Point.range)
+        /* starting Android 8 WifiManager.calculateSignalLevel(int, int) returns something looks wrong */
         val pwr = when {
             SDK_INT >= O -> MAX_INDICATOR_LEVEL * (min(level, -50) + 100) / 50
             else -> WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
@@ -145,7 +146,7 @@ class PointHolder(
         }
         when {
             !associating -> background = null
-            point.level <= Point.MIN_LEVEL -> setBackgroundResource(R.drawable.grille_red)
+            point.level <= Point.range.first -> setBackgroundResource(R.drawable.grille_red)
             else -> setBackgroundResource(R.drawable.grille)
         }
     }
