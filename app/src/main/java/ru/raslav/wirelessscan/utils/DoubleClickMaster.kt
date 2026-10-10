@@ -9,7 +9,7 @@ class DoubleClickMaster() : View.OnClickListener {
 
     private var temporaryDrawableResId = 0
     private var millisClickedFirst = 0L
-    var delay = 300L
+    var delay = 500L
     set(value) { field = if (value > 0) value else 0 }
 
     constructor(delay: Long) : this() {
