@@ -57,12 +57,12 @@ class PointHolder(
     ) {
         itemColumns.bindBackground(point, focused)
         val connected = point.bssid == current?.bssid
-        val focused = point.theSame(focused)
+        val theSame = point.theSame(focused)
         binding.updateDescription(
-            point.takeIf { focused },
+            point.takeIf { theSame },
             current?.takeIf { connected },
         )
-        root.foreground = focusedDrawable.takeIf { focused }
+        root.foreground = focusedDrawable.takeIf { theSame }
         focusedDrawable.setRtl(root.isRtl())
 
         if (point.level == -1) {
@@ -135,13 +135,11 @@ class PointHolder(
         return "#ff$red${green}00".toColorInt()
     }
 
-
     private fun View.bindBackground(point: Point, focused: Point?) {
         val focused = focused
-        val associating =  when {
+        val associating = when {
             focused == null -> false
-            focused.bssidHex.isNotEmpty() && point.bssidHex.isNotEmpty() -> focused.bssidHex == point.bssidHex
-            focused.bssid.isNotEmpty() && point.bssid.isNotEmpty() -> focused.bssid.startsWith(point.bssid.substring(0, min(8, point.bssid.length)))
+            focused.bssidGroup.isNotEmpty() && point.bssidGroup.isNotEmpty() -> focused.bssidGroup == point.bssidGroup
             else -> false
         }
         when {

@@ -58,7 +58,7 @@ class SnapshotManager(private val co: Context) {
                 val manuf = oui { find(point.bssid) }
                     ?: return@map point
                 point.copy(
-                    bssidHex = manuf.digits,
+                    bssidGroup = manuf.bssidGroup,
                     manufacturer = manuf.label,
                     manufacturerDesc = manuf.description,
                 )

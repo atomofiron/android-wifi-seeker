@@ -46,7 +46,7 @@ data class Point(
     },
 
     @Transient
-    val bssidHex: String = "",
+    val bssidGroup: String = "",
 ) {
 
     val outOfRange get() = level <= range.first

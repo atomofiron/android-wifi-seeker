@@ -84,13 +84,13 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     private fun setFocused(point: Point) {
-        notifyChanged(keyHash = focused?.keyHash())
+        notifyChanged(bssidGroup = focused?.bssidGroup)
         focused = point
-        notifyChanged(keyHash = point.keyHash())
+        notifyChanged(bssidGroup = point.bssidGroup)
     }
 
     fun resetFocus() {
-        notifyChanged(keyHash = focused?.keyHash())
+        notifyChanged(bssidGroup = focused?.bssidGroup)
         focused = null
     }
 
@@ -133,12 +133,12 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     private fun notifyChanged(
         bssid: String? = null,
-        keyHash: Long? = null,
+        bssidGroup: String? = null,
     ) {
         currentList.forEachIndexed { index, point ->
             when {
                 bssid != null && point.bssid == bssid -> Unit
-                keyHash != null && point.keyHash() == keyHash -> Unit
+                bssidGroup != null && point.bssidGroup == bssidGroup -> Unit
                 else -> return@forEachIndexed
             }
             notifyItemChanged(index)

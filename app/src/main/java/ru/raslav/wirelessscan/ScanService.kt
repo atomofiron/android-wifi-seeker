@@ -194,7 +194,7 @@ class ScanService : IntentService("ScanService") {
                         continue
                     }
                     val new = r.copy(
-                        bssidHex = info.digits,
+                        bssidGroup = info.bssidGroup,
                         manufacturer = info.label,
                         manufacturerDesc = info.description,
                     )
@@ -203,7 +203,7 @@ class ScanService : IntentService("ScanService") {
                 }
                 val old = get(index)
                 val new = r.copy(
-                    bssidHex = old.bssidHex,
+                    bssidGroup = old.bssidGroup,
                     manufacturer = old.manufacturer,
                     manufacturerDesc = old.manufacturerDesc,
                 )
