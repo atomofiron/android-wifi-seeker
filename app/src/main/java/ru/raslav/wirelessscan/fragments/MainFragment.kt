@@ -75,9 +75,11 @@ import ru.raslav.wirelessscan.connection.Connection.Event
 import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.data.PointFilter
+import ru.raslav.wirelessscan.databinding.BottomBarBinding
 import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
+import ru.raslav.wirelessscan.databinding.FilterBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
-import ru.raslav.wirelessscan.databinding.FiltersBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.granted
@@ -205,7 +207,7 @@ class MainFragment : Fragment() {
         binding.updateSaveButtonState()
 
         binding.initPeriods()
-        binding.bottomToolbar.filters.init()
+        binding.bottomToolbar.initFilters()
         binding.initButtons(binding.counter)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
@@ -318,25 +320,40 @@ class MainFragment : Fragment() {
         )
     }
 
-    private fun FiltersBinding.init() {
-        val listener = View.OnClickListener { view ->
-            var state = PointListAdapter.FILTER_DEFAULT
-            when {
-                view.isSelected -> view.isSelected = false
-                view.isActivated -> {
-                    view.isActivated = false
-                    view.isSelected = true
-                    state = PointListAdapter.FILTER_EXCLUDE
-                }
-                else -> {
-                    view.isActivated = true
-                    state = PointListAdapter.FILTER_INCLUDE
-                }
+    private fun onFilterClick(view: View, label: String) {
+        var include = false
+        var exclude = false
+        when {
+            view.isSelected -> view.isSelected = false
+            view.isActivated -> {
+                view.isActivated = false
+                view.isSelected = true
+                exclude = true
             }
-            updateCounters(adapter.updateFilter(root.indexOfChild(view), state))
+            else -> {
+                view.isActivated = true
+                include = true
+            }
         }
-        for (i in 0 until root.childCount)
-            root.getChildAt(i).setOnClickListener(listener)
+        val filter = PointFilter.defaults
+            .find { it.label == label }
+            ?.copy(include = include, exclude = exclude)
+            ?: return
+        updateCounters(adapter.updateFilter(filter))
+    }
+
+    private fun BottomBarBinding.initFilters() {
+        val inflater = LayoutInflater.from(root.context)
+        filters.completeChildren(
+            count = PointFilter.labels.size,
+            factory = { FilterBinding.inflate(inflater, this, false).root },
+        ) { index ->
+            val label = PointFilter.labels[index]
+            text = label
+            setOnClickListener {
+                onFilterClick(it, label)
+            }
+        }
     }
 
     private fun FragmentMainBinding.initButtons(label: TextView) {
@@ -541,7 +558,7 @@ class MainFragment : Fragment() {
             val margin = resources.getDimensionPixelSize(R.dimen.padding_common)
             bottomMargin = if (orientation.vertical) margin else 0
         }
-        bottomToolbar.filters.root.let { filters ->
+        bottomToolbar.filters.let { filters ->
             (filters.parent as ViewGroup).removeView(filters)
             if (orientation == Orientation.Bottom) {
                 bottomToolbar.horizontalFilters.addView(filters)

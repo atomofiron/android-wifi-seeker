@@ -16,15 +16,6 @@
         <!--  name="android:buttonsPaneBarColor">@color/colorBlack -->
         <!--  name="android:navigationBarColor">@color/colorBlack  -->
     </style>
-    <style name="FilterButtonStyle" parent="Widget.AppCompat.TextView">
-        <item name="android:layout_width">56sp</item>
-        <item name="android:layout_height">36dp</item>
-        <item name="android:layout_margin">@dimen/toolbar_padding</item>
-        <item name="android:textColor">@color/filter_btn</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:background">@drawable/toolbar_button</item>
-        <item name="android:padding">0dp</item>
-    </style>
     <style name="ToolbarButtonShape" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/toolbar_button_corner</item>

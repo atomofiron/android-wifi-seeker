@@ -15,6 +15,7 @@ import ru.raslav.wirelessscan.clipboardManager
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
+import ru.raslav.wirelessscan.data.PointFilter
 import ru.raslav.wirelessscan.databinding.ItemPointBinding
 import ru.raslav.wirelessscan.utils.AlternatingDecoration.Colors
 import kotlin.math.max
@@ -25,17 +26,12 @@ private enum class AnimType {
     None, ScanStart, ScanEnd
 }
 
-class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(PointItemCallback),
-    ValueAnimator.AnimatorUpdateListener {
-    companion object {
-        const val FILTER_DEFAULT = 0
-        const val FILTER_INCLUDE = 1
-        const val FILTER_EXCLUDE = 2
-    }
+class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(PointItemCallback)
+    , ValueAnimator.AnimatorUpdateListener
+{
 
     private val colors = PointColors(context)
-    private val filterValues = arrayOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", "HIDDEN")
-    private val filter: IntArray = IntArray(filterValues.size)
+    private val filters = mutableListOf<PointFilter>()
     val points = mutableListOf<Point>()
     private var focused: Point? = null
     private var filtering = false
@@ -117,8 +113,13 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         return getCounters(applyFilter())
     }
 
-    fun updateFilter(which: Int, state: Int) : String {
-        filter[which] = state
+    fun updateFilter(filter: PointFilter): String {
+        val index = filters.indexOfFirst { it.label == filter.label }
+        when {
+            !filter.isEmpty && index == -1 -> filters.add(filter)
+            !filter.isEmpty && index >= 0 -> filters[index] = filter
+            filter.isEmpty && index >= 0 -> filters.removeAt(index)
+        }
         return getCounters(applyFilter())
     }
 
@@ -143,17 +144,18 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     private fun applyFilter(): Int {
-        val new = points.toMutableList()
-        if (filtering) {
-            var n = 0
-            loop@ while (n < new.size) {
-                for (i in filter.indices)
-                    if (i == filter.size - 1 && filter[i] != FILTER_DEFAULT && (filter[i] == FILTER_INCLUDE) != new[n].essid.isEmpty() ||
-                            filter[i] != 0 && (filter[i] == FILTER_INCLUDE) != new[n].capabilities.contains(filterValues[i])) {
-                        new.removeAt(n)
-                        continue@loop
+        val new = when {
+            !filtering || filters.isEmpty() -> points
+            else -> points.filter { point ->
+                filters.all {
+                    when {
+                        it.hidden && it.exclude && point.isHidden() -> false
+                        it.capabilities && it.exclude && point.capabilities.contains(it.label) -> false
+                        it.hidden && it.include -> point.isHidden()
+                        it.capabilities && it.include -> point.capabilities.contains(it.label)
+                        else -> true
                     }
-                n++
+                }
             }
         }
         submitList(new)

@@ -20,7 +20,6 @@
         android:id="@+id/horizontal_filters"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/toolbar_padding"
         android:scrollbarThumbHorizontal="@drawable/scroll_horizontal"
         android:clipToPadding="false"
         android:clipChildren="false"
@@ -30,11 +29,11 @@
         app:layout_constraintEnd_toEndOf="@+id/buttons"
         app:layout_constraintBottom_toTopOf="@+id/buttons"
         >
-        <include
-            layout="@layout/filters"
+        <LinearLayout
             android:id="@+id/filters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             />
     </HorizontalScrollView>
     <ScrollView
