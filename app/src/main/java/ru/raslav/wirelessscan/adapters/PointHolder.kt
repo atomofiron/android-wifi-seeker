@@ -139,7 +139,8 @@ class PointHolder(
         val focused = focused
         val associating = when {
             focused == null -> false
-            focused.bssidGroup.isNotEmpty() && point.bssidGroup.isNotEmpty() -> focused.bssidGroup == point.bssidGroup
+            point.bssid == focused.bssid -> true
+            point.bssidGroup.isNotEmpty() && focused.bssidGroup.isNotEmpty() -> point.bssidGroup == focused.bssidGroup
             else -> false
         }
         when {
