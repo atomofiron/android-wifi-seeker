@@ -127,41 +127,23 @@ data class Point(
             )
         }
 
-        private fun getChanel(frequency: Int): Int {
-            var fr = frequency
-            var ans = 0
-            if (fr in 2412..2484) {
-                if (fr == 2484) return 14
-                while (fr >= 2412) {
-                    fr -= 5
-                    ans++
-                }
-            } else if (fr in 3658..3692) {
-                ans = 130
-                while (fr >= 3655) {
-                    fr -= 5
-                    ans++
-                }
-            } else if (fr in 4940..4990 && fr % 5 != 0) {
-                ans = 19
-                while (fr >= 4940) {
-                    fr -= 7
-                    ans++
-                }
-            } else if (fr in 4915..4980) {
-                ans = 182
-                while (fr >= 4915) {
-                    fr -= 5
-                    ans++
-                }
-            } else if (fr in 5035..5825) {
-                ans = 6
-                while (fr >= 5035) {
-                    fr -= 5
-                    ans++
-                }
-            }
-            return ans
+        /**
+         * Maps a center frequency in MHz to its Wi-Fi channel number, 0 when no channel uses it.
+         * Follows [android.net.wifi.ScanResult.convertFrequencyMhzToChannelIfSupported] for the bands it
+         * knows, plus the 3.6 GHz and the 4.9 GHz (Japan) bands the framework leaves unmapped:
+         * 2.4 GHz 1..13 (2412..2472) and 14 (2484); 3.6 GHz 131..139; 4.9 GHz 182..196;
+         * 5 GHz 7..181; 6 GHz 1..233 and the operating class 136 channel 2 (5935); 60 GHz 1..6.
+         */
+        private fun getChanel(frequency: Int): Int = when (frequency) {
+            2484 -> 14
+            in 2412..2472 -> (frequency - 2412) / 5 + 1
+            in 3655..3695 -> 131 + (frequency - 3655) / 5
+            in 4910..4980 -> (frequency - 4000) / 5
+            in 5035..5905 -> (frequency - 5000) / 5
+            5935 -> 2
+            in 5955..7115 -> (frequency - 5955) / 5 + 1
+            in 58320..69120 -> (frequency - 58320) / 2160 + 1
+            else -> 0
         }
     }
 }
