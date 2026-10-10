@@ -54,4 +54,5 @@
     <string name="period">Период</string>
     <string name="no_any_app">Приложение, способное выполнить это действие, не найдено</string>
     <string name="copied">Скопировано в буфер обмена</string>
+    <string name="share">Отправить</string>
 </resources>

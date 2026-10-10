@@ -264,10 +264,6 @@ class MainFragment : Fragment() {
             inflater.inflate(R.menu.main, menu)
             periodItem = menu.findItem(R.id.period)
             updatePeriodIcon()
-            val subMenu = periodItem.subMenu ?: return
-            resources.getStringArray(R.array.period_arr).forEachIndexed { index, it ->
-                subMenu.add(Menu.NONE, PeriodIds[index], Menu.NONE, it)
-            }
         }
 
         override fun onMenuItemSelected(item: MenuItem): Boolean {

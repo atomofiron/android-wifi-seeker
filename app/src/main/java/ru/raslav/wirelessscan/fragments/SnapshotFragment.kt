@@ -3,8 +3,12 @@ package ru.raslav.wirelessscan.fragments
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +30,7 @@ import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
+import ru.raslav.wirelessscan.utils.SnapshotManager.Companion.shareSnapshot
 
 class SnapshotFragment : Fragment() {
     companion object {
@@ -40,6 +45,8 @@ class SnapshotFragment : Fragment() {
         }
     }
 
+    private val snapshotName by unsafeLazy { requireArguments().getString(EXTRA_NAME).toString() }
+    private val menuProvider by unsafeLazy { MainMenuProvider() }
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
     private var viewJob = Job()
@@ -72,7 +79,8 @@ class SnapshotFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSnapshotBinding.inflate(inflater, container, false)
 
-        binding.appBar.init(this, requireArguments().getString(EXTRA_NAME).toString())
+        binding.appBar.init(this, snapshotName)
+        binding.appBar.toolbar.addMenuProvider(menuProvider)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.list.adapter = adapter
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
@@ -96,5 +104,26 @@ class SnapshotFragment : Fragment() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
+    }
+
+    private inner class MainMenuProvider : MenuProvider {
+
+        override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
+            inflater.inflate(R.menu.snapshot, menu)
+        }
+
+        override fun onMenuItemSelected(item: MenuItem): Boolean {
+            when (item.itemId) {
+                R.id.share -> SnapshotManager(requireContext())
+                    .put(adapter.points, snapshotName).let { // updated manufacturers
+                        when (it) {
+                            is Rslt.Ok -> requireContext().shareSnapshot(it.value)
+                            is Rslt.Err -> requireContext().showError(it.message)
+                        }
+                    }
+                else -> return false
+            }
+            return true
+        }
     }
 }
