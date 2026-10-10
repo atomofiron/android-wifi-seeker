@@ -7,8 +7,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.clipboardManager
@@ -43,6 +45,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     private var animType = AnimType.None
     private val animator = ValueAnimator.ofFloat(Const.ALPHA_ZERO, Const.ALPHA_FULL)
     private val clipboard = context.clipboardManager()
+    private var recyclerView: RecyclerView? = null
 
     init {
         setHasStableIds(true)
@@ -68,6 +71,14 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     override fun onBindViewHolder(holder: PointHolder, position: Int) = holder.bind(currentList[position], focused, current)
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = null
+    }
 
     /** Row background for RowBackgroundDecoration: alternating shades plus the out-of-range state. */
     fun backgroundAt(position: Int): Colors = when {
@@ -157,8 +168,30 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
                 }
             }
         }
-        submitList(new)
+        submitList(new, submitCallback())
         return new.size
+    }
+
+    fun submitCallback() = recyclerView?.run {
+        val center = width / 2
+        val top = paddingTop
+        val child = findChildViewUnder(center.toFloat(), top.toFloat())
+            ?: return@run null
+        val holder = findContainingViewHolder(child)
+            ?: return@run null
+        if (holder.bindingAdapterPosition != 0)
+            return@run null
+        when {
+            child.top == top -> Unit
+            scrollState == SCROLL_STATE_IDLE -> Unit
+            else -> return@run null
+        }
+        return@run ::scrollToTop
+    }
+
+    private fun scrollToTop() {
+        (recyclerView?.layoutManager as? LinearLayoutManager)
+            ?.scrollToPositionWithOffset(0, 0)
     }
 
     fun clear(): String {
