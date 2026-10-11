@@ -462,12 +462,12 @@ class MainFragment : Fragment() {
 
         scanDrawable.showAnimation(message.what == Event.START_SCAN.ordinal)
         when (message.what) {
-            Event.START_SCAN.ordinal -> adapter.animScanStart()
+            Event.START_SCAN.ordinal -> adapter.startAnim()
             Event.RESULTS.ordinal -> updateList(message)
             Event.STARTED.ordinal -> bottomToolbar.buttonResume.isActivated = true
             Event.STOPPED.ordinal -> {
                 bottomToolbar.buttonResume.isActivated = false
-                adapter.animScanCancel()
+                adapter.cancelAnim()
             }
         }
     }
@@ -478,7 +478,6 @@ class MainFragment : Fragment() {
             val list = msg.obj as ArrayList<Point>
             binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
             updateCounters(adapter.updateList(list))
-            adapter.animScanEnd()
             binding.bottomToolbar.buttonSave.isEnabled = list.isNotEmpty()
             binding.updateSaveButtonState()
         }

@@ -168,7 +168,11 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
                 }
             }
         }
-        submitList(new, submitCallback())
+        val upScroll = submitCallback()
+        submitList(new) {
+            upScroll?.invoke()
+            andAnim()
+        }
         return new.size
     }
 
@@ -214,7 +218,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         holders.remove(holder)
     }
 
-    fun animScanStart() {
+    fun startAnim() {
         if (animScale <= 0f) return
         animType = AnimType.ScanStart
         animator.cancel()
@@ -224,7 +228,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         animator.start()
     }
 
-    fun animScanEnd() {
+    private fun andAnim() {
         if (animScale <= 0f) return
         animType = AnimType.ScanEnd
         animator.cancel()
@@ -233,7 +237,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         animator.start()
     }
 
-    fun animScanCancel() {
+    fun cancelAnim() {
         if (animType == AnimType.ScanStart) {
             animator.cancel()
             animType = AnimType.None
