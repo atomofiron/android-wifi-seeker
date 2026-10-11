@@ -80,12 +80,12 @@
                     android:gravity="center"
                     android:maxWidth="240sp"
                     />
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_grant"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_half"
-                    style="@style/Widget.AppCompat.Button.Colored"
+                    app:cornerRadius="@dimen/button_corner"
                     android:text="@string/grant"
                     />
             </LinearLayout>

@@ -17,10 +17,12 @@
     <dimen name="padding_common">16dp</dimen>
     <dimen name="padding_double">32dp</dimen>
 
+    <dimen name="button_corner">8dp</dimen>
+
     <dimen name="toolbar_button_size">48dp</dimen>
     <dimen name="toolbar_corner">20dp</dimen>
     <dimen name="toolbar_button_corner">16dp</dimen>
-    <dimen name="toolbar_button_corner_pressed">8dp</dimen>
+    <dimen name="toolbar_button_corner_pressed">@dimen/button_corner</dimen>
     <dimen name="toolbar_button_margin">@dimen/padding_mini</dimen>
     <dimen name="toolbar_margin">@dimen/padding_common</dimen>
     <dimen name="toolbar_padding">@dimen/padding_mini</dimen>
