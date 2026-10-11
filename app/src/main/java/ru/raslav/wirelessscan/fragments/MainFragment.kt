@@ -192,7 +192,6 @@ class MainFragment : Fragment() {
         binding.list.addOnScrollListener(binding.periods.scrollListener)
         binding.list.setupSpringOverscroll()
         val periods = binding.initPeriods()
-
         val insets = ExtType { barsWithCutout + bottomToolbar }
         binding.counters.root.insetsPadding(insets, horizontal = true)
         binding.listTitle.root.insetsPadding(insets, horizontal = true)

@@ -94,11 +94,12 @@ class SnapshotFragment : Fragment() {
         binding.list.setupSpringOverscroll()
 
         val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
-        val layout = binding.filters.withHorizontalLinearLayout(top = true, end = true, padding = padding)
+        val filters = binding.filters.withHorizontalLinearLayout(top = true, end = true, padding = padding)
         binding.filters.onAnim { offset ->
             binding.container.translationY = offset
         }
-        filterDelegate.init(layout)
+        filters.insetsPadding(horizontal = true)
+        filterDelegate.init(filters)
         binding.listTitle.root.insetsPadding(start = true, end = true)
         binding.list.insetsPadding(start = true, end = true, bottom = true)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
