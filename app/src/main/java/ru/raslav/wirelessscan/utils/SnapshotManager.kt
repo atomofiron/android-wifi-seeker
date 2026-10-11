@@ -13,8 +13,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.decodeFromStream
 import nl.adaptivity.xmlutil.xmlStreaming
 import ru.raslav.wirelessscan.BuildConfig
-import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.Const.MIME_TYPE_XML
+import ru.raslav.wirelessscan.Const.SNAPSHOT_FORMAT
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.tryStartActivity
@@ -36,11 +36,19 @@ class SnapshotManager(private val co: Context) {
     /** @return snapshot file name*/
     fun put(
         points: List<Point>,
-        name: String = "snapshot_${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss", Locale.getDefault()).format(Date())}${Const.SNAPSHOT_FORMAT}",
+        name: String? = defaultName(),
     ): Rslt<String> {
+        val name = when (name) {
+            null -> "tmp/${defaultName()}"
+            else -> name
+        }
         val file = File(co.filesDir, name)
+        val parent = file.parentFile
+        if (parent?.isFile == true) {
+            parent.delete()
+        }
 
-        if (!co.filesDir.exists() && !co.filesDir.mkdirs() || !co.filesDir.canWrite()) {
+        if (parent == null || !parent.exists() && !parent.mkdirs()) {
             return Rslt.Err()
         }
         try {
@@ -60,7 +68,7 @@ class SnapshotManager(private val co: Context) {
         val file = File(co.filesDir, name)
         return try {
             val snapshot = file.inputStream().use {
-                xml.decodeFromStream<Snapshot>(it, QName("snapshot"))
+                xml.decodeFromStream<Snapshot>(it, QName(RootTag))
             }
             val points = snapshot.points.map { point ->
                 val manuf = oui { find(point.bssid) }
@@ -79,12 +87,18 @@ class SnapshotManager(private val co: Context) {
     }
 
     @Serializable
-    @XmlSerialName("snapshot", "", "")
+    @XmlSerialName(RootTag, "", "")
     data class Snapshot(
         val points: List<Point>,
     )
 
     companion object {
+
+        private const val RootTag = "snapshot"
+
+        private fun defaultName() = "snapshot_${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss", Locale.getDefault()).format(Date())}$SNAPSHOT_FORMAT"
+
+        fun isSnapshotName(name: String) = name.endsWith(SNAPSHOT_FORMAT)
 
         fun Context.shareSnapshot(name: String) {
             val file = File(filesDir, name)

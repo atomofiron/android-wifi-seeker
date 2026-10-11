@@ -61,4 +61,5 @@
     <string name="no_any_app">No app found that can perform this action</string>
     <string name="copied">Copied to clipboard</string>
     <string name="share">Share</string>
+    <string name="filters">Filters</string>
 </resources>

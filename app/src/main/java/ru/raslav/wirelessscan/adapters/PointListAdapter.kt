@@ -134,6 +134,8 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         return getCounters(applyFilter())
     }
 
+    fun hasFilters() = filters.isNotEmpty()
+
     fun setCurrent(current: CurrentConnection?) {
         if (current != this.current) {
             notifyChanged(bssid = this.current?.bssid)

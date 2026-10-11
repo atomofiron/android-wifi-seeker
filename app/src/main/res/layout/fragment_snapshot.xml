@@ -2,41 +2,70 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?colorSurface"
     >
     <include
-        android:id="@+id/app_bar"
         layout="@layout/app_bar"
-        />
-    <include
-        android:id="@+id/list_title"
-        layout="@layout/item_point"
+        android:id="@+id/app_bar"
         />
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         >
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
+        <ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
+            android:id="@+id/filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="?colorSurfaceContainer"
+            android:paddingBottom="@dimen/padding_mini"
+            tools:layout_marginTop="128dp"
+            />
+        <RelativeLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            android:scrollbarThumbVertical="@drawable/scroll_vertical"
-            android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            />
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="visible"
-            android:indeterminate="true"
-            />
+            >
+            <include
+                layout="@layout/item_point"
+                android:id="@+id/list_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                />
+            <include
+                layout="@layout/point_counter"
+                android:id="@+id/counters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="48dp"
+                android:layout_below="@+id/list_title"
+                android:layout_alignTop="@+id/list_title"
+                android:layout_alignParentEnd="true"
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/list_title"
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                android:scrollbarThumbVertical="@drawable/scroll_vertical"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                />
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="visible"
+                android:indeterminate="true"
+                />
+        </RelativeLayout>
     </FrameLayout>
 </LinearLayout>

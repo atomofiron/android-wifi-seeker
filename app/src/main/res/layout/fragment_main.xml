@@ -9,8 +9,8 @@
     android:orientation="vertical"
     >
     <include
-        android:id="@+id/app_bar"
         layout="@layout/app_bar"
+        android:id="@+id/app_bar"
         />
     <FrameLayout
         android:id="@+id/content"
@@ -25,23 +25,21 @@
             android:layout_height="match_parent"
             >
             <include
+                layout="@layout/item_point"
                 android:id="@+id/list_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                layout="@layout/item_point"
                 />
-            <TextView
-                android:id="@+id/counter"
+            <include
+                layout="@layout/point_counter"
+                android:id="@+id/counters"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="48dp"
                 android:layout_below="@+id/list_title"
                 android:layout_alignTop="@+id/list_title"
                 android:layout_alignParentEnd="true"
-                android:text="0/0"
-                android:paddingHorizontal="@dimen/padding_mini"
-                android:textColor="@color/color_label"
                 />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list"
@@ -91,8 +89,8 @@
             </LinearLayout>
         </RelativeLayout>
         <include
-            android:id="@+id/bottom_toolbar"
             layout="@layout/bottom_bar"
+            android:id="@+id/bottom_toolbar"
             />
         <ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
             android:id="@+id/periods"
@@ -100,7 +98,6 @@
             android:layout_height="wrap_content"
             android:background="?colorSurfaceContainer"
             android:paddingBottom="@dimen/padding_half"
-            tools:layout_height="wrap_content"
             tools:layout_marginTop="128dp"
             />
     </FrameLayout>

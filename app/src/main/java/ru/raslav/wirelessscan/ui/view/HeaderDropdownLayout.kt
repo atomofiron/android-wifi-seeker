@@ -10,7 +10,10 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.RecyclerView
+import ru.raslav.wirelessscan.R
 
 class HeaderDropdownLayout : ConstraintLayout {
 
@@ -19,6 +22,8 @@ class HeaderDropdownLayout : ConstraintLayout {
     private var callback: ((px: Float) -> Unit)? = null
     private var toExpanded = false
     private val padding = Rect()
+
+    val scrollListener: RecyclerView.OnScrollListener = ScrollListener()
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -70,6 +75,7 @@ class HeaderDropdownLayout : ConstraintLayout {
         layout.orientation = LinearLayout.HORIZONTAL
         val scrollView = HorizontalScrollView(context)
         scrollView.clipToPadding = false
+        scrollView.horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
         scrollView.setPadding(padding, 0, padding, 0)
         scrollView.addView(layout)
         addView(scrollView)
@@ -117,6 +123,15 @@ class HeaderDropdownLayout : ConstraintLayout {
             translationY = -expandedHeight * value
             getChildAt(0).translationY = -translationY
             callback?.invoke(expandedHeight + translationY)
+        }
+    }
+
+    private inner class ScrollListener : RecyclerView.OnScrollListener() {
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                collapse()
+            }
         }
     }
 }

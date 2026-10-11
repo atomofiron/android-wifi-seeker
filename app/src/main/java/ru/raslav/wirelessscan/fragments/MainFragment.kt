@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -55,7 +54,6 @@ import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import lib.atomofiron.insets.InsetsSource
 import lib.atomofiron.insets.ViewInsetsDelegate
@@ -76,12 +74,11 @@ import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointFilter
-import ru.raslav.wirelessscan.databinding.BottomBarBinding
 import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
-import ru.raslav.wirelessscan.databinding.FilterBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
+import ru.raslav.wirelessscan.fragments.delegates.FilterDelegate
 import ru.raslav.wirelessscan.granted
 import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.isWide
@@ -130,6 +127,7 @@ class MainFragment : Fragment() {
     private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission(), LocationPermissionCallback())
     private val notificationsPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
     private val snapshots by unsafeLazy { SnapshotManager(requireContext()) }
+    private val filterDelegate by unsafeLazy { FilterDelegate(::onFilterChanged) }
     private lateinit var scanDrawable: ScanDrawable
     private var scanPeriod = 0
     private var wifiInfo: WifiInfo? = null
@@ -191,12 +189,12 @@ class MainFragment : Fragment() {
 
         binding.appBar.init(this, getString(R.string.app_name), backButton = false)
         binding.appBar.toolbar.addMenuProvider(menuProvider)
-        binding.list.addOnScrollListener(ScrollListener(binding.periods))
+        binding.list.addOnScrollListener(binding.periods.scrollListener)
         binding.list.setupSpringOverscroll()
         val periods = binding.initPeriods()
 
         val insets = ExtType { barsWithCutout + bottomToolbar }
-        binding.counter.insetsPadding(insets, horizontal = true)
+        binding.counters.root.insetsPadding(insets, horizontal = true)
         binding.listTitle.root.insetsPadding(insets, horizontal = true)
         periods.insetsPadding(insets, horizontal = true)
         val toolbarDelegate = binding.bottomToolbar.root.insetsDelegate()
@@ -208,8 +206,8 @@ class MainFragment : Fragment() {
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.updateSaveButtonState()
 
-        binding.bottomToolbar.initFilters()
-        binding.initButtons(binding.counter)
+        filterDelegate.init(binding.bottomToolbar.filters)
+        binding.initButtons(binding.counters.root)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
@@ -282,11 +280,6 @@ class MainFragment : Fragment() {
         adapter.resetAnim()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        binding.listTitle.bssid.isVisible = newConfig.isWide()
-    }
-
     private fun FragmentMainBinding.initPeriods(): ViewGroup {
         val selected = getPeriodIndex()
         val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
@@ -296,7 +289,7 @@ class MainFragment : Fragment() {
             container.translationY = offset
         }
         layout.completeChildren(
-            PeriodIcons.size,
+            count = PeriodIcons.size,
             factory = { ChipPeriodBinding.inflate(context.inflater()).root },
             init = { index ->
                 chipIcon = ContextCompat.getDrawable(root.context, PeriodIcons[index])
@@ -315,44 +308,13 @@ class MainFragment : Fragment() {
                 }
             },
         )
+        root.post {
+            elog("cho ${layout.measuredHeight}")
+        }
         return layout
     }
 
-    private fun onFilterClick(view: View, label: String) {
-        var include = false
-        var exclude = false
-        when {
-            view.isSelected -> view.isSelected = false
-            view.isActivated -> {
-                view.isActivated = false
-                view.isSelected = true
-                exclude = true
-            }
-            else -> {
-                view.isActivated = true
-                include = true
-            }
-        }
-        val filter = PointFilter.defaults
-            .find { it.label == label }
-            ?.copy(include = include, exclude = exclude)
-            ?: return
-        updateCounters(adapter.updateFilter(filter))
-    }
-
-    private fun BottomBarBinding.initFilters() {
-        val inflater = LayoutInflater.from(root.context)
-        filters.completeChildren(
-            count = PointFilter.labels.size,
-            factory = { FilterBinding.inflate(inflater, this, false).root },
-        ) { index ->
-            val label = PointFilter.labels[index]
-            text = label
-            setOnClickListener {
-                onFilterClick(it, label)
-            }
-        }
-    }
+    private fun onFilterChanged(filter: PointFilter) = updateCounters(adapter.updateFilter(filter))
 
     private fun FragmentMainBinding.initButtons(label: TextView) {
         bottomToolbar.buttonFilter.setOnClickListener { view ->
@@ -484,7 +446,7 @@ class MainFragment : Fragment() {
     }
 
     private fun updateCounters(counters: String) {
-        binding.counter.text = counters
+        binding.counters.root.text = counters
     }
 
     private fun renameSnapshot(lastName: String) {
@@ -649,16 +611,6 @@ class MainFragment : Fragment() {
             }
         }
     }
-
-    private class ScrollListener(private val periods: HeaderDropdownLayout) : RecyclerView.OnScrollListener() {
-
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                periods.collapse()
-            }
-        }
-    }
 }
 
-private val PeriodIds = intArrayOf(R.id.period_3s, R.id.period_5s, R.id.period_10s, R.id.period_30s, R.id.period_1m, R.id.period_3m, R.id.period_5m)
 private val PeriodIcons = intArrayOf(R.drawable.ic_3_sec, R.drawable.ic_5_sec, R.drawable.ic_10_sec, R.drawable.ic_30_sec, R.drawable.ic_1_min, R.drawable.ic_3_min, R.drawable.ic_5_min)

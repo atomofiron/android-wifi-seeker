@@ -1,6 +1,7 @@
 package ru.raslav.wirelessscan.fragments
 
-import android.content.res.Configuration
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -21,13 +22,16 @@ import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.adapters.PointListAdapter
 import ru.raslav.wirelessscan.data.Point
+import ru.raslav.wirelessscan.data.PointFilter
 import ru.raslav.wirelessscan.databinding.FragmentSnapshotBinding
+import ru.raslav.wirelessscan.fragments.delegates.FilterDelegate
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.ui.showError
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AlternatingDecoration
+import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.utils.SnapshotManager.Companion.shareSnapshot
@@ -47,6 +51,8 @@ class SnapshotFragment : Fragment() {
 
     private val snapshotName by unsafeLazy { requireArguments().getString(EXTRA_NAME).toString() }
     private val menuProvider by unsafeLazy { MainMenuProvider() }
+    private val filterDelegate by unsafeLazy { FilterDelegate(::onFilterChanged) }
+    private lateinit var filterItem: MenuItem
     private val adapter by unsafeLazy { PointListAdapter(requireContext()) }
     private lateinit var binding: FragmentSnapshotBinding
     private var viewJob = Job()
@@ -83,12 +89,24 @@ class SnapshotFragment : Fragment() {
         binding.appBar.toolbar.addMenuProvider(menuProvider)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.list.adapter = adapter
+        binding.list.addOnScrollListener(binding.filters.scrollListener)
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.list.setupSpringOverscroll()
 
+        val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
+        val layout = binding.filters.withHorizontalLinearLayout(top = true, end = true, padding = padding)
+        binding.filters.onAnim { offset ->
+            binding.container.translationY = offset
+        }
+        filterDelegate.init(layout)
         binding.listTitle.root.insetsPadding(start = true, end = true)
         binding.list.insetsPadding(start = true, end = true, bottom = true)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
+        binding.counters.root.insetsPadding(horizontal = true)
+        binding.root.layoutChanges {
+            @SuppressLint("NotifyDataSetChanged")
+            adapter.notifyDataSetChanged() // wide item layout
+        }
 
         viewJob.complete()
         binding.updateProgressVisibility()
@@ -101,29 +119,41 @@ class SnapshotFragment : Fragment() {
         progress.isVisible = !loaded
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
+    private fun onFilterChanged(filter: PointFilter) {
+        binding.counters.root.text = adapter.updateFilter(filter)
+        when (adapter.hasFilters()) {
+            true -> R.drawable.ic_filter_active
+            false -> R.drawable.ic_filter
+        }.let { filterItem.setIcon(it) }
     }
 
     private inner class MainMenuProvider : MenuProvider {
 
         override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
             inflater.inflate(R.menu.snapshot, menu)
+            filterItem = menu.findItem(R.id.filters)
         }
 
         override fun onMenuItemSelected(item: MenuItem): Boolean {
             when (item.itemId) {
-                R.id.share -> SnapshotManager(requireContext())
-                    .put(adapter.points, snapshotName).let { // updated manufacturers
-                        when (it) {
-                            is Rslt.Ok -> requireContext().shareSnapshot(it.value)
-                            is Rslt.Err -> requireContext().showError(it.message)
-                        }
-                    }
+                R.id.filters -> binding.filters.toggle()
+                R.id.share -> {
+                    val manager = SnapshotManager(requireContext())
+                    manager.put(adapter.points, snapshotName) // updated manufacturers
+                        .handleError(requireContext())
+                        ?.let { manager.put(adapter.currentList, name = null) }
+                        ?.handleError(requireContext())
+                        ?.let { requireContext().shareSnapshot(it) }
+                }
                 else -> return false
             }
             return true
         }
     }
+}
+
+private fun <T> Rslt<T>.handleError(context: Context): T? = when (this) {
+    is Rslt.Ok -> value
+    is Rslt.Err -> context.showError(message)
+        .let { null }
 }

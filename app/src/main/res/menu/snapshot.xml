@@ -4,6 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
+        android:id="@+id/filters"
+        android:title="@string/filters"
+        android:icon="@drawable/ic_filter_state"
+        app:showAsAction="always"
+        />
+    <item
         android:id="@+id/share"
         android:title="@string/share"
         android:icon="@drawable/ic_share"

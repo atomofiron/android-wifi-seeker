@@ -4,9 +4,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import ru.raslav.wirelessscan.utils.DoubleClickMaster
-import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.databinding.ItemSnapshotBinding
+import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
 
 class SnapshotHolder(val binding: ItemSnapshotBinding) : RecyclerView.ViewHolder(binding.root)
@@ -22,7 +22,7 @@ class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<Snaps
     init {
         dir.listFiles()
             ?.sortedBy { it.name }
-            ?.filter { it.name.endsWith(Const.SNAPSHOT_FORMAT) }
+            ?.filter { SnapshotManager.isSnapshotName(it.name) }
             ?.forEach { list.add(it.name) }
     }
 

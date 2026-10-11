@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="period_3s" />
-    <item type="id" name="period_5s" />
-    <item type="id" name="period_10s" />
-    <item type="id" name="period_30s" />
-    <item type="id" name="period_1m" />
-    <item type="id" name="period_3m" />
-    <item type="id" name="period_5m" />
-
     <item type="id" name="oui_source" />
 </resources>

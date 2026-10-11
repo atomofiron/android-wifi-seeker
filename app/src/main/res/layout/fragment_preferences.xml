@@ -7,7 +7,7 @@
     android:background="?colorSurface"
     >
     <include
-        android:id="@+id/app_bar"
         layout="@layout/app_bar"
+        android:id="@+id/app_bar"
         />
 </LinearLayout>
