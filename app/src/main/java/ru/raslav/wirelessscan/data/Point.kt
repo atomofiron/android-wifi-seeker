@@ -65,7 +65,7 @@ data class Point(
 
     fun is5Ghz(): Boolean = frequency >= 4915
 
-    fun isHidden() = essid.isEmpty() || essid.length == 1 && essid[0].code == 0
+    fun isHidden() = essid.all { it.code == 0 }
 
     fun withCip(): Boolean = cip.isNotEmpty()
 
