@@ -119,7 +119,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         return getCounters(applyFilter())
     }
 
-    fun filter(enable: Boolean) : String {
+    fun filter(enable: Boolean): String {
         filtering = enable
         return getCounters(applyFilter())
     }
@@ -160,7 +160,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     private fun applyFilter(): Int {
         val new = points.filter { point ->
-            filters.all {
+            !filtering || filters.all {
                 when {
                     it.hidden && it.exclude && point.isHidden() -> false
                     it.capabilities && it.exclude && point.capabilities.contains(it.label) -> false

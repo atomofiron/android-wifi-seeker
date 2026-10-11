@@ -74,7 +74,7 @@ class SnapshotFragment : Fragment() {
                 }
             }
             withContext(Main) {
-                adapter.updateList(list)
+                updateCounters(adapter.updateList(list))
                 loaded = true
                 viewJob.join()
                 binding.updateProgressVisibility()
@@ -121,11 +121,17 @@ class SnapshotFragment : Fragment() {
     }
 
     private fun onFilterChanged(filter: PointFilter) {
-        binding.counters.root.text = adapter.updateFilter(filter)
+        adapter.updateFilter(filter)
+        val counters = adapter.filter(adapter.hasFilters())
+        updateCounters(counters)
         when (adapter.hasFilters()) {
             true -> R.drawable.ic_filter_active
             false -> R.drawable.ic_filter
         }.let { filterItem.setIcon(it) }
+    }
+
+    private fun updateCounters(counters: String) {
+        binding.counters.root.text = counters
     }
 
     private inner class MainMenuProvider : MenuProvider {

@@ -307,9 +307,6 @@ class MainFragment : Fragment() {
                 }
             },
         )
-        root.post {
-            elog("cho ${layout.measuredHeight}")
-        }
         return layout
     }
 
