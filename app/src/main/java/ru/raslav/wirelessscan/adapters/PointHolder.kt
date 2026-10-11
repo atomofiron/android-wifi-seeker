@@ -76,22 +76,24 @@ class PointHolder(
 
         enc.text = point.enc
         enc.textColor = when {
-            point.capabilities.contains("EAP") -> colors.redLight
-            point.capabilities.contains("SAE-") -> colors.jinx
-            point.capabilities.contains("WPA") -> colors.yellowMiddle
-            point.capabilities.contains("WEP") -> colors.skyLight
-            point.withCip() -> colors.gray
-            else -> colors.green
+            point.capabilities.contains("OWE") -> colors.avokado // open
+            point.capabilities.contains("EAP") -> colors.lotus // WPA2
+            point.enc == "WPA3" -> colors.jinx_eyes
+            point.enc == "WPA2/3" -> colors.chestnut
+            point.enc == "WPA2" -> colors.yellowMiddle
+            point.enc == "WPA" -> colors.tangerine
+            point.enc == "WEP" -> colors.skyLight
+            point.withCip() -> colors.nightSakura
+            else -> colors.green // open?
         }
-        cip.text = if (point.capabilities.contains("CCMP")) "CCMP" else ""
-        cip.textColor = if (point.capabilities.contains("TKIP")) {
-            cip.text = if (cip.text.isEmpty()) "  TKIP" else "+TKIP"
-            when {
-                point.capabilities.contains("preauth") -> colors.sky
-                else -> colors.skyWhite
-            }
-        } else {
-            colors.gray
+        cip.text = point.cip
+        cip.textColor = when {
+            point.capabilities.contains("preauth") -> colors.sky
+            point.capabilities.contains("TKIP") -> colors.skyWhite
+            point.cip.contains("WEP") -> colors.skyLight
+            point.cip.contains("CCMP") -> colors.gray
+            point.cip.contains("GCMP") -> colors.jinx_eyes
+            else -> colors.gray
         }
 
         wps.text = if (point.wps) "yes" else "no"
@@ -103,13 +105,13 @@ class PointHolder(
             else -> point.essidHex
         }
         essid.textColor = when {
-            connected -> colors.greenLight
+            connected -> colors.salad
             point.essid.isEmpty() -> colors.yellow
             point.essid.isVisible() -> colors.gray
             else -> colors.yellow
         }
         bssid.text = point.bssid
-        bssid.setTextColor(if (connected) colors.greenLight else colors.gray)
+        bssid.setTextColor(if (connected) colors.salad else colors.gray)
         bssid.isVisible = root.resources.configuration.isWide()
     }
 

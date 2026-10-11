@@ -20,17 +20,20 @@
     <color name="blue_light">#ff8888ff</color>
     <color name="green">#ff00ff00</color>
     <color name="yellow_middle">#ffaaaa00</color>
-    <color name="jinxs_eyes">#C71585</color>
+    <color name="jinxs_eyes">#ffc71585</color>
+    <color name="pink_lotus">#f4bfc7</color>
+    <color name="tangerine">#f28500</color>
     <color name="sky_light">#ff00ffff</color>
-    <color name="red_light">#ffffaaaa</color>
+    <color name="night_sakura">#7F6B7B</color>
+    <color name="chestnut">#CD5C5C</color>
     <color name="sky">#ff00aaff</color>
     <color name="sky_white">#ffaaffff</color>
     <color name="green_high">#ff00dd00</color>
+    <color name="avokado">#ff568203</color>
     <color name="red_high">#ffdd0000</color>
     <color name="clear">#ccff0000</color>
     <color name="yellow">#ffcccc00</color>
     <color name="yellow_high">#ffdddd00</color>
-    <color name="green_light">#ffaaffaa</color>
+    <color name="salad">#ffaaffaa</color>
     <color name="white_lite">#1fffffff</color>
-    <color name="red_light_transparent">#22ff8888</color>
 </resources>

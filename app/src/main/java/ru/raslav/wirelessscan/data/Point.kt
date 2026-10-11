@@ -33,7 +33,19 @@ data class Point(
     @Transient
     val wps: Boolean = capabilities.contains("WPS"),
     @Transient
-    val cip: String = if (capabilities.contains("CCMP")) "CCMP" else "",
+    val cip: String = when {
+        capabilities.contains("GCMP") -> "GCMP"
+        capabilities.contains("CCMP") -> "CCMP"
+        capabilities.contains("TKIP") -> "TKIP"
+        capabilities.contains("WEP") -> "WEP"
+        else -> ""
+    }.let {
+        when {
+            capabilities.contains("+TKIP") -> "+TKIP"
+            capabilities.contains("+CCMP") -> "+CCMP"
+            else -> it
+        }
+    },
     @Transient
     val enc: String = run {
         when {
