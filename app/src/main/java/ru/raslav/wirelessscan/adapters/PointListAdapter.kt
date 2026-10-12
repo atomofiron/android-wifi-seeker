@@ -111,17 +111,17 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         return "${if (filtering) "$filtered / " else ""}$count / ${points.size}"
     }
 
-    fun updateList(list: List<Point>?) : String {
+    fun updateList(list: List<Point>?, withAnim: Boolean = false): String {
         points.clear()
         if (list != null) {
             points.addAll(list)
         }
-        return getCounters(applyFilter())
+        return getCounters(submitList(withAnim))
     }
 
     fun filter(enable: Boolean): String {
         filtering = enable
-        return getCounters(applyFilter())
+        return getCounters(submitList())
     }
 
     fun updateFilter(filter: PointFilter): String {
@@ -131,7 +131,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
             !filter.isEmpty && index >= 0 -> filters[index] = filter
             filter.isEmpty && index >= 0 -> filters.removeAt(index)
         }
-        return getCounters(applyFilter())
+        return getCounters(submitList())
     }
 
     fun hasFilters() = filters.isNotEmpty()
@@ -158,9 +158,22 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         }
     }
 
-    private fun applyFilter(): Int {
-        val new = points.filter { point ->
-            !filtering || filters.all {
+    private fun submitList(withAnim: Boolean = false): Int {
+        val new = when {
+            filtering -> applyFilters()
+            else -> points.toMutableList()
+        }
+        val upScroll = submitCallback()
+        submitList(new) {
+            upScroll?.invoke()
+            if (withAnim) andAnim()
+        }
+        return new.size
+    }
+
+    private fun applyFilters(): List<Point> {
+        return points.filter { point ->
+            filters.all {
                 when {
                     it.hidden && it.exclude && point.isHidden() -> false
                     it.capabilities && it.exclude && point.capabilities.contains(it.label) -> false
@@ -170,12 +183,6 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
                 }
             }
         }
-        val upScroll = submitCallback()
-        submitList(new) {
-            upScroll?.invoke()
-            andAnim()
-        }
-        return new.size
     }
 
     fun submitCallback() = recyclerView?.run {
@@ -208,7 +215,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     fun clearOutOfRange(): String {
         points.clearOutOfRange()
-        return getCounters(applyFilter())
+        return getCounters(submitList())
     }
 
     override fun onViewAttachedToWindow(holder: PointHolder) {

@@ -435,7 +435,7 @@ class MainFragment : Fragment() {
             @Suppress("UNCHECKED_CAST")
             val list = msg.obj as ArrayList<Point>
             binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
-            updateCounters(adapter.updateList(list))
+            updateCounters(adapter.updateList(list, withAnim = true))
             binding.bottomToolbar.buttonSave.isEnabled = list.isNotEmpty()
             binding.updateSaveButtonState()
         }
