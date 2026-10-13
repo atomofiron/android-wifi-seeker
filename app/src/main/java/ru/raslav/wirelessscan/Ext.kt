@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.TIRAMISU
@@ -33,6 +34,8 @@ import kotlinx.coroutines.cancel
 import ru.raslav.wirelessscan.Const.InvisibleChars
 import ru.raslav.wirelessscan.data.Point
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.text.CharCategory.UNASSIGNED
 
 
@@ -83,6 +86,10 @@ fun MutableList<Point>.clearOutOfRange(): MutableList<Point> {
 fun Int.half() = this / 2
 
 fun Int.sqr() = this * this
+
+private fun Rect.centerX() = left + width().half()
+
+private fun Rect.centerY() = top + height().half()
 
 fun Context.colorAttr(@AttrRes attr: Int) = MaterialColors.getColor(this, attr, Color.MAGENTA)
 
@@ -197,3 +204,8 @@ var TextView.textColor: Int
     set(value) { setTextColor(value) }
 
 fun Context.clipboardManager() = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+fun IntRange.coerceIn(range: IntRange): IntRange = when {
+    first >= range.first && last <= range.last -> this
+    else -> max(first, range.first)..min(last, range.last)
+}

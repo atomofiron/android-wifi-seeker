@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.clearOutOfRange
 import ru.raslav.wirelessscan.clipboardManager
+import ru.raslav.wirelessscan.coerceIn
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
@@ -27,6 +28,8 @@ import kotlin.math.roundToInt
 private enum class AnimType {
     None, ScanStart, ScanEnd
 }
+
+private const val RECYCLER_CACHE_SIZE = 8
 
 class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(PointItemCallback)
     , ValueAnimator.AnimatorUpdateListener
@@ -74,6 +77,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
+        recyclerView.setItemViewCacheSize(RECYCLER_CACHE_SIZE)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -148,11 +152,23 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         bssid: String? = null,
         bssidGroup: String? = null,
     ) {
-        currentList.forEachIndexed { index, point ->
+        val range = recyclerView?.run {
+            val first = getChildAt(0)
+                ?.let { findContainingViewHolder(it) }
+                ?: return@run null
+            val last = getChildAt(childCount.dec())
+                ?.let { findContainingViewHolder(it) }
+                ?: return@run null
+            // no reason to check the all items
+            (first.bindingAdapterPosition - RECYCLER_CACHE_SIZE)..(last.bindingAdapterPosition + RECYCLER_CACHE_SIZE)
+        }?.coerceIn(currentList.indices)
+            ?: currentList.indices
+        for (index in range) {
+            val point = currentList[index]
             when {
                 bssid != null && point.bssid == bssid -> Unit
                 bssidGroup != null && point.bssidGroup == bssidGroup -> Unit
-                else -> return@forEachIndexed
+                else -> continue
             }
             notifyItemChanged(index)
         }
