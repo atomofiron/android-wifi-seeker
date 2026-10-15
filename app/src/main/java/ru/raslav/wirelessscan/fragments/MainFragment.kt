@@ -74,6 +74,7 @@ import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointFilter
+import ru.raslav.wirelessscan.databinding.BottomBarBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
 import ru.raslav.wirelessscan.databinding.IconChipBinding
 import ru.raslav.wirelessscan.dlog
@@ -106,6 +107,7 @@ import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.Orientation
 import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
+import ru.raslav.wirelessscan.utils.performHapticLite
 import ru.raslav.wirelessscan.withAlpha
 import java.io.File
 import java.net.Inet4Address
@@ -203,10 +205,10 @@ class MainFragment : Fragment() {
         }
         binding.list.adapter = adapter
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
-        binding.updateSaveButtonState()
+        binding.bottomToolbar.updateSaveButtonState()
 
         filterDelegate.init(binding.bottomToolbar.filters)
-        binding.initButtons(binding.counters.root)
+        binding.bottomToolbar.initButtons(binding.counters.root)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
         binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
@@ -270,6 +272,7 @@ class MainFragment : Fragment() {
                 R.id.preferences -> requireActivity().asMain().showPreference()
                 else -> return false
             }
+            periods.performHapticLite()
             return true
         }
     }
@@ -311,15 +314,15 @@ class MainFragment : Fragment() {
 
     private fun onFilterChanged(filter: PointFilter) = updateCounters(adapter.updateFilter(filter))
 
-    private fun FragmentMainBinding.initButtons(label: TextView) {
-        bottomToolbar.buttonFilter.setOnClickListener { view ->
+    private fun BottomBarBinding.initButtons(label: TextView) {
+        buttonFilter.setOnClickListener { view ->
             view.isActivated = !view.isActivated
             updateCounters(adapter.filter(view.isActivated))
-            bottomToolbar.verticalFilters.isVisible = view.isActivated && bottomToolbar.verticalFilters.isNotEmpty()
-            bottomToolbar.horizontalFilters.isVisible = view.isActivated && bottomToolbar.horizontalFilters.isNotEmpty()
+            verticalFilters.isVisible = view.isActivated && verticalFilters.isNotEmpty()
+            horizontalFilters.isVisible = view.isActivated && horizontalFilters.isNotEmpty()
         }
         var snapshotFileName: String? = null
-        bottomToolbar.buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
+        buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
             if (adapter.isNotEmpty()) {
                 binding.flash.startAnimation(flashAnim)
                 when (val rslt = snapshots.put(adapter.points)) {
@@ -331,13 +334,14 @@ class MainFragment : Fragment() {
                 }
             }
         }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
-        bottomToolbar.buttonResume.setOnClickListener { view ->
+        buttonResume.setOnClickListener { view ->
             when {
                 view.isActivated -> stopScanService()
                 else -> checkPermissionAndStartScan()
             }
+            root.performHapticLite()
         }
-        bottomToolbar.buttonClear.setOnClickListener(DoubleClickMaster {
+        buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
             updateSaveButtonState()
@@ -346,13 +350,14 @@ class MainFragment : Fragment() {
             label.text = adapter.clearOutOfRange()
             updateSaveButtonState()
         })
-        bottomToolbar.buttonList.setOnClickListener {
+        buttonList.setOnClickListener {
             requireActivity().asMain().showSnapshots()
+            root.performHapticLite()
         }
     }
 
-    private fun FragmentMainBinding.updateSaveButtonState() {
-        bottomToolbar.buttonSave.isEnabled = adapter.isNotEmpty()
+    private fun BottomBarBinding.updateSaveButtonState() {
+        buttonSave.isEnabled = adapter.isNotEmpty()
     }
 
     private fun locationGranted() = requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
@@ -436,7 +441,7 @@ class MainFragment : Fragment() {
             binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
             updateCounters(adapter.updateList(list, withAnim = true))
             binding.bottomToolbar.buttonSave.isEnabled = list.isNotEmpty()
-            binding.updateSaveButtonState()
+            binding.bottomToolbar.updateSaveButtonState()
         }
     }
 

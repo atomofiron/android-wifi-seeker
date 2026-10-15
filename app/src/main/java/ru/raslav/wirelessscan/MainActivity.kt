@@ -11,6 +11,7 @@ import ru.raslav.wirelessscan.fragments.MainFragment
 import ru.raslav.wirelessscan.fragments.PreferenceFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
 import ru.raslav.wirelessscan.fragments.SnapshotListFragment
+import ru.raslav.wirelessscan.utils.setHapticEffect
 
 fun FragmentActivity.asMain(): MainActivity = this as MainActivity
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.fragment_container, MainFragment())
                 .commit()
         }
+        window.decorView.setHapticEffect(true)
     }
 
     private fun setFragment(fragment: Fragment) {

@@ -35,6 +35,7 @@ import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.utils.SnapshotManager.Companion.shareSnapshot
+import ru.raslav.wirelessscan.utils.performHapticLite
 
 class SnapshotFragment : Fragment() {
     companion object {
@@ -153,6 +154,7 @@ class SnapshotFragment : Fragment() {
                 }
                 else -> return false
             }
+            binding.root.performHapticLite()
             return true
         }
     }

@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import lib.atomofiron.insets.insetsPadding
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.databinding.AppBarBinding
+import ru.raslav.wirelessscan.utils.performHapticLite
 
 fun AppBarBinding.init(fragment: Fragment, title: Int) {
     init(fragment, fragment.getString(title))
@@ -23,6 +24,7 @@ fun AppBarBinding.init(
             if (clicked) return@setNavigationOnClickListener
             clicked = true
             fragment.parentFragmentManager.popBackStack()
+            root.performHapticLite()
         }
     }
 }
