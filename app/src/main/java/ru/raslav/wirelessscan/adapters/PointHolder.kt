@@ -9,12 +9,14 @@ import android.os.Build.VERSION_CODES.O
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import ru.raslav.wirelessscan.Const
 import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.copy
@@ -35,7 +37,6 @@ import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.min
 import kotlin.text.isEmpty
 
-
 private const val MAX_INDICATOR_LEVEL = 512
 
 class PointHolder(
@@ -49,6 +50,11 @@ class PointHolder(
         ContextCompat.getColor(binding.root.context, R.color.gray),
         binding.root.resources.getDimension(R.dimen.one),
     )
+
+    init {
+        binding.pwr.text = Const.Dot
+        binding.pwr.gravity = Gravity.END
+    }
 
     fun bind(point: Point, focused: Point?, current: CurrentConnection?) = binding.bind(point, focused, current)
 

@@ -3,7 +3,6 @@ package ru.raslav.wirelessscan.adapters
 import android.animation.ValueAnimator
 import android.content.Context
 import android.provider.Settings
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -62,8 +61,6 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         val binding = ItemPointBinding.inflate(parent.context.inflater(), parent, false)
         val holder = PointHolder(binding, colors, clipboard, closeDescription)
 
-        binding.pwr.text = Const.Dot
-        binding.pwr.gravity = Gravity.END
         binding.root.setOnClickListener {
             val position = holder.bindingAdapterPosition
             if (position != RecyclerView.NO_POSITION) {
