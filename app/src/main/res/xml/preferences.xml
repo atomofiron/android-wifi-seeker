@@ -19,7 +19,7 @@
         android:entries="@array/period_arr"
         android:defaultValue="1"
         />
-    <SwitchPreferenceCompat
+    <ru.raslav.wirelessscan.ui.preference.HapticSwitchPreference
         android:title="@string/work_in_bg"
         android:icon="@drawable/ic_radar"
         android:key="work_in_bg"
