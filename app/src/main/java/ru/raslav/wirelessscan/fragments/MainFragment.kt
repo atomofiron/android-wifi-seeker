@@ -210,7 +210,6 @@ class MainFragment : Fragment() {
         filterDelegate.init(binding.bottomToolbar.filters)
         binding.bottomToolbar.initButtons(binding.counters.root)
         binding.listTitle.root.setBackgroundResource(R.color.black_lite)
-        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         scanDrawable = ScanDrawable(
             color = requireContext().colorAttr(MaterialAttr.colorSurfaceContainer),
             scanColor = requireContext().colorAttr(MaterialAttr.colorPrimaryInverse) withAlpha 0.1f,
@@ -514,6 +513,7 @@ class MainFragment : Fragment() {
         orientation: Orientation,
         toolbarDelegate: ViewInsetsDelegate,
     ) {
+        binding.listTitle.bssid.isVisible = root.isWide()
         val vertical = orientation.vertical
         bottomToolbar.root.updateLayoutParams<FrameLayoutParams> {
             gravity = when (orientation) {

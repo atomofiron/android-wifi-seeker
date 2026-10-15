@@ -103,11 +103,11 @@ class SnapshotFragment : Fragment() {
         filterDelegate.init(filters)
         binding.listTitle.root.insetsPadding(start = true, end = true)
         binding.list.insetsPadding(start = true, end = true, bottom = true)
-        binding.listTitle.bssid.isVisible = resources.configuration.isWide()
         binding.counters.root.insetsPadding(horizontal = true)
         binding.root.layoutChanges {
             @SuppressLint("NotifyDataSetChanged")
             adapter.notifyDataSetChanged() // wide item layout
+            binding.listTitle.bssid.isVisible = binding.root.isWide()
         }
 
         viewJob.complete()

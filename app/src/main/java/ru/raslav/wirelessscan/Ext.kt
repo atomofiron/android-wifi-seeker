@@ -62,7 +62,7 @@ fun Boolean.toInt(): Int = if (this) 1 else 0
 
 fun Int.toBoolean(): Boolean = this != 0
 
-fun Configuration.isWide() = screenWidthDp > 640
+fun View.isWide() = width > resources.getDimensionPixelSize(R.dimen.medium_width)
 
 fun Context.openPermissionSettings() {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)

@@ -11,6 +11,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
@@ -41,6 +42,7 @@ private const val MAX_INDICATOR_LEVEL = 512
 
 class PointHolder(
     val binding: ItemPointBinding,
+    private val parent: ViewGroup,
     private val colors: PointColors,
     private val clip: ClipboardManager,
     private val closeDescription: (View) -> Unit,
@@ -120,7 +122,7 @@ class PointHolder(
         }
         bssid.text = point.bssid
         bssid.setTextColor(if (connected) colors.salad else colors.gray)
-        bssid.isVisible = root.resources.configuration.isWide()
+        bssid.isVisible = parent.isWide()
     }
 
     @Suppress("DEPRECATION")

@@ -59,7 +59,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointHolder {
         val binding = ItemPointBinding.inflate(parent.context.inflater(), parent, false)
-        val holder = PointHolder(binding, colors, clipboard, closeDescription)
+        val holder = PointHolder(binding, parent, colors, clipboard, closeDescription)
 
         binding.root.setOnClickListener {
             val position = holder.bindingAdapterPosition
