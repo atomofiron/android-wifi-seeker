@@ -76,7 +76,7 @@ class SnapshotManager(private val context: Context) {
                 point.copy(
                     bssidGroup = manuf.bssidGroup,
                     manufacturer = manuf.label,
-                    manufacturerDesc = manuf.description,
+                    manufacturerName = manuf.name,
                 )
             }
             Rslt.Ok(points)

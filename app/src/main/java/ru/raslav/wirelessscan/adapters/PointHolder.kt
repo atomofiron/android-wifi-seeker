@@ -212,8 +212,8 @@ class PointHolder(
         tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.channel, point.level)
         tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
         tvManuf.isVisible = point.manufacturer.isNotBlank()
-        tvManufDesc.text = point.manufacturerDesc
-        tvManufDesc.isVisible = point.manufacturerDesc.isNotBlank()
+        tvManufDesc.text = point.manufacturerName
+        tvManufDesc.isVisible = point.manufacturerName.isNotBlank()
         cross.setOnClickListener(closeDescription)
     }
 

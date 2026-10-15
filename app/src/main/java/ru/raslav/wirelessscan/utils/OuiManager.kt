@@ -33,7 +33,7 @@ private val DIGITS = arrayOf(6, 7, 9)
 private const val TABLE = "OUI"
 private const val COLUMN_MAC = "MAC"
 private const val COLUMN_LABEL = "label"
-private const val COLUMN_DESC = "description"
+private const val COLUMN_NAME = "description"
 private const val INDEX_MAC = "idx_oui_mac"
 
 private val MockRefreshing = BuildConfig.DEBUG
@@ -174,15 +174,15 @@ class OuiManager private constructor(context: Context) {
         val found = mutableMapOf<String, Manufacturer>()
         val macColumn = cursor.getColumnIndex(COLUMN_MAC)
         val labelColumn = cursor.getColumnIndex(COLUMN_LABEL)
-        val descColumn = cursor.getColumnIndex(COLUMN_DESC)
+        val descColumn = cursor.getColumnIndex(COLUMN_NAME)
         while (cursor.moveToNext()) {
             val label = labelColumn.takeIf { it >= 0 }?.let { cursor.getString(it) }
-            val description = descColumn.takeIf { it >= 0 }?.let { cursor.getString(it) }
-            if (label == null && description == null) {
+            val name = descColumn.takeIf { it >= 0 }?.let { cursor.getString(it) }
+            if (label == null && name == null) {
                 continue
             }
             val mac = cursor.getString(macColumn)
-            found[mac] = Manufacturer(mac, label = label ?: "", description = description ?: "")
+            found[mac] = Manufacturer(mac, label = label ?: "", name = name ?: "")
         }
         cursor.close()
         return found
@@ -206,10 +206,10 @@ class OuiManager private constructor(context: Context) {
         tmpFile.delete()
 
         val db = SQLiteDatabase.openOrCreateDatabase(tmpFile.absolutePath, null)
-        db.execSQL("create table $TABLE ($COLUMN_MAC TEXT NOT NULL, $COLUMN_LABEL TEXT NOT NULL, $COLUMN_DESC TEXT NOT NULL)")
+        db.execSQL("create table $TABLE ($COLUMN_MAC TEXT NOT NULL, $COLUMN_LABEL TEXT NOT NULL, $COLUMN_NAME TEXT NOT NULL)")
 
         val delimiter = Pattern.compile(" *\t")
-        val statement = db.compileStatement("insert into $TABLE ($COLUMN_MAC, $COLUMN_LABEL, $COLUMN_DESC) values (?, ?, ?)")
+        val statement = db.compileStatement("insert into $TABLE ($COLUMN_MAC, $COLUMN_LABEL, $COLUMN_NAME) values (?, ?, ?)")
         val step = entries / 100
         var counter = 0L
         var totalCounter = 0L

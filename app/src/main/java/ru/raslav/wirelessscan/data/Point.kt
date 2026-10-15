@@ -5,7 +5,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.TIRAMISU
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import nl.adaptivity.xmlutil.serialization.XmlDefault
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import ru.raslav.wirelessscan.isReadable
@@ -25,9 +24,8 @@ data class Point(
     val essidHex: String = "",
     val bssid: String,
     val manufacturer: String = "",
-    @XmlDefault("")
-    @XmlSerialName("manufacturer_description", "", "")
-    val manufacturerDesc: String = "",
+    @XmlSerialName("manufacturer_name", "", "")
+    val manufacturerName: String = "",
 
     @Transient
     val wps: Boolean = capabilities.contains("WPS"),
