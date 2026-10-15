@@ -30,7 +30,7 @@
     <string name="essid_empty">пусто</string>
     <string name="capab_format">Возможности: %s</string>
     <string name="frequ_format">Частота: %1$d, канал: %2$s, мощь: %3$d</string>
-    <string name="manuf_format">Производитель: %s</string>
+    <string name="manuf_format">Производитель: %s\n%s</string>
 
     <!-- Permissions -->
     <string name="need_location_permission">Для функционирования на Android 6 и выше\nнеобходимо разрешение на доступ к местоположению</string>

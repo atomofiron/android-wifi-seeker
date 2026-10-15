@@ -4,4 +4,5 @@ data class Manufacturer(
     val bssidGroup: String,
     val label: String,
     val name: String,
+    val presumably: Boolean,
 )

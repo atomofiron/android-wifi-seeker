@@ -99,13 +99,13 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     }
 
     private fun setFocused(point: Point) {
-        notifyChanged(bssidGroup = focused?.bssidGroup)
+        notifyChanged(bssid = focused?.bssid, bssidGroup = focused?.bssidGroup)
         focused = point
-        notifyChanged(bssidGroup = point.bssidGroup)
+        notifyChanged(bssid = point.bssid, bssidGroup = point.bssidGroup)
     }
 
     fun resetFocus() {
-        notifyChanged(bssidGroup = focused?.bssidGroup)
+        notifyChanged(bssid = focused?.bssid, bssidGroup = focused?.bssidGroup)
         focused = null
     }
 
@@ -164,13 +164,9 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
         }?.coerceIn(currentList.indices)
             ?: currentList.indices
         for (index in range) {
-            val point = currentList[index]
-            when {
-                bssid != null && point.bssid == bssid -> Unit
-                bssidGroup != null && point.bssidGroup == bssidGroup -> Unit
-                else -> continue
+            if (currentList[index].related(bssid, bssidGroup)) {
+                notifyItemChanged(index)
             }
-            notifyItemChanged(index)
         }
     }
 

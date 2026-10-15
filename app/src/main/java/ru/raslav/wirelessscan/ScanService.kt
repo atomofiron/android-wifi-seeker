@@ -193,20 +193,12 @@ class ScanService : IntentService("ScanService") {
                         add(0, r)
                         continue
                     }
-                    val new = r.copy(
-                        bssidGroup = info.bssidGroup,
-                        manufacturer = info.label,
-                        manufacturerName = info.name,
-                    )
+                    val new = r.copy(manufacturer = info)
                     add(0, new)
                     continue
                 }
                 val old = get(index)
-                val new = r.copy(
-                    bssidGroup = old.bssidGroup,
-                    manufacturer = old.manufacturer,
-                    manufacturerName = old.manufacturerName,
-                )
+                val new = r.copy(manufacturer = old.manufacturer)
                 removeAt(index)
                 add(0, new)
             }

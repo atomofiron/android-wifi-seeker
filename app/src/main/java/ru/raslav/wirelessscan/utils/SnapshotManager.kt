@@ -73,11 +73,7 @@ class SnapshotManager(private val context: Context) {
             val points = snapshot.points.map { point ->
                 val manuf = oui { find(point.bssid) }
                     ?: return@map point
-                point.copy(
-                    bssidGroup = manuf.bssidGroup,
-                    manufacturer = manuf.label,
-                    manufacturerName = manuf.name,
-                )
+                point.copy(manufacturer = manuf)
             }
             Rslt.Ok(points)
         } catch (e: Exception) {

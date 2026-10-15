@@ -30,6 +30,7 @@ import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
 import ru.raslav.wirelessscan.textColor
+import ru.raslav.wirelessscan.utils.Manufacturer
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.min
 import kotlin.text.isEmpty
@@ -116,7 +117,6 @@ class PointHolder(
         bssid.isVisible = root.resources.configuration.isWide()
     }
 
-
     @Suppress("DEPRECATION")
     private fun getPowerColor(level: Int): Int {
         val level = level.coerceIn(Point.range)
@@ -138,19 +138,10 @@ class PointHolder(
         return "#ff$red${green}00".toColorInt()
     }
 
-    private fun View.bindBackground(point: Point, focused: Point?) {
-        val focused = focused
-        val associating = when {
-            focused == null -> false
-            point.bssid == focused.bssid -> true
-            point.bssidGroup.isNotEmpty() && focused.bssidGroup.isNotEmpty() -> point.bssidGroup == focused.bssidGroup
-            else -> false
-        }
-        when {
-            !associating -> background = null
-            point.level <= Point.range.first -> setBackgroundResource(R.drawable.grille_red)
-            else -> setBackgroundResource(R.drawable.grille)
-        }
+    private fun View.bindBackground(point: Point, focused: Point?) = when {
+        !point.related(focused) -> background = null
+        point.level <= Point.range.first -> setBackgroundResource(R.drawable.grille_red)
+        else -> setBackgroundResource(R.drawable.grille)
     }
 
     private fun ItemPointBinding.updateDescription(point: Point?, current: CurrentConnection?) {
@@ -210,10 +201,14 @@ class PointHolder(
         tvGateway.isVisible = !current?.gateway.isNullOrEmpty()
         tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
         tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.channel, point.level)
-        tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
-        tvManuf.isVisible = point.manufacturer.isNotBlank()
-        tvManufDesc.text = point.manufacturerName
-        tvManufDesc.isVisible = point.manufacturerName.isNotBlank()
+        tvManuf.isVisible = point.manufacturer?.also {
+            val label = when {
+                it.presumably -> "${it.label} [${it.bssidGroup}]"
+                else -> it.label
+            }
+            tvManuf.text = resources.getString(R.string.manuf_format, label, it.name)
+            tvManuf.textColor = it.getColor()
+        } != null
         cross.setOnClickListener(closeDescription)
     }
 
@@ -221,6 +216,11 @@ class PointHolder(
         return SpannableStringBuilder(getString(R.string.essid_format, text)).apply {
             setSpan(ForegroundColorSpan(color), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
+    }
+
+    private fun Manufacturer.getColor(): Int = when {
+        presumably -> colors.grayLow
+        else -> colors.white
     }
 
     private fun Band?.getColor(): Int = when (this) {

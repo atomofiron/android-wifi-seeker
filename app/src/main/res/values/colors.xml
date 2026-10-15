@@ -15,6 +15,7 @@
     <color name="black_lite">#33000000</color>
     <color name="red_dark_lite">#33550000</color>
     <color name="gray">#ffcccccc</color>
+    <color name="gray_low">#ffa0a0a0</color>
     <color name="normal">#ccffffff</color>
     <color name="blue_light">#ff8888ff</color>
     <color name="green">#ff00ff00</color>

@@ -8,6 +8,8 @@ class PointColors(context: Context) {
     val blackLite = ContextCompat.getColor(context, R.color.black_lite)
     val redDarkLite = ContextCompat.getColor(context, R.color.red_dark_lite)
     val gray = ContextCompat.getColor(context, R.color.gray)
+    val grayLow = ContextCompat.getColor(context, R.color.gray_low)
+    val white = ContextCompat.getColor(context, R.color.white)
     val blueLight = ContextCompat.getColor(context, R.color.blue_light)
     val green = ContextCompat.getColor(context, R.color.green)
     val yellowMiddle = ContextCompat.getColor(context, R.color.yellow_middle)

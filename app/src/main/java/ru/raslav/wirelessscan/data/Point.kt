@@ -8,6 +8,7 @@ import kotlinx.serialization.Transient
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import ru.raslav.wirelessscan.isReadable
+import ru.raslav.wirelessscan.utils.Manufacturer
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
@@ -23,9 +24,6 @@ data class Point(
     @XmlSerialName("essid_hex")
     val essidHex: String = "",
     val bssid: String,
-    val manufacturer: String = "",
-    @XmlSerialName("manufacturer_name", "", "")
-    val manufacturerName: String = "",
 
     @Transient
     val wps: Boolean = capabilities.contains("WPS"),
@@ -55,7 +53,7 @@ data class Point(
     },
 
     @Transient
-    val bssidGroup: String = "",
+    val manufacturer: Manufacturer? = null,
     @Transient
     private var fcb: FrequencyChannelBand = FrequencyChannelBand(frequency),
 ) {
@@ -69,6 +67,15 @@ data class Point(
     }
 
     val band: Band? get() = fcb.band
+
+    @XmlElement
+    @XmlSerialName("manufacturer")
+    val manufacturerLabel: String? = manufacturer?.label
+    @XmlElement
+    @XmlSerialName("manufacturer_name")
+    val manufacturerName: String? = manufacturer?.name
+
+    val bssidGroup: String? get() = manufacturer?.bssidGroup
 
     val outOfRange get() = level <= range.first
 
@@ -89,6 +96,18 @@ data class Point(
         else -> other.essidHex == essidHex
     }
 
+    fun related(other: Point?): Boolean = related(other?.bssid, other?.bssidGroup)
+
+    fun related(bssid: String?, bssidGroup: String?): Boolean = when {
+        bssidGroup != null && bssidGroup == this.bssidGroup -> return true
+        bssid == null -> return false
+        else -> for (i in 0..12) {
+            if (this.bssid[i] != bssid[i]) {
+                return false
+            }
+        }
+    }.let { true }
+
     fun keyHash(): Long = when {
         essidHex.isEmpty() -> essid
         else -> essidHex
@@ -108,7 +127,7 @@ data class Point(
                 capabilities = capabilities,
                 essid = essid,
                 essidHex = getSsidHexIfNeeded(essid),
-                bssid = BSSID,
+                bssid = BSSID.uppercase(),
             )
         }
     }

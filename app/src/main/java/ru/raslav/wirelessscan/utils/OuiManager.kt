@@ -28,7 +28,6 @@ import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DB_NAME = "oui.db"
-private val DIGITS = arrayOf(6, 7, 9)
 
 private const val TABLE = "OUI"
 private const val COLUMN_MAC = "MAC"
@@ -45,6 +44,7 @@ class OuiManager private constructor(context: Context) {
         private const val BUILTIN_ENTRIES = 58526L
 
         private lateinit var self: OuiManager
+        private val cache = mutableMapOf<String, Manufacturer>()
 
         private val mutex = Mutex()
 
@@ -107,13 +107,31 @@ class OuiManager private constructor(context: Context) {
     fun entries(): Long = DatabaseUtils.queryNumEntries(db, TABLE)
 
     fun find(bssid: String): Manufacturer? {
-        val mac = bssid.replace(":", "").uppercase()
-        val candidates = DIGITS.map { mac.take(it) }
-        val found = db.find(candidates)
-        candidates.forEach {
-            candidate -> found[candidate]?.let { return it }
+        cache[bssid]?.let {
+            return it
         }
-        return null
+        val digits = bssid.replace(":", "")
+            .take(9)
+            .uppercase()
+        val candidates = buildList {
+            add(digits)
+            add(digits.take(7))
+            add(digits.take(6))
+            val nonLocal = resetULbit(digits)
+            if (nonLocal != null) {
+                add(nonLocal)
+                add(nonLocal.take(7))
+                add(nonLocal.take(6))
+            }
+        }
+        return db.find(candidates)
+            ?.also { cache[bssid] = it }
+    }
+
+    private fun resetULbit(digits: String): String? {
+        return "2367ABEF".indexOf(digits[1])
+            .let { "014589CD".getOrNull(it) }
+            ?.let { digits.replaceRange(1, 2, it.toString()) }
     }
 
     private suspend fun update(length: Long): OuiMeta? = withContext(IO) {
@@ -165,12 +183,12 @@ class OuiManager private constructor(context: Context) {
         }
     }
 
-    private fun SQLiteDatabase.find(digits: List<String>): Map<String, Manufacturer> {
+    private fun SQLiteDatabase.find(candidates: List<String>): Manufacturer? {
         val cursor = rawQuery(
-            "select * from $TABLE where $COLUMN_MAC in (${digits.joinToString { "?" }});",
-            digits.toTypedArray(),
+            "select * from $TABLE where $COLUMN_MAC in (${candidates.joinToString { "?" }});",
+            candidates.toTypedArray(),
         )
-        val found = mutableMapOf<String, Manufacturer>()
+        var found: Manufacturer? = null
         val macColumn = cursor.getColumnIndex(COLUMN_MAC)
         val labelColumn = cursor.getColumnIndex(COLUMN_LABEL)
         val descColumn = cursor.getColumnIndex(COLUMN_NAME)
@@ -180,8 +198,14 @@ class OuiManager private constructor(context: Context) {
             if (label == null && name == null) {
                 continue
             }
-            val mac = cursor.getString(macColumn)
-            found[mac] = Manufacturer(mac, label = label ?: "", name = name ?: "")
+            val digits = cursor.getString(macColumn)
+            val presumably = candidates.indexOf(digits) >= 3
+            if (found == null || !presumably) {
+                found = Manufacturer(digits, label = label ?: "", name = name ?: "", presumably = presumably)
+                if (!presumably) {
+                    break
+                }
+            }
         }
         cursor.close()
         return found
