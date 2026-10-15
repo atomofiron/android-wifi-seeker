@@ -6,7 +6,8 @@
     </item>
     <item>
         <bitmap
-            android:src="@drawable/grille_img_diag"
-            android:tileMode="repeat" />
+            android:src="@drawable/grille_img"
+            android:tileMode="repeat"
+            />
     </item>
 </layer-list>

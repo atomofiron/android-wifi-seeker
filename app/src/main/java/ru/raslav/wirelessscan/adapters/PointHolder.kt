@@ -140,8 +140,12 @@ class PointHolder(
 
     private fun View.bindBackground(point: Point, focused: Point?) = when {
         !point.related(focused) -> background = null
-        point.level <= Point.range.first -> setBackgroundResource(R.drawable.grille_red)
-        else -> setBackgroundResource(R.drawable.grille)
+        else -> when (point.bssidGroup) {
+            null if (point.outOfRange) -> R.drawable.grille_red
+            null -> R.drawable.grille
+            else if (point.outOfRange) -> R.drawable.grille_red_diag
+            else  -> R.drawable.grille_diag
+        }.let { setBackgroundResource(it) }
     }
 
     private fun ItemPointBinding.updateDescription(point: Point?, current: CurrentConnection?) {

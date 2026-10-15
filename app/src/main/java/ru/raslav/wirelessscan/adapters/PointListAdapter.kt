@@ -111,7 +111,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
 
     /** @return counters like '15 / 22' or '5 / 15 / 22' */
     private fun getCounters(filtered: Int): String {
-        val count = points.count { it.level > Point.range.first }
+        val count = points.count { !it.outOfRange }
         return "${if (filtering) "$filtered / " else ""}$count / ${points.size}"
     }
 
