@@ -13,60 +13,61 @@
         android:orientation="horizontal"
         >
         <TextView
-            android:layout_width="28dp"
+            android:id="@+id/pwr"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:id="@+id/pwr"
             android:text="PW"
-            android:layout_marginStart="2dp"
-            android:gravity="center"
-            android:maxLines="1"
+            android:typeface="monospace"
+            android:gravity="end"
             />
         <TextView
-            android:layout_width="4dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:id="@+id/ch"
+            android:layout_width="36sp"
+            android:layout_height="wrap_content"
             android:text="CH"
+            android:typeface="monospace"
             android:gravity="center"
             />
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
             android:id="@+id/enc"
+            android:layout_width="56sp"
+            android:layout_height="wrap_content"
             android:text="ENC"
+            android:typeface="monospace"
             />
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
             android:id="@+id/cip"
+            android:layout_width="52sp"
+            android:layout_height="wrap_content"
             android:text="CIP"
+            android:typeface="monospace"
             />
         <TextView
-            android:layout_width="4dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:id="@+id/wps"
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
             android:text="WPS"
+            android:typeface="monospace"
             android:gravity="center"
             />
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="10"
-            android:id="@+id/essid"
-            android:text="ESSID"
-            android:maxLines="1"
-            android:ellipsize="end"
-            />
-        <TextView
-            android:layout_width="128sp"
+            android:layout_width="164sp"
             android:layout_height="wrap_content"
             android:id="@+id/bssid"
             android:text="BSSID"
+            android:typeface="monospace"
             android:maxLines="1"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/essid"
+            android:text="ESSID"
+            android:typeface="monospace"
+            android:maxLines="1"
+            android:ellipsize="end"
             />
     </LinearLayout>
 </LinearLayout>
