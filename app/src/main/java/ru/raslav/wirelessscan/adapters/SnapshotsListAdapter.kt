@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.databinding.ItemSnapshotBinding
 import ru.raslav.wirelessscan.inflater
-import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.utils.setOnDoubleClickListener
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
 
@@ -36,13 +36,13 @@ class SnapshotsListAdapter(private val context: Context) : RecyclerView.Adapter<
         binding.share.setOnClickListener {
             positionOf(holder)?.let { onSnapshotShareListener(list[it]) }
         }
-        binding.delete.setOnClickListener(DoubleClickMaster {
+        binding.delete.setOnDoubleClickListener {
             positionOf(holder)?.let { index ->
                 File(dir.absolutePath, list[index]).delete()
                 list.removeAt(index)
                 notifyItemRemoved(index)
             }
-        })
+        }
         return holder
     }
 

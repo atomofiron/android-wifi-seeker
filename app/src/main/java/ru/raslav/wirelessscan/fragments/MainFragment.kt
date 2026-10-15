@@ -97,7 +97,7 @@ import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
 import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
-import ru.raslav.wirelessscan.utils.DoubleClickMaster
+import ru.raslav.wirelessscan.utils.setOnDoubleClickListener
 import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.FrameLayoutParams
@@ -322,18 +322,21 @@ class MainFragment : Fragment() {
             horizontalFilters.isVisible = view.isActivated && horizontalFilters.isNotEmpty()
         }
         var snapshotFileName: String? = null
-        buttonSave.setOnClickListener(DoubleClickMaster(1000L).onClickListener {
-            if (adapter.isNotEmpty()) {
-                binding.flash.startAnimation(flashAnim)
-                when (val rslt = snapshots.put(adapter.points)) {
-                    is Rslt.Err -> requireContext().showError(rslt.message)
-                    is Rslt.Ok -> {
-                        Toast.makeText(requireContext(), R.string.snapshot_saved, Toast.LENGTH_LONG).show()
-                        snapshotFileName = rslt.value
+        buttonSave.setOnDoubleClickListener(
+            onClick = {
+                if (adapter.isNotEmpty()) {
+                    binding.flash.startAnimation(flashAnim)
+                    when (val rslt = snapshots.put(adapter.points)) {
+                        is Rslt.Err -> requireContext().showError(rslt.message)
+                        is Rslt.Ok -> {
+                            Toast.makeText(requireContext(), R.string.snapshot_saved, Toast.LENGTH_LONG).show()
+                            snapshotFileName = rslt.value
+                        }
                     }
                 }
-            }
-        }.onDoubleClickListener { renameSnapshot(snapshotFileName ?: return@onDoubleClickListener) })
+            },
+            onDoubleClick = { snapshotFileName?.let { renameSnapshot(it) } },
+        )
         buttonResume.setOnClickListener { view ->
             when {
                 view.isActivated -> stopScanService()
@@ -341,15 +344,18 @@ class MainFragment : Fragment() {
             }
             root.performHapticLite()
         }
-        buttonClear.setOnClickListener(DoubleClickMaster {
-            scanConnection.clearPointsList()
-            label.text = adapter.clear()
-            updateButtonsState()
-        }.onClickListener {
-            scanConnection.clearOutOfRangePoints()
-            label.text = adapter.clearOutOfRange()
-            updateButtonsState()
-        })
+        buttonClear.setOnDoubleClickListener(
+            onClick = {
+                scanConnection.clearOutOfRangePoints()
+                label.text = adapter.clearOutOfRange()
+                updateButtonsState()
+            },
+            onDoubleClick = {
+                scanConnection.clearPointsList()
+                label.text = adapter.clear()
+                updateButtonsState()
+            },
+        )
         buttonList.setOnClickListener {
             requireActivity().asMain().showSnapshots()
             root.performHapticLite()
