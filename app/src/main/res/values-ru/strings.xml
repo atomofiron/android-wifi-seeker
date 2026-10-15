@@ -29,7 +29,7 @@
     <!-- Description -->
     <string name="essid_empty">пусто</string>
     <string name="capab_format">Возможности: %s</string>
-    <string name="frequ_format">Частота: %1$d, канал: %2$d, мощь: %3$d</string>
+    <string name="frequ_format">Частота: %1$d, канал: %2$s, мощь: %3$d</string>
     <string name="manuf_format">Производитель: %s</string>
 
     <!-- Permissions -->

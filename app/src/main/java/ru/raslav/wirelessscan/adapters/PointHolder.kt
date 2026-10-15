@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const.ALPHA_INT_HALF
 import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.copy
+import ru.raslav.wirelessscan.data.Band
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
@@ -71,8 +72,8 @@ class PointHolder(
         // point.level >= -1 experiment
         pwr.textColor = if (point.level >= -1) Color.MAGENTA else getPowerColor(point.level)
 
-        ch.text = point.ch.toString()
-        ch.textColor = if (point.is5Ghz()) colors.blueLight else colors.gray
+        ch.text = point.channel
+        ch.textColor = point.band.getColor()
 
         enc.text = point.enc
         enc.textColor = when {
@@ -208,7 +209,7 @@ class PointHolder(
             ?.let { resources.getString(R.string.gateway_format, it) }
         tvGateway.isVisible = !current?.gateway.isNullOrEmpty()
         tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
-        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.ch, point.level)
+        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.channel, point.level)
         tvManuf.text = resources.getString(R.string.manuf_format, point.manufacturer)
         tvManuf.isVisible = point.manufacturer.isNotBlank()
         tvManufDesc.text = point.manufacturerDesc
@@ -222,4 +223,14 @@ class PointHolder(
         }
     }
 
+    private fun Band?.getColor(): Int = when (this) {
+        Band.G2 -> colors.gray
+        Band.G3 -> colors.nightSakura
+        Band.G4 -> colors.lotus
+        Band.G5 -> colors.blueLight
+        Band.G6S -> colors.chestnut
+        Band.G6 -> colors.skyWhite
+        Band.G60 -> colors.tangerine
+        null -> colors.redHigh
+    }
 }

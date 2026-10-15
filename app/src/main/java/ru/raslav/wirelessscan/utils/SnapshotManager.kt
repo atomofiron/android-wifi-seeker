@@ -87,7 +87,7 @@ class SnapshotManager(private val context: Context) {
     }
 
     @Serializable
-    @XmlSerialName(RootTag, "", "")
+    @XmlSerialName(RootTag)
     data class Snapshot(
         val points: List<Point>,
     )
