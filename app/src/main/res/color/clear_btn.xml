@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_activated="true" android:color="?colorError" />
-    <item android:color="@color/normal" />
+    <item
+        android:state_enabled="false"
+        android:color="?attr/colorControlNormal"
+        android:alpha="@dimen/material_emphasis_disabled"
+        />
+    <item
+        android:state_activated="true"
+        android:color="?colorError"
+        />
+    <item
+        android:color="?colorControlNormal"
+        />
 </selector>

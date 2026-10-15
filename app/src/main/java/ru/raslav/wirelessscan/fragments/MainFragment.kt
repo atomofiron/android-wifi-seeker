@@ -205,7 +205,7 @@ class MainFragment : Fragment() {
         }
         binding.list.adapter = adapter
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
-        binding.bottomToolbar.updateSaveButtonState()
+        binding.bottomToolbar.updateButtonsState()
 
         filterDelegate.init(binding.bottomToolbar.filters)
         binding.bottomToolbar.initButtons(binding.counters.root)
@@ -344,11 +344,11 @@ class MainFragment : Fragment() {
         buttonClear.setOnClickListener(DoubleClickMaster {
             scanConnection.clearPointsList()
             label.text = adapter.clear()
-            updateSaveButtonState()
+            updateButtonsState()
         }.onClickListener {
             scanConnection.clearOutOfRangePoints()
             label.text = adapter.clearOutOfRange()
-            updateSaveButtonState()
+            updateButtonsState()
         })
         buttonList.setOnClickListener {
             requireActivity().asMain().showSnapshots()
@@ -356,8 +356,10 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun BottomBarBinding.updateSaveButtonState() {
-        buttonSave.isEnabled = adapter.isNotEmpty()
+    private fun BottomBarBinding.updateButtonsState() {
+        val isNotEmpty = adapter.isNotEmpty()
+        buttonClear.isEnabled = isNotEmpty
+        buttonSave.isEnabled = isNotEmpty
     }
 
     private fun locationGranted() = requireContext().checkSelfPermission(Const.LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
@@ -440,8 +442,7 @@ class MainFragment : Fragment() {
             val list = msg.obj as ArrayList<Point>
             binding.bottomToolbar.buttonResume.isActivated = msg.arg1.toBoolean()
             updateCounters(adapter.updateList(list, withAnim = true))
-            binding.bottomToolbar.buttonSave.isEnabled = list.isNotEmpty()
-            binding.bottomToolbar.updateSaveButtonState()
+            binding.bottomToolbar.updateButtonsState()
         }
     }
 
