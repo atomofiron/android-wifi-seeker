@@ -55,7 +55,6 @@
                 android:layout_below="@+id/list_title"
                 android:scrollbars="vertical"
                 android:clipToPadding="false"
-                android:scrollbarThumbVertical="@drawable/scroll_vertical"
                 android:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 />

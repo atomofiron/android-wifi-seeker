@@ -77,7 +77,6 @@ class HeaderDropdownLayout : ConstraintLayout {
         val scrollView = HorizontalScrollView(context)
         scrollView.clipToPadding = false
         scrollView.overScrollMode = OVER_SCROLL_NEVER
-        if (SDK_INT >= Q) scrollView.horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
         scrollView.addView(layout)
         addView(scrollView)
         updatePadding()

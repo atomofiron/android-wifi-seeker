@@ -20,10 +20,7 @@ class FilterDelegate(
     private val onFilterChanged: (PointFilter) -> Unit,
 ) {
     fun init(layout: ViewGroup) {
-        (layout.parent as? HorizontalScrollView)?.run {
-            overScrollMode = OVER_SCROLL_NEVER
-            if (SDK_INT >= Q) horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
-        }
+        (layout.parent as? HorizontalScrollView)?.overScrollMode = OVER_SCROLL_NEVER
         val inflater = layout.context.inflater()
         layout.completeChildren(
             count = PointFilter.labels.size,

@@ -15,6 +15,9 @@
         <item name="android:windowBackground">@color/colorDarkGray</item>
         <!--  name="android:buttonsPaneBarColor">@color/colorBlack -->
         <!--  name="android:navigationBarColor">@color/colorBlack  -->
+
+        <item name="android:scrollbarThumbHorizontal">@drawable/scroll_horizontal</item>
+        <item name="android:scrollbarThumbVertical">@drawable/scroll_vertical</item>
     </style>
     <style name="ToolbarButtonShape" parent="">
         <item name="cornerFamily">rounded</item>

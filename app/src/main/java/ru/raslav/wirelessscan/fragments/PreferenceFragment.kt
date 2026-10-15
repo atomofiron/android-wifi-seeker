@@ -102,9 +102,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         insetsPadding(start = true, end = true, bottom = true)
         setupSpringOverscroll()
         clipToPadding = false
-        if (SDK_INT >= Q) {
-            verticalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_vertical)
-        }
         addOnChildAttachStateChangeListener(ChildAttachListener(sp, ouiPreference))
     }
 
