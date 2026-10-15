@@ -49,6 +49,7 @@ import ru.raslav.wirelessscan.data.Loading
 import ru.raslav.wirelessscan.data.OuiMeta
 import ru.raslav.wirelessscan.databinding.FragmentPreferencesBinding
 import ru.raslav.wirelessscan.databinding.WidgetRefreshAndOutsideBinding
+import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.openPermissionSettings
 import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
@@ -225,6 +226,7 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
                         is Loading.Finished<OuiMeta> -> {
                             button.setImageResource(R.drawable.ic_circle_check)
                             preference.setOuiEntries(root.resources, loading.data.entries)
+                            elog(loading.data.toString())
                         }
                         is Loading.Error if (tried) -> {
                             tried = false

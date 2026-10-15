@@ -33,7 +33,7 @@ private val DIGITS = arrayOf(6, 7, 9)
 private const val TABLE = "OUI"
 private const val COLUMN_MAC = "MAC"
 private const val COLUMN_LABEL = "label"
-private const val COLUMN_NAME = "description"
+private const val COLUMN_NAME = "name"
 private const val INDEX_MAC = "idx_oui_mac"
 
 private val MockRefreshing = BuildConfig.DEBUG
@@ -41,8 +41,8 @@ private val MockRefreshing = BuildConfig.DEBUG
 class OuiManager private constructor(context: Context) {
     companion object {
 
-        const val BUILTIN_OUI_TEXT_LENGTH = 3169791L
-        private const val BUILTIN_ENTRIES = 58482L
+        const val BUILTIN_OUI_TEXT_LENGTH = 3172357L
+        private const val BUILTIN_ENTRIES = 58526L
 
         private lateinit var self: OuiManager
 
