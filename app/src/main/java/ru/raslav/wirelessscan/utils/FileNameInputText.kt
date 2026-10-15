@@ -5,7 +5,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import java.util.regex.Pattern
 import kotlin.math.min
 
-class FileNameInputText(co: Context) : AppCompatEditText(co) {
+class FileNameInputText(context: Context) : AppCompatEditText(context) {
     companion object { // necessary
         private val pattern = Pattern.compile("[^a-zA-Zа-яА-Я0-9.()_-]")
     }

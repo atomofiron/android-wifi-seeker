@@ -9,7 +9,6 @@ import android.os.Build.VERSION_CODES.O
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -25,6 +24,7 @@ import ru.raslav.wirelessscan.data.PointColors
 import ru.raslav.wirelessscan.databinding.PointDescriptionBinding
 import ru.raslav.wirelessscan.databinding.ItemPointBinding
 import ru.raslav.wirelessscan.elog
+import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.isRtl
 import ru.raslav.wirelessscan.isVisible
 import ru.raslav.wirelessscan.isWide
@@ -76,9 +76,9 @@ class PointHolder(
 
         enc.text = point.enc
         enc.textColor = when {
-            point.capabilities.contains("OWE") -> colors.avokado // open
+            point.capabilities.contains("OWE") -> colors.avocado // open
             point.capabilities.contains("EAP") -> colors.lotus // WPA2
-            point.enc == "WPA3" -> colors.jinx_eyes
+            point.enc == "WPA3" -> colors.jinxEyes
             point.enc == "WPA2/3" -> colors.chestnut
             point.enc == "WPA2" -> colors.yellowMiddle
             point.enc == "WPA" -> colors.tangerine
@@ -92,7 +92,7 @@ class PointHolder(
             point.capabilities.contains("TKIP") -> colors.skyWhite
             point.cip.contains("WEP") -> colors.skyLight
             point.cip.contains("CCMP") -> colors.gray
-            point.cip.contains("GCMP") -> colors.jinx_eyes
+            point.cip.contains("GCMP") -> colors.jinxEyes
             else -> colors.gray
         }
 
@@ -158,7 +158,7 @@ class PointHolder(
         when {
             point != null && description != null -> description.bind(point, current, colors)
             point == null && description != null -> root.removeView(description.root)
-            point != null && description == null -> LayoutInflater.from(root.context)
+            point != null && description == null -> root.context.inflater()
                 .let { PointDescriptionBinding.inflate(it, root, true) }
                 .init()
                 .bind(point, current, colors)

@@ -10,7 +10,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.TIRAMISU
@@ -54,7 +53,7 @@ fun Context.canHandle(intent: Intent): Boolean = when {
     else -> packageManager.queryIntentActivities(intent, 0)
 }.isNotEmpty()
 
-fun Context.inflater() = LayoutInflater.from(this)
+fun Context.inflater(): LayoutInflater = LayoutInflater.from(this)
 
 fun <T> unsafeLazy(provider: () -> T) = lazy(LazyThreadSafetyMode.NONE, provider)
 
@@ -86,10 +85,6 @@ fun MutableList<Point>.clearOutOfRange(): MutableList<Point> {
 fun Int.half() = this / 2
 
 fun Int.sqr() = this * this
-
-private fun Rect.centerX() = left + width().half()
-
-private fun Rect.centerY() = top + height().half()
 
 fun Context.colorAttr(@AttrRes attr: Int) = MaterialColors.getColor(this, attr, Color.MAGENTA)
 
@@ -208,4 +203,14 @@ fun Context.clipboardManager() = getSystemService(Context.CLIPBOARD_SERVICE) as 
 fun IntRange.coerceIn(range: IntRange): IntRange = when {
     first >= range.first && last <= range.last -> this
     else -> max(first, range.first)..min(last, range.last)
+}
+
+fun View.absoluteElevation(): Float {
+    var elevation = 0f
+    var view: View? = this
+    while (view != null) {
+        elevation += view.elevation
+        view = view.parent as? View
+    }
+    return elevation
 }

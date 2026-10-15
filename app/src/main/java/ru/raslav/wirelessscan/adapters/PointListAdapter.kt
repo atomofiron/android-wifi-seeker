@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.provider.Settings
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +19,7 @@ import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
 import ru.raslav.wirelessscan.data.PointFilter
 import ru.raslav.wirelessscan.databinding.ItemPointBinding
+import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.utils.AlternatingDecoration.Colors
 import kotlin.math.max
 import kotlin.math.min
@@ -59,7 +59,7 @@ class PointListAdapter(context: Context) : ListAdapter<Point, PointHolder>(Point
     override fun getItemId(position: Int): Long = currentList[position].keyHash()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointHolder {
-        val binding = ItemPointBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemPointBinding.inflate(parent.context.inflater(), parent, false)
         val holder = PointHolder(binding, colors, clipboard, closeDescription)
 
         binding.pwr.text = Const.Dot

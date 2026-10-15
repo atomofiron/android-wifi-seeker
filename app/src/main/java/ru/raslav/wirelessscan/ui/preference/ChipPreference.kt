@@ -1,7 +1,6 @@
 package ru.raslav.wirelessscan.ui.preference
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.Gravity
@@ -20,12 +19,12 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceViewHolder
 import com.google.android.material.chip.Chip
 import ru.raslav.wirelessscan.R
-import ru.raslav.wirelessscan.colorAttr
 import ru.raslav.wirelessscan.completeChildren
+import ru.raslav.wirelessscan.databinding.TextChipBinding
+import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.updateMarginLayoutParams
 import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.LinearLayoutParams
-import ru.raslav.wirelessscan.utils.MaterialAttr
 import ru.raslav.wirelessscan.utils.PreferenceId
 import ru.raslav.wirelessscan.utils.RelativeLayoutParams
 
@@ -138,16 +137,19 @@ class ChipPreference : ListPreference {
     private fun LinearLayout.completeChildren(
         entries: Array<out CharSequence>,
         entryValues: Array<out CharSequence>,
-    ) = completeChildren(
-        entries.size,
-        factory = { Chip(context) },
-        init = { index ->
-            chipStrokeColor = ColorStateList.valueOf(context.colorAttr(MaterialAttr.colorOutlineVariant))
-            text = entries[index]
-            setOnClickListener { setValue(entryValues[index].toString()) }
-            updateMarginLayoutParams {
-                marginStart = if (index == 0) 0 else chipMargin
-            }
-        },
-    )
+    ) {
+        val inflater = layout.context.inflater()
+        completeChildren(
+            count = entries.size,
+            factory = { TextChipBinding.inflate(inflater, this, false).root },
+            init = { index ->
+                text = entries[index]
+                elevation = resources.getDimension(R.dimen.chip_elevation)
+                setOnClickListener { setValue(entryValues[index].toString()) }
+                updateMarginLayoutParams {
+                    marginStart = if (index == 0) 0 else chipMargin
+                }
+            },
+        )
+    }
 }

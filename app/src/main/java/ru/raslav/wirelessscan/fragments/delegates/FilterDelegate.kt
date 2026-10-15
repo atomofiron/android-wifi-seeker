@@ -1,21 +1,44 @@
 package ru.raslav.wirelessscan.fragments.delegates
 
-import android.view.LayoutInflater
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.view.View
+import android.view.View.OVER_SCROLL_NEVER
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
+import androidx.core.content.ContextCompat
+import ru.raslav.wirelessscan.R
+import ru.raslav.wirelessscan.absoluteElevation
 import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.data.PointFilter
-import ru.raslav.wirelessscan.databinding.FilterBinding
+import ru.raslav.wirelessscan.databinding.TextChipBinding
+import ru.raslav.wirelessscan.inflater
+import ru.raslav.wirelessscan.updateMarginLayoutParams
+import kotlin.math.max
 
 class FilterDelegate(
     private val onFilterChanged: (PointFilter) -> Unit,
 ) {
     fun init(layout: ViewGroup) {
-        val inflater = LayoutInflater.from(layout.context)
+        (layout.parent as? HorizontalScrollView)?.run {
+            overScrollMode = OVER_SCROLL_NEVER
+            if (SDK_INT >= Q) horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
+        }
+        val inflater = layout.context.inflater()
         layout.completeChildren(
             count = PointFilter.labels.size,
-            factory = { FilterBinding.inflate(inflater, this, false).root },
+            factory = { TextChipBinding.inflate(inflater, this, false).root },
         ) { index ->
+            elevation = max(0f, resources.getDimension(R.dimen.chip_elevation) - absoluteElevation())
+            ensureAccessibleTouchTarget(0)
+            setTextColor(ContextCompat.getColorStateList(context, R.color.filter_text))
+            updateMarginLayoutParams {
+                val margin = resources.getDimensionPixelSize(R.dimen.padding_mini)
+                marginStart = margin
+                marginEnd = margin
+                topMargin = margin
+                bottomMargin = margin
+            }
             val label = PointFilter.labels[index]
             text = label
             setOnClickListener {
@@ -28,14 +51,16 @@ class FilterDelegate(
         var include = false
         var exclude = false
         when {
-            view.isSelected -> view.isSelected = false
             view.isActivated -> {
                 view.isActivated = false
-                view.isSelected = true
+                view.isSelected = false
+            }
+            view.isSelected -> {
+                view.isActivated = true
                 exclude = true
             }
             else -> {
-                view.isActivated = true
+                view.isSelected = true
                 include = true
             }
         }

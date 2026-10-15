@@ -93,8 +93,7 @@ class SnapshotFragment : Fragment() {
         binding.list.addItemDecoration(AlternatingDecoration(adapter::backgroundAt))
         binding.list.setupSpringOverscroll()
 
-        val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
-        val filters = binding.filters.withHorizontalLinearLayout(top = true, end = true, padding = padding)
+        val filters = binding.filters.withHorizontalLinearLayout(top = true, end = true)
         binding.filters.onAnim { offset ->
             binding.container.translationY = offset
         }

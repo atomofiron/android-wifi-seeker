@@ -1,20 +1,20 @@
 package ru.raslav.wirelessscan.adapters
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.databinding.ItemSnapshotBinding
+import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.utils.DoubleClickMaster
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import java.io.File
 
 class SnapshotHolder(val binding: ItemSnapshotBinding) : RecyclerView.ViewHolder(binding.root)
 
-class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<SnapshotHolder>() {
+class SnapshotsListAdapter(private val context: Context) : RecyclerView.Adapter<SnapshotHolder>() {
 
     private val list = mutableListOf<String>()
-    private val dir = File(co.applicationInfo.dataDir, "files")
+    private val dir = File(context.applicationInfo.dataDir, "files")
 
     var onSnapshotShareListener: (name: String) -> Unit = {}
     var onSnapshotClickListener: (name: String) -> Unit = {}
@@ -27,7 +27,7 @@ class SnapshotsListAdapter(private val co: Context) : RecyclerView.Adapter<Snaps
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnapshotHolder {
-        val binding = ItemSnapshotBinding.inflate(LayoutInflater.from(co), parent, false)
+        val binding = ItemSnapshotBinding.inflate(context.inflater(), parent, false)
         val holder = SnapshotHolder(binding)
 
         binding.root.setOnClickListener {

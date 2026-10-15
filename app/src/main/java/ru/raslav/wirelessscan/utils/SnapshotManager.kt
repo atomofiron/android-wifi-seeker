@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class SnapshotManager(private val co: Context) {
+class SnapshotManager(private val context: Context) {
 
     private val xml = XML.v1 {
         policy {
@@ -42,7 +42,7 @@ class SnapshotManager(private val co: Context) {
             null -> "tmp/${defaultName()}"
             else -> name
         }
-        val file = File(co.filesDir, name)
+        val file = File(context.filesDir, name)
         val parent = file.parentFile
         if (parent?.isFile == true) {
             parent.delete()
@@ -65,7 +65,7 @@ class SnapshotManager(private val co: Context) {
     }
 
     suspend fun get(name: String): Rslt<List<Point>> {
-        val file = File(co.filesDir, name)
+        val file = File(context.filesDir, name)
         return try {
             val snapshot = file.inputStream().use {
                 xml.decodeFromStream<Snapshot>(it, QName(RootTag))

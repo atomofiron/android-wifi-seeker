@@ -3,6 +3,8 @@ package ru.raslav.wirelessscan.ui.view
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
@@ -68,15 +70,14 @@ class HeaderDropdownLayout : ConstraintLayout {
         top: Boolean = false,
         end: Boolean = false,
         bottom: Boolean = false,
-        padding: Int = 0,
     ): LinearLayout {
         removeAllViews()
         val layout = LinearLayout(context)
         layout.orientation = LinearLayout.HORIZONTAL
         val scrollView = HorizontalScrollView(context)
         scrollView.clipToPadding = false
-        scrollView.horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
-        scrollView.setPadding(padding, 0, padding, 0)
+        scrollView.overScrollMode = OVER_SCROLL_NEVER
+        if (SDK_INT >= Q) scrollView.horizontalScrollbarThumbDrawable = ContextCompat.getDrawable(context, R.drawable.scroll_horizontal)
         scrollView.addView(layout)
         addView(scrollView)
         updatePadding()

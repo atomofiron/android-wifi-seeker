@@ -21,7 +21,6 @@
         android:id="@+id/horizontal_filters"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:scrollbarThumbHorizontal="@drawable/scroll_horizontal"
         android:clipToPadding="false"
         android:clipChildren="false"
         android:visibility="gone"
@@ -35,6 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:padding="@dimen/padding_mini"
             />
     </HorizontalScrollView>
     <ScrollView

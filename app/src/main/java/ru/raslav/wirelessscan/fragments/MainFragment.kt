@@ -74,8 +74,8 @@ import ru.raslav.wirelessscan.connection.ScanConnection
 import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointFilter
-import ru.raslav.wirelessscan.databinding.ChipPeriodBinding
 import ru.raslav.wirelessscan.databinding.FragmentMainBinding
+import ru.raslav.wirelessscan.databinding.IconChipBinding
 import ru.raslav.wirelessscan.dlog
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.fragments.delegates.FilterDelegate
@@ -281,15 +281,14 @@ class MainFragment : Fragment() {
 
     private fun FragmentMainBinding.initPeriods(): ViewGroup {
         val selected = getPeriodIndex()
-        val padding = resources.getDimensionPixelSize(R.dimen.padding_half)
         val seconds = resources.getIntArray(R.array.period_arr_int)
-        val layout = periods.withHorizontalLinearLayout(top = true, end = true, padding = padding)
+        val layout = periods.withHorizontalLinearLayout(top = true, end = true)
         periods.onAnim { offset ->
             container.translationY = offset
         }
         layout.completeChildren(
             count = PeriodIcons.size,
-            factory = { ChipPeriodBinding.inflate(context.inflater()).root },
+            factory = { IconChipBinding.inflate(context.inflater()).root },
             init = { index ->
                 chipIcon = ContextCompat.getDrawable(root.context, PeriodIcons[index])
                 isSelected = index == selected
