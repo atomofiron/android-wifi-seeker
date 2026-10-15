@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
@@ -162,7 +163,11 @@ fun ClipboardManager.copy(
 @RequiresApi(TIRAMISU)
 private fun Context.clipboardAlertsEnabled(): Boolean {
     val appOps = getSystemService(AppOpsManager::class.java)
-    val info = packageManager.getApplicationInfo("com.android.systemui", 0)
+    val info = try {
+        packageManager.getApplicationInfo("com.android.systemui", 0)
+    } catch (_: NameNotFoundException) {
+        return false
+    }
     val mode = appOps.checkOpNoThrow("android:read_clipboard", info.uid, "com.android.systemui")
     // 0/4 allow, 1 ignore, 3 default
     return mode == 0 || mode == 4

@@ -75,9 +75,10 @@ class SnapshotFragment : Fragment() {
                 }
             }
             withContext(Main) {
-                updateCounters(adapter.updateList(list))
+                val counters = adapter.updateList(list)
                 loaded = true
                 viewJob.join()
+                updateCounters(counters)
                 binding.updateProgressVisibility()
             }
         }

@@ -153,7 +153,6 @@ class OuiManager private constructor(context: Context) {
             ouiLoading.emit(Loading())
             oui {
                 db.close()
-                file.delete()
                 tmpFile.renameTo(file)
                 db = openDatabase()
             }
