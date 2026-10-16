@@ -9,15 +9,15 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import ru.raslav.wirelessscan.isReadable
 import ru.raslav.wirelessscan.utils.Manufacturer
+import ru.raslav.wirelessscan.utils.PointTag
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 
 @Serializable
-@XmlSerialName("point")
+@XmlSerialName(PointTag)
 data class Point(
-    @XmlSerialName("level")
     val rssi: Int,
     val frequency: Int,
     val capabilities: String,

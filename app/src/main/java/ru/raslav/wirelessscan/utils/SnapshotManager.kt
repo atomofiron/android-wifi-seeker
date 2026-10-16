@@ -68,12 +68,11 @@ class SnapshotManager(private val context: Context) {
         val file = File(context.filesDir, name)
         return try {
             val snapshot = file.inputStream().use {
-                xml.decodeFromStream<Snapshot>(it, QName(RootTag))
+                xml.decodeFromStream<SnapshotCompat>(it, QName(RootTag))
             }
             val points = snapshot.points.map { point ->
-                val manuf = oui { find(point.bssid) }
-                    ?: return@map point
-                point.copy(manufacturer = manuf)
+                val manufacturer = oui { find(point.bssid) }
+                point.toPoint(manufacturer)
             }
             Rslt.Ok(points)
         } catch (e: Exception) {
@@ -82,15 +81,7 @@ class SnapshotManager(private val context: Context) {
         }
     }
 
-    @Serializable
-    @XmlSerialName(RootTag)
-    data class Snapshot(
-        val points: List<Point>,
-    )
-
     companion object {
-
-        private const val RootTag = "snapshot"
 
         private fun defaultName() = "snapshot_${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss", Locale.getDefault()).format(Date())}$SNAPSHOT_FORMAT"
 
@@ -108,4 +99,41 @@ class SnapshotManager(private val context: Context) {
             tryStartActivity(intent)
         }
     }
+}
+
+private const val RootTag = "snapshot"
+const val PointTag = "point"
+
+@Serializable
+@XmlSerialName(RootTag)
+data class Snapshot(
+    val points: List<Point>,
+)
+
+@Serializable
+@XmlSerialName(RootTag)
+data class SnapshotCompat(
+    val points: List<PointCompat>,
+)
+
+@Serializable
+@XmlSerialName(PointTag)
+data class PointCompat(
+    val level: Int = 0,
+    val rssi: Int = 0,
+    val frequency: Int = 0,
+    val capabilities: String = "",
+    val essid: String = "",
+    val essid_hex: String = "",
+    val bssid: String,
+) {
+    fun toPoint(manufacturer: Manufacturer? = null) = Point(
+        rssi = if (rssi != 0) rssi else level,
+        frequency = frequency,
+        capabilities = capabilities,
+        essid = essid,
+        essidHex = essid_hex,
+        bssid = bssid,
+        manufacturer = manufacturer,
+    )
 }
