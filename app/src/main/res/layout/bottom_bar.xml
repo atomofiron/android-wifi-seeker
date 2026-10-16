@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="@dimen/padding_mini"
+            android:gravity="center_horizontal"
             />
     </HorizontalScrollView>
     <ScrollView
