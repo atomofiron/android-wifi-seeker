@@ -5,12 +5,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import lib.atomofiron.insets.ExtendedWindowInsets
 import lib.atomofiron.insets.InsetsProviderImpl
+import lib.atomofiron.insets.TypeSet
+import lib.atomofiron.insets.builder
 import lib.atomofiron.insets.setContentView
 import ru.raslav.wirelessscan.fragments.MainFragment
 import ru.raslav.wirelessscan.fragments.PreferenceFragment
 import ru.raslav.wirelessscan.fragments.SnapshotFragment
 import ru.raslav.wirelessscan.fragments.SnapshotListFragment
+import ru.raslav.wirelessscan.utils.ExtType
 import ru.raslav.wirelessscan.utils.setHapticEffect
 
 fun FragmentActivity.asMain(): MainActivity = this as MainActivity
@@ -22,7 +26,9 @@ class MainActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        setContentView(R.layout.activity_main, InsetsProviderImpl())
+        val insetsProvider = InsetsProviderImpl()
+        setContentView(R.layout.activity_main, insetsProvider)
+        insetsProvider.setInsetsModifier(::onModifyInsets)
 
         if (supportFragmentManager.fragments.isEmpty()) {
             supportFragmentManager.beginTransaction()
@@ -54,4 +60,15 @@ class MainActivity : AppCompatActivity() {
     fun showSnapshots() = setFragment(SnapshotListFragment())
 
     fun showSnapshot(name: String) = setFragment(SnapshotFragment(name))
+
+    private fun onModifyInsets(types: () -> TypeSet, windowInsets: ExtendedWindowInsets): ExtendedWindowInsets {
+        val navigation = windowInsets[ExtType.navigationBars]
+        val tappable = windowInsets[ExtType.tappableElement]
+        return when (navigation.bottom) {
+            0, tappable.bottom -> windowInsets
+            else -> windowInsets.builder()
+                .set(ExtType.navigationBars, navigation.copy(bottom = navigation.bottom / 2))
+                .build()
+        }
+    }
 }

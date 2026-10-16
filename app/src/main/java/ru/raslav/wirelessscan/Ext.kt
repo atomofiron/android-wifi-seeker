@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.Insets
 import androidx.core.view.children
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
@@ -219,3 +220,10 @@ fun View.absoluteElevation(): Float {
     }
     return elevation
 }
+
+fun Insets.copy(
+    left: Int = this.left,
+    top: Int = this.top,
+    right: Int = this.right,
+    bottom: Int = this.bottom,
+) = Insets.of(left, top, right, bottom)

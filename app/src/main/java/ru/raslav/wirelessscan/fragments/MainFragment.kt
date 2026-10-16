@@ -509,7 +509,9 @@ class MainFragment : Fragment() {
             }
             filters.orientation = if (vertical) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
         }
-        toolbarDelegate.changeInsets {
+        toolbarDelegate.changeInsets(
+            ExtType { if (vertical) barsWithCutout else statusBars + tappableElement + displayCutout },
+        ) {
             when (orientation) {
                 is Orientation.Start -> translation(start, bottom)
                 is Orientation.End -> translation(bottom, end)
