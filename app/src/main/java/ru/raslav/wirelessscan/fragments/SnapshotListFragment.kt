@@ -12,7 +12,6 @@ import ru.raslav.wirelessscan.asMain
 import ru.raslav.wirelessscan.databinding.ListBinding
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
-import ru.raslav.wirelessscan.utils.SnapshotManager.Companion.shareSnapshot
 
 class SnapshotListFragment : Fragment() {
 
@@ -22,10 +21,9 @@ class SnapshotListFragment : Fragment() {
         binding = ListBinding.inflate(inflater, container, false)
         binding.appBar.init(this, R.string.title_snapshots)
 
-        val adapter = SnapshotsListAdapter(requireContext())
-        adapter.onSnapshotShareListener = { name -> requireContext().shareSnapshot(name) }
-        adapter.onSnapshotClickListener = { name -> requireActivity().asMain().showSnapshot(name) }
-        binding.listView.adapter = adapter
+        binding.listView.adapter = SnapshotsListAdapter(requireContext()) { name ->
+            requireActivity().asMain().showSnapshot(name)
+        }
         binding.listView.insetsPadding(start = true, end = true, bottom = true)
         binding.listView.setupSpringOverscroll()
         return binding.root

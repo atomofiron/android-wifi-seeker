@@ -92,6 +92,7 @@ import ru.raslav.wirelessscan.tryStartActivity
 import ru.raslav.wirelessscan.ui.drawable.ScanDrawable
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
+import ru.raslav.wirelessscan.ui.renameSnapshot
 import ru.raslav.wirelessscan.ui.showError
 import ru.raslav.wirelessscan.ui.view.HeaderDropdownLayout
 import ru.raslav.wirelessscan.unsafeLazy
@@ -99,7 +100,6 @@ import ru.raslav.wirelessscan.utils.AlternatingDecoration
 import ru.raslav.wirelessscan.utils.ConstraintLayoutParams
 import ru.raslav.wirelessscan.utils.setOnDoubleClickListener
 import ru.raslav.wirelessscan.utils.ExtType
-import ru.raslav.wirelessscan.utils.FileNameInputText
 import ru.raslav.wirelessscan.utils.FrameLayoutParams
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutChanges
 import ru.raslav.wirelessscan.utils.LayoutOrientation.Companion.layoutOrientation
@@ -109,7 +109,6 @@ import ru.raslav.wirelessscan.utils.Rslt
 import ru.raslav.wirelessscan.utils.SnapshotManager
 import ru.raslav.wirelessscan.utils.performHapticLite
 import ru.raslav.wirelessscan.withAlpha
-import java.io.File
 import java.net.Inet4Address
 import android.os.Build.VERSION_CODES.TIRAMISU as T
 
@@ -334,7 +333,7 @@ class MainFragment : Fragment() {
                     }
                 }
             },
-            onDoubleClick = { snapshotFileName?.let { renameSnapshot(it) } },
+            onDoubleClick = { snapshotFileName?.let { requireContext().renameSnapshot(it) } },
         )
         buttonResume.setOnClickListener { view ->
             when {
@@ -453,33 +452,6 @@ class MainFragment : Fragment() {
 
     private fun updateCounters(counters: String) {
         binding.counters.root.text = counters
-    }
-
-    private fun renameSnapshot(lastName: String) {
-        val file = File(requireContext().filesDir, lastName)
-        if (file.exists()) {
-            val editText = FileNameInputText(requireContext())
-            editText.setText(lastName)
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.rename_to)
-                .setView(editText)
-                .setCancelable(false)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok) { _, _ ->
-                    var text = editText.text.toString()
-
-                    if (text.isEmpty())
-                        return@setPositiveButton
-
-                    if (!text.endsWith(Const.SNAPSHOT_FORMAT))
-                        text += Const.SNAPSHOT_FORMAT
-
-                    val success = file.renameTo(File(file.parent, text))
-                    val messageId = if (success) R.string.success else R.string.failure
-                    Toast.makeText(context, messageId, Toast.LENGTH_SHORT).show()
-                }.create().show()
-        } else
-            Toast.makeText(activity, R.string.failure, Toast.LENGTH_SHORT).show()
     }
 
     private fun updateConnectionInfo() {
