@@ -35,11 +35,10 @@ data class Point(
     },
     @Transient
     val cip: String = when {
-        capabilities.contains("+TKIP") -> "+TKIP"
-        capabilities.contains("+CCMP") -> "+CCMP"
-        capabilities.contains("GCMP") -> "GCMP"
-        capabilities.contains("CCMP") -> "CCMP"
-        capabilities.contains("TKIP") -> "TKIP"
+        capabilities.contains("-GCMP") -> if (capabilities.contains("+TKIP")) "GCMP+" else "GCMP"
+        capabilities.contains("-CCMP") -> if (capabilities.contains("+TKIP")) "CCMP+" else "CCMP"
+        capabilities.contains("-TKIP+") -> "TKIP+"
+        capabilities.contains("-TKIP") -> "TKIP"
         capabilities.contains("WEP") -> "WEP"
         else -> ""
     },
