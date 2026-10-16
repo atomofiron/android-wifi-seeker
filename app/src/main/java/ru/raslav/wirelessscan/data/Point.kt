@@ -28,24 +28,27 @@ data class Point(
     @Transient
     val wps: Boolean = capabilities.contains("WPS"),
     @Transient
+    val pmf: Feature = when {
+        capabilities.contains("MFPR") -> Feature.Required
+        capabilities.contains("MFPC") -> Feature.Supported
+        else -> Feature.No
+    },
+    @Transient
     val cip: String = when {
+        capabilities.contains("+TKIP") -> "+TKIP"
+        capabilities.contains("+CCMP") -> "+CCMP"
         capabilities.contains("GCMP") -> "GCMP"
         capabilities.contains("CCMP") -> "CCMP"
         capabilities.contains("TKIP") -> "TKIP"
         capabilities.contains("WEP") -> "WEP"
         else -> ""
-    }.let {
-        when {
-            capabilities.contains("+TKIP") -> "+TKIP"
-            capabilities.contains("+CCMP") -> "+CCMP"
-            else -> it
-        }
     },
     @Transient
     val enc: String = run {
         when {
             capabilities.contains("SAE-") -> if (capabilities.contains("WPA2")) "WPA2/3" else "WPA3"
-            capabilities.contains("WPA") -> if (capabilities.contains("WPA2")) "WPA2" else "WPA"
+            capabilities.contains("WPA2") -> "WPA2"
+            capabilities.contains("WPA") -> "WPA"
             capabilities.contains("WEP") -> "WEP"
             cip.isEmpty() || capabilities.contains("OWE") -> "OPN"
             else -> UNKNOWN
@@ -57,6 +60,12 @@ data class Point(
     @Transient
     private var fcb: FrequencyChannelBand = FrequencyChannelBand(frequency),
 ) {
+    init {
+        if (fcb.frequency != frequency) {
+            fcb = FrequencyChannelBand(frequency)
+        }
+    }
+
     @XmlElement
     @XmlSerialName("channel")
     val channelNumber: Int = fcb.channel
@@ -78,12 +87,6 @@ data class Point(
     val bssidGroup: String? get() = manufacturer?.bssidGroup
 
     val outOfRange get() = level <= range.first
-
-    init {
-        if (fcb.frequency != frequency) {
-            fcb = FrequencyChannelBand(frequency)
-        }
-    }
 
     fun isHidden() = essid.all { it.code == 0 }
 

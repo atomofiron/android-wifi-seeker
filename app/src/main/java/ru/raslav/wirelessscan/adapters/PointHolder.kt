@@ -23,6 +23,7 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.copy
 import ru.raslav.wirelessscan.data.Band
 import ru.raslav.wirelessscan.data.CurrentConnection
+import ru.raslav.wirelessscan.data.Feature
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
 import ru.raslav.wirelessscan.databinding.PointDescriptionBinding
@@ -56,6 +57,7 @@ class PointHolder(
     init {
         binding.pwr.text = Const.Dot
         binding.pwr.gravity = Gravity.END
+        binding.pwr.typeface = null
     }
 
     fun bind(point: Point, focused: Point?, current: CurrentConnection?) = binding.bind(point, focused, current)
@@ -86,19 +88,19 @@ class PointHolder(
 
         enc.text = point.enc
         enc.textColor = when {
-            point.capabilities.contains("OWE") -> colors.avocado // open
-            point.capabilities.contains("EAP") -> colors.lotus // WPA2
             point.enc == "WPA3" -> colors.jinxEyes
             point.enc == "WPA2/3" -> colors.chestnut
+            point.capabilities.contains("WPA2-EAP") -> colors.lotus
             point.enc == "WPA2" -> colors.yellowMiddle
             point.enc == "WPA" -> colors.tangerine
             point.enc == "WEP" -> colors.skyLight
+            point.capabilities.contains("OWE") -> colors.avocado // open
             point.withCip() -> colors.nightSakura
             else -> colors.green // open?
         }
         cip.text = point.cip
         cip.textColor = when {
-            point.capabilities.contains("preauth") -> colors.sky
+            point.capabilities.contains("PREAUTH") -> colors.sky
             point.capabilities.contains("TKIP") -> colors.skyWhite
             point.cip.contains("WEP") -> colors.skyLight
             point.cip.contains("CCMP") -> colors.gray
@@ -106,8 +108,15 @@ class PointHolder(
             else -> colors.gray
         }
 
-        wps.text = if (point.wps) "yes" else "no"
-        wps.textColor = if (point.wps) colors.greenHigh else colors.redHigh
+        wps.text = Feature.supported(point.wps).label
+        wps.textColor = if (point.wps) colors.avocado else colors.chestnut
+
+        pmf.text = point.pmf.label
+        pmf.textColor = when (point.pmf) {
+            Feature.Required -> colors.chestnut
+            Feature.Supported -> colors.yellowMiddle
+            Feature.No -> colors.avocado
+        }
 
         essid.text = when {
             point.essid.isEmpty() -> point.bssid

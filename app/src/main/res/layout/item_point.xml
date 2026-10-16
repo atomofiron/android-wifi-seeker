@@ -17,7 +17,6 @@
             android:id="@+id/pwr"
             android:layout_width="24dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
             android:text="PW"
             android:typeface="monospace"
             android:gravity="end"
@@ -45,8 +44,16 @@
             android:typeface="monospace"
             />
         <TextView
+            android:id="@+id/pmf"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:text="PMF"
+            android:typeface="monospace"
+            android:gravity="center"
+            />
+        <TextView
             android:id="@+id/wps"
-            android:layout_width="36dp"
+            android:layout_width="32dp"
             android:layout_height="wrap_content"
             android:text="WPS"
             android:typeface="monospace"
