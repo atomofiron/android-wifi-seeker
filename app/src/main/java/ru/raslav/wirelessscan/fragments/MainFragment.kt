@@ -564,7 +564,7 @@ class MainFragment : Fragment() {
     }
 
     private fun WifiInfo.withLocalIp(): CurrentConnection? {
-        val bssid = bssid ?: return null
+        val bssid = bssid?.uppercase() ?: return null
         val network = connectivityManager.activeNetwork
             ?: return CurrentConnection(bssid)
         connectivityManager.getNetworkCapabilities(network)
