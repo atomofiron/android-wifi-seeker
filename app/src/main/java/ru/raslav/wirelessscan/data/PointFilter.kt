@@ -14,7 +14,7 @@ data class PointFilter(
 
         private const val LabelHidden = "HIDDEN"
 
-        val labels = listOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "WPS", "P2P", "WEP", LabelHidden)
+        val labels = listOf("WPA", "PSK", "EAP", "CCMP", "TKIP", "MFPR", "MFPC", "WPS", "P2P", "WEP", LabelHidden)
         val defaults = labels.map { PointFilter(it) }
     }
 }

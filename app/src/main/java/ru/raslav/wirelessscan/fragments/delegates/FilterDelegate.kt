@@ -1,7 +1,5 @@
 package ru.raslav.wirelessscan.fragments.delegates
 
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.Q
 import android.view.View
 import android.view.View.OVER_SCROLL_NEVER
 import android.view.ViewGroup
