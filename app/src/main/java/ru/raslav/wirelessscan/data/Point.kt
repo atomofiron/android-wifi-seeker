@@ -17,7 +17,8 @@ import java.nio.charset.StandardCharsets
 @Serializable
 @XmlSerialName("point")
 data class Point(
-    val level: Int,
+    @XmlSerialName("level")
+    val rssi: Int,
     val frequency: Int,
     val capabilities: String,
     val essid: String,
@@ -85,7 +86,7 @@ data class Point(
 
     val bssidGroup: String? get() = manufacturer?.bssidGroup
 
-    val outOfRange get() = level <= range.first
+    val outOfRange get() = rssi <= range.first
 
     fun isHidden() = essid.all { it.code == 0 }
 
@@ -115,16 +116,30 @@ data class Point(
         else -> essidHex
     }.hashCode().toLong().shl(32) + bssid.hashCode().toLong()
 
+    /* starting Android 8 WifiManager.calculateSignalLevel(int, int) returns something looks wrong */
+    fun calculateSignalLevel(numLevels: Int): Int = when {
+        rssi <= MIN_RSSI -> 0
+        rssi >= MAX_RSSI -> numLevels
+        else -> {
+            val inputRange = (MAX_RSSI - MIN_RSSI).toFloat()
+            val outputRange = numLevels.toFloat()
+            ((rssi - MIN_RSSI).toFloat() * outputRange / inputRange).toInt()
+        }
+    }
+
     companion object {
 
         const val UNKNOWN = "?"
 
         val range = -100..0
 
+        private const val MIN_RSSI = -90
+        private const val MAX_RSSI = -50
+
         fun ScanResult.toPoint(): Point {
             val essid = getSsid()
             return Point(
-                level = level,
+                rssi = level,
                 frequency = frequency,
                 capabilities = capabilities,
                 essid = essid,

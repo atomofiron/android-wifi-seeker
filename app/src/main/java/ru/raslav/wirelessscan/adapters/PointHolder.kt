@@ -3,9 +3,6 @@ package ru.raslav.wirelessscan.adapters
 import android.content.ClipboardManager
 import android.content.res.Resources
 import android.graphics.Color
-import android.net.wifi.WifiManager
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.O
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -14,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.raslav.wirelessscan.Const
@@ -26,8 +22,8 @@ import ru.raslav.wirelessscan.data.CurrentConnection
 import ru.raslav.wirelessscan.data.Feature
 import ru.raslav.wirelessscan.data.Point
 import ru.raslav.wirelessscan.data.PointColors
-import ru.raslav.wirelessscan.databinding.PointDescriptionBinding
 import ru.raslav.wirelessscan.databinding.ItemPointBinding
+import ru.raslav.wirelessscan.databinding.PointDescriptionBinding
 import ru.raslav.wirelessscan.elog
 import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.isRtl
@@ -37,9 +33,8 @@ import ru.raslav.wirelessscan.textColor
 import ru.raslav.wirelessscan.utils.Manufacturer
 import ru.raslav.wirelessscan.utils.SideDrawable
 import kotlin.math.min
-import kotlin.text.isEmpty
 
-private const val MAX_INDICATOR_LEVEL = 512
+private const val MAX_CHANNEL = 0xFF
 
 class PointHolder(
     val binding: ItemPointBinding,
@@ -77,11 +72,11 @@ class PointHolder(
         root.foreground = focusedDrawable.takeIf { theSame }
         focusedDrawable.setRtl(root.isRtl())
 
-        if (point.level == -1) {
+        if (point.rssi == -1) {
             elog("WOW: point.level == -1")
         }
         // point.level >= -1 experiment
-        pwr.textColor = if (point.level >= -1) Color.MAGENTA else getPowerColor(point.level)
+        pwr.textColor = if (point.rssi >= -1) Color.MAGENTA else point.getPowerColor()
 
         ch.text = point.channel
         ch.textColor = point.band.getColor()
@@ -134,25 +129,14 @@ class PointHolder(
         bssid.isVisible = parent.isWide()
     }
 
-    @Suppress("DEPRECATION")
-    private fun getPowerColor(level: Int): Int {
-        val level = level.coerceIn(Point.range)
-        /* starting Android 8 WifiManager.calculateSignalLevel(int, int) returns something looks wrong */
-        val pwr = when {
-            SDK_INT >= O -> MAX_INDICATOR_LEVEL * (min(level, -50) + 100) / 50
-            else -> WifiManager.calculateSignalLevel(level, MAX_INDICATOR_LEVEL)
+    private fun Point.getPowerColor(): Int {
+        val pwr = calculateSignalLevel(MAX_CHANNEL * 2)
+        if (pwr == 0) {
+            return Color.RED
         }
-
-        var red = if (pwr <= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(MAX_INDICATOR_LEVEL - pwr)
-        var green = if (pwr >= MAX_INDICATOR_LEVEL / 2) "ff" else Integer.toHexString(pwr)
-
-        if (red.length < 2)
-            red = "0$red"
-
-        if (green.length < 2)
-            green = "0$green"
-
-        return "#ff$red${green}00".toColorInt()
+        val green = min(pwr, MAX_CHANNEL)
+        val red = min(MAX_CHANNEL * 2 - pwr, MAX_CHANNEL)
+        return Color.argb(MAX_CHANNEL, red, green, 0)
     }
 
     private fun View.bindBackground(point: Point, focused: Point?) = when {
@@ -221,7 +205,7 @@ class PointHolder(
             ?.let { resources.getString(R.string.gateway_format, it) }
         tvGateway.isVisible = !current?.gateway.isNullOrEmpty()
         tvCapab.text = resources.getString(R.string.capab_format, point.capabilities)
-        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.channel, point.level)
+        tvFrequ.text = resources.getString(R.string.frequ_format, point.frequency, point.channel, point.rssi)
         tvManuf.isVisible = point.manufacturer?.also {
             val label = when {
                 it.presumably -> "${it.label} [${it.bssidGroup}]"
