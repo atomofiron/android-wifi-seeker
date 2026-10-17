@@ -540,11 +540,11 @@ class MainFragment : Fragment() {
     private fun WifiInfo.withLocalIp(): CurrentConnection? {
         val bssid = bssid?.uppercase() ?: return null
         val network = connectivityManager.activeNetwork
-            ?: return CurrentConnection(bssid)
+            ?: return null
         connectivityManager.getNetworkCapabilities(network)
             ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
             ?.takeIf { it }
-            ?: return CurrentConnection(bssid)
+            ?: return null
         val properties = connectivityManager.getLinkProperties(network)
         val local = properties?.linkAddresses
             ?.firstOrNull { it.address is Inet4Address }
