@@ -38,6 +38,7 @@ class SettingsBackgroundDecorator(
     private val paint = Paint()
     private val padding = context.resources.getDimensionPixelSize(R.dimen.padding_semi)
     private val edgeRadius = context.resources.getDimension(R.dimen.corner_extra)
+    private val minRadius = context.resources.getDimension(R.dimen.corner_mini)
     private val gap = context.resources.getDimension(R.dimen.padding_micro)
 
     init {
@@ -84,10 +85,10 @@ class SettingsBackgroundDecorator(
             val nextChild: View? = parent.getChildAt(index.inc())
             val first = group !== item.previous?.parent
             val last = group !== item.next?.parent
-            val topDistance = distanceBetween(previousChild, child, edge = first, current = item.preference, other = item.previous)
-            val bottomDistance = distanceBetween(child, nextChild, edge = last, current = item.preference, other = item.next)
+            val topRadius = radius(previousChild, child, edge = first, current = item.preference, other = item.previous)
+            val bottomRadius = radius(child, nextChild, edge = last, current = item.preference, other = item.next)
             val drawable = child.getTranslucentDrawable()
-            val changed = item.updateRadii(child, radiiFor(first, topDistance), radiiFor(last, bottomDistance))
+            val changed = item.updateRadii(child, topRadius, bottomRadius)
             if (changed && drawable != null) {
                 drawable.cornerRadii = item.radii
                 drawable.setBounds(0, 0, child.width, child.height)
@@ -109,12 +110,7 @@ class SettingsBackgroundDecorator(
         else -> (gap / 2).roundToInt()
     }
 
-    private fun radiiFor(edge: Boolean, distance: Float): Float = when {
-        edge -> edgeRadius
-        else -> max(min(distance, edgeRadius), 0f)
-    }
-
-    private fun distanceBetween(
+    private fun radius(
         upper: View?,
         lower: View?,
         edge: Boolean,
@@ -122,7 +118,14 @@ class SettingsBackgroundDecorator(
         other: Preference?,
     ): Float = when {
         edge -> edgeRadius
-        upper != null && lower != null -> lower.y - upper.y - upper.height
+        upper != null && lower != null -> {
+            var distance = max(lower.y - upper.y - upper.height, 0f)
+            distance = when {
+                distance < gap -> minRadius * (distance / gap)
+                else -> distance + minRadius - gap
+            }
+            min(distance, edgeRadius)
+        }
         current.isMergedWith(other) -> 0f
         else -> gap
     }

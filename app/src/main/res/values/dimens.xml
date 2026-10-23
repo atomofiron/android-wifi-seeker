@@ -11,6 +11,7 @@
     <dimen name="icon_size">24dp</dimen>
     <dimen name="chip_min_size">40dp</dimen>
     <dimen name="corner_extra">20dp</dimen>
+    <dimen name="corner_mini">4dp</dimen>
 
     <dimen name="padding_micro">2dp</dimen>
     <dimen name="padding_mini">4dp</dimen>
