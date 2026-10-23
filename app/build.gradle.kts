@@ -17,8 +17,8 @@ android { // key alias raslav_2016
     defaultConfig {
         minSdk = 23
         targetSdk = 37
-        versionCode = 21
-        versionName = "2.3.0"
+        versionCode = 22
+        versionName = "2.3.1"
 
         resValue("string", "app_version", "v$versionName ($versionCode)")
     }
