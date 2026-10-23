@@ -49,15 +49,24 @@ class SettingsBackgroundDecorator(
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
         val preference = parent.preferenceOf(view) ?: return
         val group = preference.parent ?: return
-        val previous = parent.preferenceOf(view, -1)
-        val next = parent.preferenceOf(view, 1)
-        val first = previous?.parent !== group
-        val last = next?.parent !== group
+
+        val item = view.tag as? Item ?: Item()
+        if (item.preference?.key != preference.key) {
+            item.previous = null
+            item.next = null
+        }
+        item.preference = preference
+        item.previous = parent.preferenceOf(view, -1) ?: item.previous
+        item.next = parent.preferenceOf(view, 1) ?: item.next
+        view.tag = item
+
+        val first = item.previous?.parent !== group
+        val last = item.next?.parent !== group
         outRect.set(
             padding,
-            offsetFor(first, preference.isMergedWith(previous)),
+            offsetFor(first, preference.isMergedWith(item.previous)),
             padding,
-            offsetFor(last, preference.isMergedWith(next)),
+            offsetFor(last, preference.isMergedWith(item.next)),
         )
         val drawable = view.setTranslucentDrawable()
         if (drawable != null && view.outlineProvider !is OutlineProvider) {
@@ -67,23 +76,16 @@ class SettingsBackgroundDecorator(
     }
 
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-        for (child in parent.children) {
-            val item = child.tag as? Item ?: Item()
-            item.preference = parent.preferenceOf(child)
-            child.tag = item
-        }
         for (index in 0 until parent.childCount) {
             val child = parent.getChildAt(index)
             val item = child.tag as? Item ?: continue
             val group = item.group ?: continue
             val previousChild = parent.getChildAt(index.dec())
             val nextChild = parent.getChildAt(index.inc())
-            val previous = (previousChild?.tag as? Item)?.preference
-            val next = (nextChild?.tag as? Item)?.preference
-            val first = previous?.parent !== group
-            val last = next?.parent !== group
-            val topDistance = distanceBetween(previousChild, child)
-            val bottomDistance = distanceBetween(child, nextChild)
+            val first = group !== item.previous?.parent
+            val last = group !== item.next?.parent
+            val topDistance = distanceBetween(previousChild, child, edge = first)
+            val bottomDistance = distanceBetween(child, nextChild, edge = last)
             val drawable = child.getTranslucentDrawable()
             if (drawable != null && child.outlineProvider !is OutlineProvider) {
                 child.outlineProvider = OutlineProvider(drawable)
@@ -116,8 +118,9 @@ class SettingsBackgroundDecorator(
         else -> max(min(distance, edgeRadius), 0f)
     }
 
-    private fun distanceBetween(above: View?, below: View?): Float = when {
-        above == null || below == null -> edgeRadius
+    private fun distanceBetween(above: View?, below: View?, edge: Boolean): Float = when {
+        edge -> edgeRadius
+        above == null || below == null -> gap
         else -> below.y - above.y - above.height
     }
 
@@ -178,6 +181,8 @@ class SettingsBackgroundDecorator(
 
         var preference: Preference? = null
         val group: PreferenceGroup? get() = preference?.parent
+        var next: Preference? = null
+        var previous: Preference? = null
         val radii = FloatArray(8)
         val path = Path()
         private var size = Size()
