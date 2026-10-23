@@ -9,7 +9,7 @@ import ru.raslav.wirelessscan.R
 import ru.raslav.wirelessscan.absoluteElevation
 import ru.raslav.wirelessscan.completeChildren
 import ru.raslav.wirelessscan.data.PointFilter
-import ru.raslav.wirelessscan.databinding.TextChipBinding
+import ru.raslav.wirelessscan.databinding.ChipBinding
 import ru.raslav.wirelessscan.inflater
 import ru.raslav.wirelessscan.updateMarginLayoutParams
 import kotlin.math.max
@@ -22,7 +22,7 @@ class FilterDelegate(
         val inflater = layout.context.inflater()
         layout.completeChildren(
             count = PointFilter.labels.size,
-            factory = { TextChipBinding.inflate(inflater, this, false).root },
+            factory = { ChipBinding.inflate(inflater, this, false).root },
         ) { index ->
             elevation = max(0f, resources.getDimension(R.dimen.chip_elevation) - absoluteElevation())
             ensureAccessibleTouchTarget(0)

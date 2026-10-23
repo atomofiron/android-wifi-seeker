@@ -227,3 +227,10 @@ fun Insets.copy(
     right: Int = this.right,
     bottom: Int = this.bottom,
 ) = Insets.of(left, top, right, bottom)
+
+fun <V : ViewGroup> V.noClip(): V {
+    clipToPadding = false
+    clipChildren = false
+    clipToOutline = false
+    return this
+}

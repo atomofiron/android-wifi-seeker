@@ -3,10 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:textColor="@color/m3_chip_text_color"
-    app:chipStrokeColor="?colorOutlineVariant"
-    app:chipIconEnabled="false"
-    tools:text="LABEL"
+    app:chipStrokeColor="?colorSecondaryContainer"
+    tools:text="Label"
     />
