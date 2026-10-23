@@ -27,10 +27,11 @@
         app:widgetLayout="@layout/widget_switch"
         />
     <PreferenceCategory
-        android:title="@string/other"
-        android:key="other"
+        app:title="@string/other"
+        app:key="other"
+        app:iconSpaceReserved="false"
         >
-        <PreferenceScreen
+        <Preference
             android:key="source_code"
             android:id="@+id/source_code"
             android:title="@string/source_code"
@@ -38,7 +39,7 @@
             android:widgetLayout="@layout/widget_outside"
             android:summary="@string/app_version"
             />
-        <PreferenceScreen
+        <Preference
             android:key="oui_source"
             android:id="@+id/oui_source"
             android:title="@string/oui_source"
@@ -46,7 +47,7 @@
             android:icon="@drawable/ic_shark"
             android:widgetLayout="@layout/widget_refresh_and_outside"
             />
-        <PreferenceScreen
+        <Preference
             android:key="privacy_policy"
             android:id="@+id/privacy_policy"
             android:title="@string/privacy_policy"

@@ -55,6 +55,7 @@ import ru.raslav.wirelessscan.scope
 import ru.raslav.wirelessscan.sp
 import ru.raslav.wirelessscan.systemTime
 import ru.raslav.wirelessscan.tryStartActivity
+import ru.raslav.wirelessscan.ui.SettingsBackgroundDecorator
 import ru.raslav.wirelessscan.ui.init
 import ru.raslav.wirelessscan.ui.overscroll.setupSpringOverscroll
 import ru.raslav.wirelessscan.ui.showError
@@ -104,6 +105,8 @@ class PreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceCh
         setupSpringOverscroll()
         clipToPadding = false
         addOnChildAttachStateChangeListener(ChildAttachListener(sp, ouiPreference))
+        while (itemDecorationCount > 0) removeItemDecorationAt(0)
+        addItemDecoration(SettingsBackgroundDecorator(parent.context))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
