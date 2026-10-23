@@ -39,6 +39,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.text.CharCategory.UNASSIGNED
 
+operator fun Boolean.plus(other: Boolean): Boolean = this || other
 
 fun Context.sp(): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
